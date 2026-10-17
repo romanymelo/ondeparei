@@ -792,14 +792,6 @@ a.temporada:hover .titulo { color: var(--projetor); }
 .vazio-minhas { display: grid; justify-items: start; gap: 14px; }
 .vazio-minhas .vazio { margin: 0; }
 
-@media (max-width: 599px) {
-  .episodio { grid-template-columns: 40px 1fr; gap: 12px; }
-  .episodio-imagem { display: none; }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .status-opcao, .favorita, .marcar { transition: none; }
-}
 /* no celular, o bloco de status sai da coluna estreita ao lado do pôster e ocupa a largura toda */
 @media (max-width: 767px) {
   .cabecalho-serie { display: grid; grid-template-columns: 112px minmax(0, 1fr); align-items: end; }
@@ -812,3 +804,11 @@ a.temporada:hover .titulo { color: var(--projetor); }
   .favorita { flex-shrink: 0; width: 48px; height: auto; min-height: 44px; border-radius: 12px; }
 }
 
+@media (max-width: 599px) {
+  .episodio { grid-template-columns: 40px 1fr; gap: 12px; }
+  .episodio-imagem { display: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .status-opcao, .favorita, .marcar { transition: none; }
+}
