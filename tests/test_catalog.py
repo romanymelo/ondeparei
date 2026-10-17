@@ -25,8 +25,14 @@ def mock():
         yield m
 
 
+def provider_list(*names: tuple[int, str]) -> dict:
+    return {"results": [{"provider_id": i, "provider_name": n, "display_priority": k}
+                        for k, (i, n) in enumerate(names)]}
+
+
 async def test_discover_sends_translated_params(catalog, mock):
     data = load_fixture("discover.json")
+    mock.get("/watch/providers/tv").respond(json=provider_list((8, "Netflix")))
     route = mock.get("/discover/tv").respond(json=data)
     page = await catalog.discover(Filters(providers=(8,), sort="nota"))
     for call in route.calls:
@@ -34,6 +40,22 @@ async def test_discover_sends_translated_params(catalog, mock):
         assert params["with_watch_providers"] == "8" and params["vote_count.gte"] == "50"
         assert params["watch_region"] == "BR"
     assert page.items[0].id == data["results"][0]["id"]
+
+
+async def test_discover_searches_every_version_of_the_chosen_service(catalog, mock):
+    mock.get("/watch/providers/tv").respond(json=provider_list(
+        (8, "Netflix"), (582, "Paramount+ Amazon Channel"), (531, "Paramount Plus"),
+        (1853, "Paramount Plus Apple TV channel"), (2303, "Paramount Plus Premium"), (1796, "Netflix Standard with Ads")))
+    route = mock.get("/discover/tv").respond(json=load_fixture("discover.json"))
+    await catalog.discover(Filters(providers=(531,)))
+    assert set(route.calls[0].request.url.params["with_watch_providers"].split("|")) == {"531", "582", "1853", "2303"}
+
+
+async def test_discover_falls_back_to_chosen_ids_when_provider_list_fails(catalog, mock):
+    mock.get("/watch/providers/tv").respond(status_code=503)
+    route = mock.get("/discover/tv").respond(json=load_fixture("discover.json"))
+    await catalog.discover(Filters(providers=(531,)))
+    assert route.calls[0].request.url.params["with_watch_providers"] == "531"
 
 
 def tmdb_page(n: int, total_results: int) -> dict:

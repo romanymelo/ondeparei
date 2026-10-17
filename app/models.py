@@ -22,6 +22,11 @@ class Provider:
     id: int
     name: str
     logo_url: str | None
+    variant_ids: tuple[int, ...] = ()  # outras versões do mesmo serviço: "Paramount+ Amazon Channel", "Premium"...
+
+    @property
+    def ids(self) -> tuple[int, ...]:
+        return (self.id, *self.variant_ids)
 
 
 @dataclass(frozen=True)

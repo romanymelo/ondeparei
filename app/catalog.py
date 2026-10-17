@@ -58,8 +58,8 @@ class Catalog:
 
     async def discover(self, filters: Filters) -> CatalogPage:
         """Página de PAGE_SIZE séries montada a partir das páginas de 20 da TMDB que cobrem o intervalo."""
-        params = discover_params(filters, self._region, self._language, self._today())
-        start = (filters.page - 1) * PAGE_SIZE
+        params = discover_params(await self._every_version(filters), self._region, self._language, self._today())
+        start =(filters.page - 1) * PAGE_SIZE
         first_page = start // TMDB_PAGE_SIZE + 1
         last_page = (start + PAGE_SIZE - 1) // TMDB_PAGE_SIZE + 1
         if first_page > MAX_PAGE:
@@ -73,6 +73,19 @@ class Catalog:
         offset = start - (first_page - 1) * TMDB_PAGE_SIZE
         items = tuple(to_card(item) for item in results[offset:offset + PAGE_SIZE])
         return CatalogPage(items, filters.page, _total_pages(head), head.get("total_results", 0))
+
+    async def _every_version(self, filters: Filters) -> Filters:
+        """Escolher um serviço vale para todas as versões dele: Paramount+ busca também "Paramount+ Amazon
+        Channel", "Paramount Plus Premium"... Sem a lista de serviços, busca só os ids escolhidos."""
+        if not filters.providers:
+            return filters
+        try:
+            services = await self.providers()
+        except TMDBError:
+            return filters
+        versions = {i: service.ids for service in services for i in service.ids}
+        ids = dict.fromkeys(i for chosen in filters.providers for i in versions.get(chosen, (chosen,)))
+        return dataclasses.replace(filters, providers=tuple(ids))
 
     async def spotlight(self) -> Spotlight | None:
         """Destaque da tela inicial: a série mais em alta hoje na TMDB que esteja em algum serviço no Brasil

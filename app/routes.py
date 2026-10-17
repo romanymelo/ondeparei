@@ -8,7 +8,7 @@ from fastapi.responses import RedirectResponse
 from app.catalog import Catalog
 from app.filters import parse_filters, parse_page
 from app.models import Provider
-from app.templating import NO_STORE, VARY_HX, VISIBLE_PROVIDERS, is_htmx, templates
+from app.templating import NO_STORE, POPULAR_PROVIDERS, VARY_HX, VISIBLE_PROVIDERS, is_htmx, templates
 from app.tmdb.client import TMDBError
 from app.tracking.routes import get_tracking
 from app.tracking.service import TrackingService
@@ -44,7 +44,10 @@ async def _or_none(call: Awaitable[T]) -> T | None:
 
 def split_providers(providers: Sequence[Provider], selected: Sequence[int],
                     limit: int = VISIBLE_PROVIDERS) -> tuple[list[Provider], list[Provider]]:
-    """Os `limit` primeiros ficam na faixa visível, mais qualquer serviço selecionado que estaria escondido."""
+    """Os `limit` primeiros ficam na faixa visível, mais qualquer serviço selecionado que estaria escondido.
+    Os populares vão à frente; o resto segue a ordem da TMDB."""
+    rank = {pid: i for i, pid in enumerate(POPULAR_PROVIDERS)}
+    providers = sorted(providers, key=lambda p: rank.get(p.id, len(rank)))
     visible = [p for i, p in enumerate(providers) if i < limit or p.id in selected]
     rest = [p for i, p in enumerate(providers) if i >= limit and p.id not in selected]
     return visible, rest

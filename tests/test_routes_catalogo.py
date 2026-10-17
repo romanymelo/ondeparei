@@ -84,13 +84,24 @@ def test_page_beyond_total_has_no_button(make_client):
     assert r.status_code == 200 and "Carregar mais" not in r.text
 
 
-def test_providers_beyond_12_go_into_more_menu(make_client):
-    providers = tuple(Provider(i, f"Serviço {i}", None) for i in range(1, 16))
+def test_providers_beyond_6_go_into_more_menu(make_client):
+    providers = tuple(Provider(i, f"Serviço {i}", None) for i in range(101, 116))
     c = make_client(FakeCatalog(discover=make_page(), providers=providers))
     t = c.get("/").text
     menu = t.index('id="menu-servicos"')
     assert 'popovertarget="menu-servicos"' in t and "Mais serviços" in t
-    assert t.index('name="servicos" value="12"') < menu < t.index('name="servicos" value="13"')
+    assert t.index('name="servicos" value="106"') < menu < t.index('name="servicos" value="107"')
+
+
+def test_most_popular_services_lead_the_strip(make_client):
+    # na ordem da TMDB, JustWatch TV e Claro video vêm antes de HBO Max e Globoplay
+    ids = (8, 119, 350, 337, 2285, 167, 47, 531, 1899, 307)
+    providers = tuple(Provider(i, f"Serviço {i}", None) for i in ids)
+    t = make_client(FakeCatalog(discover=make_page(), providers=providers)).get("/").text
+    menu = t.index('id="menu-servicos"')
+    strip = [i for i in ids if t.index(f'name="servicos" value="{i}"') < menu]
+    assert sorted(strip) == sorted((8, 119, 337, 1899, 307, 531))
+    assert t.index('value="8"') < t.index('value="119"') < t.index('value="337"') < t.index('value="1899"')
 
 
 def test_selected_hidden_provider_moves_to_visible_strip(make_client):

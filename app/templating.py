@@ -14,7 +14,10 @@ SORT_LABELS = {
     "recentes": "Mais recentes",
     "nome": "Nome A–Z",
 }
-VISIBLE_PROVIDERS = 12
+VISIBLE_PROVIDERS = 6
+# os maiores do Brasil, na faixa visível nesta ordem: Netflix, Prime Video, Disney+, HBO Max, Globoplay, Paramount+.
+# A ordem da TMDB põe JustWatch TV e Claro video entre os primeiros, por isso a lista fixa.
+POPULAR_PROVIDERS = (8, 119, 337, 1899, 307, 531)
 TAB_LABELS = {"assistindo": "Assistindo", "quero": "Quero assistir", "assistidas": "Assistidas", "favoritas": "Favoritas"}
 TAB_ICONS = {"assistindo": "watching", "quero": "want", "assistidas": "watched", "favoritas": "favorite"}
 MARK_LABELS = {"want": "Quero assistir", "watching": "Assistindo", "watched": "Assistido", "favorite": "Favorita"}

@@ -57,7 +57,10 @@ def test_provider_list_sorted_by_region_priority():
 def test_provider_list_one_logo_per_service():
     names = ["Netflix", "Paramount+ Amazon Channel", "Paramount Plus", "Netflix Standard with Ads", "Plex Channel", "Plex"]
     data = {"results": [{"provider_id": i, "provider_name": n, "display_priority": i} for i, n in enumerate(names)]}
-    assert [p.name for p in to_provider_list(data, "BR")] == ["Netflix", "Paramount Plus", "Plex"]
+    merged = to_provider_list(data, "BR")
+    assert [p.name for p in merged] == ["Netflix", "Paramount Plus", "Plex"]
+    # cada logo carrega os ids de todas as versões do serviço, o principal primeiro
+    assert [p.ids for p in merged] == [(0, 3), (2, 1), (5, 4)]
 
 
 def p(i, prio=0):

@@ -1,5 +1,6 @@
 """Conversão das respostas JSON da TMDB nos modelos do domínio."""
 
+import dataclasses
 import re
 from collections.abc import Mapping, Sequence
 from datetime import date
@@ -83,13 +84,17 @@ def _service(name: str) -> tuple[str, bool]:
 
 
 def merge_variants(providers: Sequence[Provider]) -> tuple[Provider, ...]:
-    """Um logo por serviço, na ordem em que o serviço aparece; o principal no lugar das variações."""
-    chosen: dict[str, Provider] = {}
+    """Um logo por serviço, na ordem em que o serviço aparece; o principal no lugar das variações,
+    levando os ids de todas elas."""
+    groups: dict[str, list[Provider]] = {}
     for provider in providers:
-        key, main = _service(provider.name)
-        if key not in chosen or (main and not _service(chosen[key].name)[1]):
-            chosen[key] = provider
-    return tuple(chosen.values())
+        groups.setdefault(_service(provider.name)[0], []).append(provider)
+    merged = []
+    for versions in groups.values():
+        main = next((p for p in versions if _service(p.name)[1]), versions[0])
+        ids = dict.fromkeys(i for p in (main, *versions) for i in p.ids)
+        merged.append(dataclasses.replace(main, variant_ids=tuple(ids)[1:]))
+    return tuple(merged)
 
 
 def to_card(item: Mapping) -> SeriesCard:
