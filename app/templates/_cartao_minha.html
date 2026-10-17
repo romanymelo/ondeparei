@@ -5,13 +5,19 @@
     {% else %}
       <span class="poster poster-vazio" aria-hidden="true"><span>{{ item.name }}</span></span>
     {% endif %}
+    {% if item.new_episodes %}
+      <span class="selo-novidade">{{ "Temporada nova" if item.new_season else "Episódios novos" }}</span>
+    {% endif %}
     {% if item.progress and item.progress[1] %}
       <span class="progresso" aria-hidden="true"><span class="progresso-feito" style="--pausa: {{ item.progress|porcento }}"></span></span>
     {% endif %}
   </a>
   <span class="cartao-info">
     <a class="titulo" href="/serie/{{ item.tmdb_id }}">{{ item.name }}</a>
-    {% if item.next_episode %}
+    {% if item.new_episodes %}
+      {% set t, e = item.next_episode %}
+      <a class="proximo-cartao" href="/serie/{{ item.tmdb_id }}/temporada/{{ t }}#ep-{{ e }}">{{ item.new_episodes }} {{ "episódio novo" if item.new_episodes == 1 else "episódios novos" }}</a>
+    {% elif item.next_episode %}
       {% set t, e = item.next_episode %}
       <a class="proximo-cartao" href="/serie/{{ item.tmdb_id }}/temporada/{{ t }}#ep-{{ e }}">Próximo: {{ item.next_episode|ep }}</a>
     {% elif item.caught_up %}

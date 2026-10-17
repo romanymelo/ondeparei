@@ -154,6 +154,8 @@ class TrackedSeries:
     next_episode: tuple[int, int] | None = None
     caught_up: bool = False
     progress: tuple[int, int] | None = None  # (marcados, exibidos); só na aba Assistindo
+    new_episodes: int = 0  # aba Assistidas: episódios já exibidos ainda não marcados
+    new_season: bool = False  # aba Assistidas: estreou uma temporada da qual nada foi visto
 
 
 @dataclass(frozen=True)

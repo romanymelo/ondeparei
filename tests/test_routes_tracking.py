@@ -316,3 +316,12 @@ def test_auth_down_on_action_shows_message_instead_of_login(make_client):
     r = c.post(f"/serie/{ID}/status", data={"status": "want"}, headers=HX)
     assert r.status_code == 200 and message in r.text and "hx-redirect" not in r.headers
     assert c.get("/minhas-series", follow_redirects=False).status_code == 503
+
+
+def test_watched_tab_shows_news_badge_and_link(make_client, tmp_path):
+    db = tmp_path / "n.db"
+    seed(db, status="watched", add=[(1, 1), (1, 2), (1, 3)])
+    t = make_client(tracked_catalog(), db=db).get("/minhas-series?aba=assistidas").text
+    assert '<span class="selo-novidade">Temporada nova</span>' in t
+    assert f'href="/serie/{ID}/temporada/2#ep-1">2 episódios novos</a>' in t
+    assert "Próximo:" not in t

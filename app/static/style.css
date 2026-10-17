@@ -1083,3 +1083,24 @@ a.temporada:hover .titulo { color: var(--projetor); }
   .campos-lado { grid-template-columns: 1fr; }
   .conta-cartao { padding: 22px 18px 20px; }
 }
+
+/* aba Assistidas: série com episódios novos desde que foi dada como assistida */
+.selo-novidade {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  z-index: 1;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: var(--projetor);
+  color: var(--meia-noite);
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.01em;
+  box-shadow: 0 4px 14px rgba(4, 7, 22, 0.55), 0 0 18px var(--projetor-brilho);
+}
+.selo-novidade { max-width: calc(100% - 16px); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+@media (max-width: 599px) {
+  .selo-novidade { top: 6px; left: 6px; padding: 3px 7px; font-size: 0.6rem; }
+}

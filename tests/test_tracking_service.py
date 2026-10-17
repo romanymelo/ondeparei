@@ -194,3 +194,22 @@ async def test_unknown_runtime_still_counts_the_episode(repo):
     await s.set_status(ID, "watched")
     assert (await s.my_series("assistidas")).watch_time == (5, 0)
     assert await repo.missing_runtimes() == {ID: {1, 2}}  # tenta de novo na próxima vez
+
+
+# Selo de novidade na aba Assistidas
+async def test_watched_tab_flags_new_season_new_episodes_and_puts_news_first(repo):
+    details = {ID: tracked_detail(), 1: tracked_detail(id=1, name="Nova temporada"),
+               2: tracked_detail(id=2, name="Episódios novos"), 3: tracked_detail(id=3, name="Em dia")}
+    s = service(repo, tracked_catalog(details=details))
+    t1 = [(1, 1), (1, 2), (1, 3)]
+    await repo.save(1, name="Nova temporada", poster_path=None, status="watched", favorite=False, add=t1 + [(0, 1)])
+    await repo.save(2, name="Episódios novos", poster_path=None, status="watched", favorite=False, add=t1 + [(2, 1)])
+    await repo.save(3, name="Em dia", poster_path=None, status="watched", favorite=False, add=t1 + [(2, 1), (2, 2)])
+    await repo.save(777, name="Sumiu", poster_path=None, status="watched", favorite=False)  # some da TMDB
+    view = await s.my_series("assistidas")
+    by_id = {i.tmdb_id: i for i in view.items}
+    assert (by_id[1].new_episodes, by_id[1].new_season, by_id[1].next_episode) == (2, True, (2, 1))
+    assert (by_id[2].new_episodes, by_id[2].new_season, by_id[2].next_episode) == (1, False, (2, 2))
+    assert (by_id[3].new_episodes, by_id[3].new_season) == (0, False)
+    assert by_id[777].new_episodes == 0
+    assert {i.tmdb_id for i in view.items[:2]} == {1, 2}  # novidades primeiro (gravadas no mesmo instante)

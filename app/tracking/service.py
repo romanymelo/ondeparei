@@ -165,6 +165,10 @@ class TrackingService:
         if tab == "assistindo":
             semaphore = asyncio.Semaphore(DETAIL_CONCURRENCY)
             items = await asyncio.gather(*(self._with_next(item, semaphore) for item in items))
+        elif tab == "assistidas":
+            semaphore = asyncio.Semaphore(DETAIL_CONCURRENCY)
+            items = await asyncio.gather(*(self._with_news(item, semaphore) for item in items))
+            items = sorted(items, key=lambda item: item.new_episodes == 0)  # novidades primeiro (sort estável)
         return MySeries(tab, {url: counts[key] for url, key in TABS.items()}, tuple(items),
                         await self._repo.watch_time())
 
@@ -195,6 +199,22 @@ class TrackingService:
             known |= _runtimes(season, typical)
         runtimes = {ep: known.get(ep) or typical for ep in (await self._repo.watched(tmdb_id)) if ep[0] in numbers}
         await self._repo.set_runtimes(tmdb_id, {ep: minutes for ep, minutes in runtimes.items() if minutes})
+
+    async def _with_news(self, item: TrackedSeries, semaphore: asyncio.Semaphore) -> TrackedSeries:
+        """Episódios exibidos depois que a série foi dada como assistida; sem TMDB, o cartão segue sem selo."""
+        try:
+            async with semaphore:
+                detail = await self._catalog.detail(item.tmdb_id)
+        except TMDBError:
+            return item
+        watched = await self._repo.watched(item.tmdb_id)
+        unwatched = [ep for ep in _aired(detail) if ep not in watched]
+        if not unwatched:
+            return item
+        seen_seasons = {season for season, _ in watched}
+        new_season = any(season not in seen_seasons for season, _ in unwatched)
+        return dataclasses.replace(item, new_episodes=len(unwatched), new_season=new_season,
+                                   next_episode=unwatched[0])
 
     async def _with_next(self, item: TrackedSeries, semaphore: asyncio.Semaphore) -> TrackedSeries:
         """Próximo episódio e progresso; se a TMDB falhar para esta série, o cartão segue sem eles."""
