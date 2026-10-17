@@ -181,21 +181,55 @@ def spotlight_result(id_, backdrop, overview="Sinopse."):
             "first_air_date": "2008-01-20", "vote_average": 9.0, "vote_count": 100, "genre_ids": [18, 999]}
 
 
-async def test_spotlight_is_first_popular_with_backdrop(catalog, mock):
-    results = [spotlight_result(1, None), spotlight_result(2, "/b.jpg", overview=""), spotlight_result(3, "/c.jpg")]
-    route = mock.get("/discover/tv").respond(json={"page": 1, "total_pages": 1, "total_results": 3, "results": results})
-    mock.get("/tv/3/watch/providers").respond(json={"results": {"BR": {"flatrate": [
-        {"provider_id": 8, "provider_name": "Netflix", "logo_path": "/n.png", "display_priority": 0}]}}})
+NETFLIX_BR = {"results": {"BR": {"flatrate": [
+    {"provider_id": 8, "provider_name": "Netflix", "logo_path": "/n.png", "display_priority": 0}]}}}
+SO_NOS_EUA = {"results": {"US": {"flatrate": [
+    {"provider_id": 8, "provider_name": "Netflix", "logo_path": "/n.png", "display_priority": 0}]}}}
+
+
+def mock_genres(mock):
     mock.get("/genre/tv/list").respond(json={"genres": [{"id": 18, "name": "Drama"}]})
+
+
+async def test_spotlight_is_first_trending_today_on_br_streaming(catalog, mock):
+    results = [spotlight_result(1, None), spotlight_result(2, "/b.jpg", overview=""),
+               spotlight_result(3, "/c.jpg"), spotlight_result(4, "/d.jpg"), spotlight_result(5, "/e.jpg")]
+    trending = mock.get("/trending/tv/day").respond(json={"page": 1, "results": results})
+    mock.get("/tv/3/watch/providers").respond(json=SO_NOS_EUA)
+    mock.get("/tv/4/watch/providers").respond(json=NETFLIX_BR)
+    mock.get("/tv/5/watch/providers").respond(json=NETFLIX_BR)
+    mock_genres(mock)
     s = await catalog.spotlight()
-    assert (s.id, s.name, s.year, s.rating, s.genres) == (3, "S3", 2008, 9.0, ("Drama",))
-    assert s.backdrop_url == "https://image.tmdb.org/t/p/w1280/c.jpg" and s.overview == "Sinopse."
+    assert (s.id, s.name, s.year, s.rating, s.genres) == (4, "S4", 2008, 9.0, ("Drama",))
+    assert s.backdrop_url == "https://image.tmdb.org/t/p/w1280/d.jpg" and s.overview == "Sinopse."
     assert [p.name for p in s.providers] == ["Netflix"]
+    assert trending.calls.last.request.url.params["language"] == "pt-BR"
+
+
+async def test_spotlight_skips_trending_series_whose_providers_fail(catalog, mock):
+    mock.get("/trending/tv/day").respond(json={"page": 1, "results": [spotlight_result(3, "/c.jpg"),
+                                                                       spotlight_result(4, "/d.jpg")]})
+    mock.get("/tv/3/watch/providers").respond(404, json={"status_code": 34})
+    mock.get("/tv/4/watch/providers").respond(json=NETFLIX_BR)
+    mock_genres(mock)
+    assert (await catalog.spotlight()).id == 4
+
+
+async def test_spotlight_falls_back_to_most_popular_when_no_trending_on_br(catalog, mock):
+    mock.get("/trending/tv/day").respond(json={"page": 1, "results": [spotlight_result(1, "/a.jpg")]})
+    mock.get("/tv/1/watch/providers").respond(json=SO_NOS_EUA)
+    results = [spotlight_result(2, None), spotlight_result(3, "/c.jpg")]
+    route = mock.get("/discover/tv").respond(json={"page": 1, "total_pages": 1, "total_results": 2, "results": results})
+    mock.get("/tv/3/watch/providers").respond(json=NETFLIX_BR)
+    mock_genres(mock)
+    s = await catalog.spotlight()
+    assert s.id == 3 and [p.name for p in s.providers] == ["Netflix"]
     params = route.calls.last.request.url.params
     assert params["page"] == "1" and params["sort_by"] == "popularity.desc" and "with_watch_providers" not in params
 
 
 async def test_spotlight_none_without_backdrops(catalog, mock):
+    mock.get("/trending/tv/day").respond(json={"page": 1, "results": []})
     mock.get("/discover/tv").respond(json={"page": 1, "total_pages": 1, "total_results": 1,
                                            "results": [spotlight_result(1, None)]})
     assert await catalog.spotlight() is None

@@ -36,6 +36,11 @@ VIDEO_LANGUAGES = "pt,en,null"
 FALLBACK_LANGUAGE = "en-US"
 
 
+def _showcase(item: dict) -> bool:
+    """Dá para usar no destaque: tem imagem de fundo e sinopse."""
+    return bool(item.get("backdrop_path") and item.get("overview"))
+
+
 class Catalog:
     def __init__(
         self,
@@ -68,16 +73,24 @@ class Catalog:
         return CatalogPage(items, filters.page, _total_pages(head), head.get("total_results", 0))
 
     async def spotlight(self) -> Spotlight | None:
-        """A série mais popular do momento que tenha imagem de fundo e sinopse (destaque da tela inicial)."""
-        params = discover_params(Filters(), self._region, self._language, self._today())
-        data = await self._discover_page(params, 1)
-        item = next((r for r in data.get("results", []) if r.get("backdrop_path") and r.get("overview")), None)
-        if item is None:
-            return None
-        watch = await self._client.get(f"/tv/{item['id']}/watch/providers", ttl=TTL_DETAIL)
+        """Destaque da tela inicial: a série mais em alta hoje na TMDB que esteja em algum serviço no Brasil
+        e tenha imagem de fundo e sinopse. Se nenhuma da lista estiver no Brasil, a mais popular do catálogo."""
+        trending = await self._client.get("/trending/tv/day", {"language": self._language}, ttl=TTL_RESULTS)
+        candidates = [item for item in trending.get("results", []) if _showcase(item)]
+        semaphore = asyncio.Semaphore(SEARCH_CONCURRENCY)
+        found = await asyncio.gather(*(self._region_providers(item["id"], semaphore) for item in candidates))
+        pick = next(((item, providers) for item, providers in zip(candidates, found) if providers), None)
+        if pick is None:
+            params = discover_params(Filters(), self._region, self._language, self._today())
+            data = await self._discover_page(params, 1)
+            item = next((r for r in data.get("results", []) if _showcase(r)), None)
+            if item is None:
+                return None
+            pick = item, await self._region_providers(item["id"], semaphore) or ()
+        item, providers = pick
         names = {genre.id: genre.name for genre in await self.genres()}
         genres = tuple(names[g] for g in item.get("genre_ids", []) if g in names)
-        return to_spotlight(item, card_providers((watch.get("results") or {}).get(self._region)), genres)
+        return to_spotlight(item, providers, genres)
 
     async def _discover_page(self, params: dict[str, str], tmdb_page: int) -> dict:
         return await self._client.get("/discover/tv", {**params, "page": str(tmdb_page)}, ttl=TTL_RESULTS)
@@ -100,13 +113,17 @@ class Catalog:
         return dataclasses.replace(result, items=tuple(cards))
 
     async def _with_providers(self, card: SeriesCard, semaphore: asyncio.Semaphore) -> SeriesCard:
+        providers = await self._region_providers(card.id, semaphore)
+        return card if providers is None else dataclasses.replace(card, providers=providers)
+
+    async def _region_providers(self, series_id: int, semaphore: asyncio.Semaphore) -> tuple[Provider, ...] | None:
+        """Serviços da série na região; None quando a TMDB falha (não dá para saber)."""
         try:
             async with semaphore:
-                data = await self._client.get(f"/tv/{card.id}/watch/providers", ttl=TTL_DETAIL)
+                data = await self._client.get(f"/tv/{series_id}/watch/providers", ttl=TTL_DETAIL)
         except TMDBError:
-            return card
-        region_data = (data.get("results") or {}).get(self._region)
-        return dataclasses.replace(card, providers=card_providers(region_data))
+            return None
+        return card_providers((data.get("results") or {}).get(self._region))
 
     async def detail(self, series_id: int) -> SeriesDetail:
         params = {"language": self._language, "append_to_response": DETAIL_APPEND,

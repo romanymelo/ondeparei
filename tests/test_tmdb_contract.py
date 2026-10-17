@@ -35,3 +35,10 @@ def test_discover_beyond_page_500_is_rejected(api):
     r = api.get("/discover/tv", params={"page": 501, "watch_region": "BR",
                                         "with_watch_monetization_types": "flatrate"})
     assert r.status_code != 200 or r.json()["results"] == []
+
+
+def test_trending_tv_day_has_spotlight_fields(api):
+    r = api.get("/trending/tv/day", params={"language": "pt-BR"})
+    assert r.status_code == 200
+    item = r.json()["results"][0]
+    assert {"id", "name", "backdrop_path", "overview", "genre_ids", "first_air_date", "vote_average"} <= item.keys()
