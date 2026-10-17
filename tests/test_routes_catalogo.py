@@ -45,7 +45,7 @@ def test_invalid_query_uses_defaults(client, fake):
 
 def test_filters_prefilled(client):
     t = client.get("/?servicos=8&nota=7&generos=18").text
-    assert 'name="servicos" value="8" checked' in t and 'value="7" selected' in t
+    assert 'name="servicos" value="8" checked' in t and 'name="nota" value="7" checked' in t
     assert 'name="generos" value="18" checked' in t
     assert "Limpar filtros (3)" in t
 

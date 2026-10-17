@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% from "_icones.html" import icone %}
 
 {% macro servico(p) %}
   <label class="servico" title="{{ p.name }}">
@@ -78,18 +79,25 @@
         {% endif %}
       </div>
 
-      <select name="nota" class="seletor" aria-label="Nota mínima">
-        <option value="">Qualquer nota</option>
-        {% for n in RATINGS %}
-          <option value="{{ n }}"{% if filters.min_rating == n %} selected{% endif %}>★ {{ n }} ou mais</option>
-        {% endfor %}
-      </select>
-
       <select name="ordem" class="seletor" aria-label="Ordenar por">
         {% for key, label in SORT_LABELS.items() %}
           <option value="{{ key }}"{% if filters.sort == key %} selected{% endif %}>{{ label }}</option>
         {% endfor %}
       </select>
+    </div>
+
+    <div class="notas" role="radiogroup" aria-labelledby="rotulo-notas">
+      <span id="rotulo-notas" class="notas-rotulo">Filtrar por nota</span>
+      <label class="nota-opcao">
+        <input type="radio" name="nota" value=""{% if filters.min_rating is none %} checked{% endif %}>
+        <span>Todas</span>
+      </label>
+      {% for n in RATINGS %}
+        <label class="nota-opcao">
+          <input type="radio" name="nota" value="{{ n }}"{% if filters.min_rating == n %} checked{% endif %}>
+          <span>{{ icone("star") }}{{ n }}+</span>
+        </label>
+      {% endfor %}
     </div>
   </form>
 

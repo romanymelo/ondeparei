@@ -324,6 +324,36 @@ select.seletor {
 }
 #botao-generos::after { content: ""; display: inline-block; margin-left: 10px; border: 4px solid transparent; border-top-color: var(--nevoa); transform: translateY(2px); }
 
+/* filtro por nota: pílulas de rádio; a escolhida acende como a luz do projetor */
+.notas { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.notas-rotulo { margin-right: 6px; color: var(--nevoa); font-size: 0.92rem; }
+.nota-opcao { position: relative; cursor: pointer; }
+.nota-opcao input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+.nota-opcao span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 16px;
+  border: 1px solid var(--fio);
+  border-radius: 999px;
+  background: linear-gradient(180deg, rgba(43, 53, 112, 0.55), rgba(23, 31, 72, 0.9));
+  color: var(--tela);
+  font-size: 0.92rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  box-shadow: inset 0 1px 0 rgba(238, 240, 255, 0.06);
+  transition: border-color 0.2s, background-color 0.2s, box-shadow 0.25s, color 0.2s;
+}
+.nota-opcao .icone { width: 15px; height: 15px; fill: var(--projetor); stroke: var(--projetor); stroke-width: 1.5; }
+.nota-opcao:hover span { border-color: var(--nevoa); }
+.nota-opcao input:checked + span {
+  border-color: var(--projetor);
+  background: radial-gradient(120% 140% at 50% 0%, rgba(255, 181, 71, 0.26), rgba(255, 181, 71, 0.08) 70%), var(--veludo);
+  color: var(--projetor);
+  box-shadow: 0 0 0 4px var(--projetor-brilho), 0 0 26px rgba(255, 181, 71, 0.35), inset 0 1px 0 rgba(255, 220, 160, 0.25);
+}
+.nota-opcao input:focus-visible + span { outline: 2px solid var(--tela); outline-offset: 4px; }
+
 /* menus (popover nativo: fecha clicando fora ou com Esc) */
 .menu {
   margin: auto;
@@ -540,6 +570,7 @@ select.seletor {
   .filtros { gap: 12px; }
   .servicos { flex-basis: 100%; }
   .seletores { width: 100%; }
+  .notas-rotulo { flex-basis: 100%; margin: 0 0 2px; }
   /* minmax(0, …): sem isso a coluna não encolhe abaixo da largura natural do pôster e a página vaza para o lado */
   .cartoes { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px 8px; }
   .cabecalho-serie { gap: 16px; margin-top: -96px; }
@@ -550,7 +581,7 @@ select.seletor {
 
 @media (prefers-reduced-motion: reduce) {
   .destaque-fundo, .pausa-feito { animation: none; }
-  .cartao-info, .botao, .servico img { transition: none; }
+  .cartao-info, .botao, .servico img, .nota-opcao span { transition: none; }
 }
 
 /* Marcações ------------------------------------------------------------- */
