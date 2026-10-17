@@ -1,14 +1,17 @@
 <a class="cartao{% if card.providers is not none and not card.providers %} esmaecido{% endif %}" href="/serie/{{ card.id }}">
-  {% if card.poster_url %}
-    <img class="poster" src="{{ card.poster_url }}" loading="lazy" alt="{{ card.name }}">
-  {% else %}
-    <div class="poster poster-vazio" aria-hidden="true"><span>{{ card.name }}</span></div>
-  {% endif %}
-  <span class="titulo">{{ card.name }}</span>
-  <span class="meta">
-    {%- if card.year %}{{ card.year }}{% endif %}
-    {%- if card.year and card.rating %} · {% endif %}
-    {%- if card.rating %}<span class="nota">★ {{ card.rating|nota }}</span>{% endif -%}
+  <span class="cartao-quadro">
+    {% if card.poster_url %}
+      <img class="poster" src="{{ card.poster_url }}" loading="lazy" alt="{{ card.name }}" width="342" height="513">
+    {% else %}
+      <span class="poster poster-vazio" aria-hidden="true"><span>{{ card.name }}</span></span>
+    {% endif %}
+    <span class="cartao-info">
+      <span class="titulo">{{ card.name }}</span>
+      <span class="meta">
+        {%- if card.year %}<span>{{ card.year }}</span>{% endif %}
+        {%- if card.rating %}<span class="nota">★ {{ card.rating|nota }}</span>{% endif -%}
+      </span>
+    </span>
   </span>
   {% if card.providers is not none %}
     {% if card.providers %}

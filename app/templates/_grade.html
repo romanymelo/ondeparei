@@ -1,5 +1,6 @@
 {% if oob %}
-<label id="botao-filtros" for="mostrar-filtros" class="botao-filtros" hx-swap-oob="true">Filtros ({{ filters.active_count }})</label>
+<a id="limpar-filtros" href="/" class="limpar" hx-swap-oob="true"{% if not filters.active_count %} hidden{% endif %}>Limpar filtros ({{ filters.active_count }})</a>
+<button type="button" id="botao-generos" class="seletor" popovertarget="menu-generos" hx-swap-oob="true">Gênero{% if filters.genres %} ({{ filters.genres|length }}){% endif %}</button>
 {% endif %}
 <p class="contador">{{ page.total_results|milhar }} {{ "série" if page.total_results == 1 else "séries" }}</p>
 {% if page.items %}

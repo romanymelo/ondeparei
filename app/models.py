@@ -91,3 +91,17 @@ class SeriesDetail:
     seasons: tuple[Season, ...]
     cast: tuple[CastMember, ...]
     watch: WatchOptions
+
+
+@dataclass(frozen=True)
+class Spotlight:
+    """Série em destaque no topo da tela inicial."""
+
+    id: int
+    name: str
+    year: int | None
+    rating: float | None
+    overview: str
+    backdrop_url: str
+    genres: tuple[str, ...]
+    providers: tuple[Provider, ...]

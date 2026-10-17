@@ -6,8 +6,16 @@ from collections.abc import Callable
 from datetime import date
 
 from app.filters import MAX_PAGE, discover_params
-from app.mappers import card_providers, to_card, to_catalog_page, to_detail, to_genres, to_provider_list
-from app.models import CatalogPage, Filters, Genre, Provider, SeriesCard, SeriesDetail
+from app.mappers import (
+    card_providers,
+    to_card,
+    to_catalog_page,
+    to_detail,
+    to_genres,
+    to_provider_list,
+    to_spotlight,
+)
+from app.models import CatalogPage, Filters, Genre, Provider, SeriesCard, SeriesDetail, Spotlight
 from app.tmdb.client import TMDBClient, TMDBError
 
 TTL_LISTS = 24 * 3600
@@ -58,6 +66,18 @@ class Catalog:
         offset = start - (first_page - 1) * TMDB_PAGE_SIZE
         items = tuple(to_card(item) for item in results[offset:offset + PAGE_SIZE])
         return CatalogPage(items, filters.page, _total_pages(head), head.get("total_results", 0))
+
+    async def spotlight(self) -> Spotlight | None:
+        """A série mais popular do momento que tenha imagem de fundo e sinopse (destaque da tela inicial)."""
+        params = discover_params(Filters(), self._region, self._language, self._today())
+        data = await self._discover_page(params, 1)
+        item = next((r for r in data.get("results", []) if r.get("backdrop_path") and r.get("overview")), None)
+        if item is None:
+            return None
+        watch = await self._client.get(f"/tv/{item['id']}/watch/providers", ttl=TTL_DETAIL)
+        names = {genre.id: genre.name for genre in await self.genres()}
+        genres = tuple(names[g] for g in item.get("genre_ids", []) if g in names)
+        return to_spotlight(item, card_providers((watch.get("results") or {}).get(self._region)), genres)
 
     async def _discover_page(self, params: dict[str, str], tmdb_page: int) -> dict:
         return await self._client.get("/discover/tv", {**params, "page": str(tmdb_page)}, ttl=TTL_RESULTS)

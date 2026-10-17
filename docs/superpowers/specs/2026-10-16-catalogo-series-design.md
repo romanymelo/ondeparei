@@ -183,7 +183,7 @@ Base: `https://api.themoviedb.org/3`, cabeçalho `Authorization: Bearer <TMDB_TO
 
 ### 8.2 Catálogo (`GET /`)
 
-**Layout:** filtros numa lateral à esquerda e grade de pôsteres à direita (opção A aprovada no mockup). No celular, a lateral vira um botão "Filtros (n)" que abre o painel.
+**Layout** *(redesenhado em 2026-10-16, identidade "a sala escura, a tela acesa")*: no topo, um **destaque** com a série mais popular do momento (imagem de fundo, título em letreiro condensado, sinopse, "Ver detalhes" e onde assistir) e a barra âmbar "onde parei". Abaixo, "Séries no streaming agora" com os filtros numa faixa horizontal: logos dos serviços (12 visíveis + "Mais serviços" em popover; selecionados sempre visíveis), Gênero em popover, Nota e Ordem em selects, e "Limpar filtros (n)". Grade densa de pôsteres (nome e nota sobem no hover/foco; em telas de toque ficam embaixo). Paleta meia-noite `#0e1430` + âmbar `#ffb547`; fonte Archivo (local, OFL). Se o destaque falhar na TMDB, a página abre sem ele.
 
 **Parâmetros da URL**: os nomes são em português. Os parâmetros de múltipla escolha se repetem (`servicos=8&servicos=1899`), que é como um formulário HTML com checkboxes envia.
 

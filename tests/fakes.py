@@ -2,7 +2,7 @@
 
 from typing import Any
 
-from app.models import CastMember, CatalogPage, Provider, Season, SeriesCard, SeriesDetail, WatchOptions
+from app.models import CastMember, CatalogPage, Provider, Season, SeriesCard, SeriesDetail, Spotlight, WatchOptions
 
 HX = {"HX-Request": "true"}
 
@@ -46,14 +46,28 @@ def make_detail(**kw: Any) -> SeriesDetail:
     return SeriesDetail(**fields)
 
 
+def make_spotlight(**kw: Any) -> Spotlight:
+    fields = {
+        "id": 1396,
+        "name": "Breaking Bad",
+        "year": 2008,
+        "rating": 9.0,
+        "overview": "Um professor de química com câncer terminal passa a fabricar metanfetamina para garantir o futuro da família.",
+        "backdrop_url": "https://image.tmdb.org/t/p/w1280/bb.jpg",
+        "genres": ("Drama", "Crime"),
+        "providers": (Provider(8, "Netflix", "https://image.tmdb.org/t/p/w92/n.png"),),
+    } | kw
+    return Spotlight(**fields)
+
+
 class FakeCatalog:
     """Mesma interface do Catalog; devolve valores configurados ou lança o erro configurado."""
 
-    def __init__(self, *, discover=None, providers=(), genres=(), search=None, detail=None,
-                 error=None, providers_error=None, genres_error=None) -> None:
+    def __init__(self, *, discover=None, providers=(), genres=(), search=None, detail=None, spotlight=None,
+                 error=None, providers_error=None, genres_error=None, spotlight_error=None) -> None:
         self._results = {"discover": discover, "providers": providers, "genres": genres,
-                         "search": search, "detail": detail}
-        self._errors = {"providers": providers_error, "genres": genres_error}
+                         "search": search, "detail": detail, "spotlight": spotlight}
+        self._errors = {"providers": providers_error, "genres": genres_error, "spotlight": spotlight_error}
         self._error = error
         self.calls: list[tuple[str, tuple]] = []
 
@@ -78,3 +92,6 @@ class FakeCatalog:
 
     async def detail(self, series_id):
         return await self._answer("detail", series_id)
+
+    async def spotlight(self):
+        return await self._answer("spotlight")

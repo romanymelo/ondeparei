@@ -7,7 +7,8 @@ from fastapi.responses import RedirectResponse
 
 from app.catalog import Catalog
 from app.filters import parse_filters, parse_page
-from app.templating import VARY_HX, is_htmx, templates
+from app.models import Provider
+from app.templating import VARY_HX, VISIBLE_PROVIDERS, is_htmx, templates
 from app.tmdb.client import TMDBError
 
 router = APIRouter()
@@ -39,6 +40,14 @@ async def _or_none(call: Awaitable[T]) -> T | None:
         return None
 
 
+def split_providers(providers: Sequence[Provider], selected: Sequence[int],
+                    limit: int = VISIBLE_PROVIDERS) -> tuple[list[Provider], list[Provider]]:
+    """Os `limit` primeiros ficam na faixa visível, mais qualquer serviço selecionado que estaria escondido."""
+    visible = [p for i, p in enumerate(providers) if i < limit or p.id in selected]
+    rest = [p for i, p in enumerate(providers) if i >= limit and p.id not in selected]
+    return visible, rest
+
+
 @router.get("/")
 async def catalog_page(request: Request, catalog: Catalog = Depends(get_catalog)):
     filters = parse_filters(query_dict(request))
@@ -53,9 +62,14 @@ async def catalog_page(request: Request, catalog: Catalog = Depends(get_catalog)
         template = "_cartoes.html" if filters.page > 1 else "_grade.html"
         return templates.TemplateResponse(request, template, context | {"oob": True}, headers=VARY_HX)
 
+    providers = await _or_none(catalog.providers())
+    visible, rest = split_providers(providers or (), filters.providers)
     context |= {
-        "providers": await _or_none(catalog.providers()),
+        "providers": providers,
+        "visible_providers": visible,
+        "more_providers": rest,
         "genres": await _or_none(catalog.genres()),
+        "spotlight": await _or_none(catalog.spotlight()),
     }
     return templates.TemplateResponse(request, "catalogo.html", context, headers=VARY_HX)
 

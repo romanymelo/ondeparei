@@ -5,20 +5,21 @@ import pytest
 from app.models import Filters, Genre, Provider
 from app.routes import next_page_url
 from app.tmdb.client import TMDBUnavailable
-from tests.fakes import HX, FakeCatalog, make_page
+from tests.fakes import HX, FakeCatalog, make_page, make_spotlight
 
 
 @pytest.fixture
 def fake():
     return FakeCatalog(discover=make_page(n=3, page=1, total_pages=2, total_results=1284),
-                       providers=(Provider(8, "Netflix", None),), genres=(Genre(18, "Drama"),))
+                       providers=(Provider(8, "Netflix", None),), genres=(Genre(18, "Drama"),),
+                       spotlight=make_spotlight())
 
 
 def test_full_page(client):
     t = client.get("/").text
     assert 'id="filtros"' in t and 'hx-target="#grade"' in t and 'hx-push-url="true"' in t
     assert "Netflix" in t and "Drama" in t and "1.284 séries" in t and "Carregar mais" in t
-    assert 'for="mostrar-filtros"' in t and "Filtros (0)" in t
+    assert re.search(r'<a id="limpar-filtros"[^>]*\bhidden\b', t)
 
 
 def test_htmx_first_page_returns_grid_fragment(client):
@@ -46,7 +47,7 @@ def test_filters_prefilled(client):
     t = client.get("/?servicos=8&nota=7&generos=18").text
     assert 'name="servicos" value="8" checked' in t and 'value="7" selected' in t
     assert 'name="generos" value="18" checked' in t
-    assert "Filtros (3)" in t
+    assert "Limpar filtros (3)" in t
 
 
 def test_only_service_genre_and_rating_filters(client):
@@ -83,14 +84,49 @@ def test_page_beyond_total_has_no_button(make_client):
     assert r.status_code == 200 and "Carregar mais" not in r.text
 
 
-def test_providers_beyond_12_go_into_details(make_client):
+def test_providers_beyond_12_go_into_more_menu(make_client):
     providers = tuple(Provider(i, f"Serviço {i}", None) for i in range(1, 16))
     c = make_client(FakeCatalog(discover=make_page(), providers=providers))
-    closed = c.get("/").text
-    assert re.search(r"<details>\s*<summary>ver todos \(15\)</summary>", closed)
-    opened = c.get("/?servicos=13").text
-    assert re.search(r"<details open>\s*<summary>ver todos \(15\)</summary>", opened)
-    assert 'name="servicos" value="13" checked' in opened
+    t = c.get("/").text
+    menu = t.index('id="menu-servicos"')
+    assert 'popovertarget="menu-servicos"' in t and "Mais serviços" in t
+    assert t.index('name="servicos" value="12"') < menu < t.index('name="servicos" value="13"')
+
+
+def test_selected_hidden_provider_moves_to_visible_strip(make_client):
+    providers = tuple(Provider(i, f"Serviço {i}", None) for i in range(1, 16))
+    t = make_client(FakeCatalog(discover=make_page(), providers=providers)).get("/?servicos=13").text
+    assert t.index('name="servicos" value="13" checked') < t.index('id="menu-servicos"')
+    assert t.count('name="servicos" value="13"') == 1
+
+
+def test_genres_open_in_popover_menu(client):
+    t = client.get("/").text
+    assert 'popovertarget="menu-generos"' in t
+    assert t.index('id="menu-generos"') < t.index('name="generos" value="18"')
+
+
+# Destaque (spotlight) no topo da tela inicial
+def test_home_shows_spotlight(client):
+    t = client.get("/").text
+    assert 'class="destaque"' in t and "Breaking Bad" in t and 'href="/serie/1396"' in t
+    assert "https://image.tmdb.org/t/p/w1280/bb.jpg" in t and 'alt="Netflix"' in t and "Ver detalhes" in t
+
+
+def test_home_without_spotlight_still_renders(make_client):
+    r = make_client(FakeCatalog(discover=make_page())).get("/")
+    assert r.status_code == 200 and 'class="destaque"' not in r.text
+
+
+def test_spotlight_failure_does_not_break_home(make_client):
+    r = make_client(FakeCatalog(discover=make_page(), spotlight_error=TMDBUnavailable())).get("/")
+    assert r.status_code == 200 and 'class="destaque"' not in r.text and 'class="cartoes"' in r.text
+
+
+def test_htmx_fragment_has_no_spotlight_but_updates_clear_link(client):
+    t = client.get("/?servicos=8", headers=HX).text
+    assert 'class="destaque"' not in t
+    assert re.search(r'<a id="limpar-filtros"[^>]*hx-swap-oob="true"', t) and "Limpar filtros (1)" in t
 
 
 # Revisão final #1: voltar/avançar do navegador com HTMX

@@ -12,6 +12,7 @@ from app.models import (
     Season,
     SeriesCard,
     SeriesDetail,
+    Spotlight,
     WatchOptions,
 )
 
@@ -176,4 +177,17 @@ def to_detail(data: Mapping, region: str, overview_fallback: str = "") -> Series
         seasons=tuple(seasons),
         cast=tuple(_cast_member(c) for c in cast[:MAX_CAST]),
         watch=to_watch_options(region_watch),
+    )
+
+
+def to_spotlight(item: Mapping, providers: tuple[Provider, ...], genres: tuple[str, ...]) -> Spotlight:
+    return Spotlight(
+        id=item["id"],
+        name=item.get("name", ""),
+        year=_year(item.get("first_air_date")),
+        rating=_rating(item),
+        overview=item.get("overview") or "",
+        backdrop_url=image_url(item.get("backdrop_path"), "w1280") or "",
+        genres=genres,
+        providers=providers,
     )

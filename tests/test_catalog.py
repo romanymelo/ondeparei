@@ -173,3 +173,29 @@ async def test_search_card_with_invalid_json_keeps_page(catalog, mock):
     mock.get(url__regex=r"/tv/\d+/watch/providers").respond(200, content=b"nao e json")
     page = await catalog.search("office", 1)
     assert len(page.items) == 3 and all(c.providers is None for c in page.items)
+
+
+# Destaque da tela inicial
+def spotlight_result(id_, backdrop, overview="Sinopse."):
+    return {"id": id_, "name": f"S{id_}", "backdrop_path": backdrop, "overview": overview, "poster_path": "/p.jpg",
+            "first_air_date": "2008-01-20", "vote_average": 9.0, "vote_count": 100, "genre_ids": [18, 999]}
+
+
+async def test_spotlight_is_first_popular_with_backdrop(catalog, mock):
+    results = [spotlight_result(1, None), spotlight_result(2, "/b.jpg", overview=""), spotlight_result(3, "/c.jpg")]
+    route = mock.get("/discover/tv").respond(json={"page": 1, "total_pages": 1, "total_results": 3, "results": results})
+    mock.get("/tv/3/watch/providers").respond(json={"results": {"BR": {"flatrate": [
+        {"provider_id": 8, "provider_name": "Netflix", "logo_path": "/n.png", "display_priority": 0}]}}})
+    mock.get("/genre/tv/list").respond(json={"genres": [{"id": 18, "name": "Drama"}]})
+    s = await catalog.spotlight()
+    assert (s.id, s.name, s.year, s.rating, s.genres) == (3, "S3", 2008, 9.0, ("Drama",))
+    assert s.backdrop_url == "https://image.tmdb.org/t/p/w1280/c.jpg" and s.overview == "Sinopse."
+    assert [p.name for p in s.providers] == ["Netflix"]
+    params = route.calls.last.request.url.params
+    assert params["page"] == "1" and params["sort_by"] == "popularity.desc" and "with_watch_providers" not in params
+
+
+async def test_spotlight_none_without_backdrops(catalog, mock):
+    mock.get("/discover/tv").respond(json={"page": 1, "total_pages": 1, "total_results": 1,
+                                           "results": [spotlight_result(1, None)]})
+    assert await catalog.spotlight() is None

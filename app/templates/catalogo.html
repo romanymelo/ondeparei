@@ -1,68 +1,91 @@
 {% extends "base.html" %}
 
-{% block content %}
-<div class="catalogo">
-  <input type="checkbox" id="mostrar-filtros" class="toggle-filtros" hidden>
+{% macro servico(p) %}
+  <label class="servico" title="{{ p.name }}">
+    <input type="checkbox" name="servicos" value="{{ p.id }}"{% if p.id in filters.providers %} checked{% endif %}>
+    {% if p.logo_url %}<img src="{{ p.logo_url }}" alt="{{ p.name }}" loading="lazy" width="46" height="46">{% else %}<span class="logo-texto">{{ p.name }}</span>{% endif %}
+  </label>
+{% endmacro %}
 
-  <form id="filtros" class="catalogo-form" action="/" method="get" novalidate
+{% block content %}
+{% if spotlight %}
+<section class="destaque" aria-label="Em destaque">
+  <img class="destaque-fundo" src="{{ spotlight.backdrop_url }}" alt="" fetchpriority="high">
+  <div class="destaque-conteudo">
+    {% set tamanho = spotlight.name|length %}
+    <h1 class="destaque-titulo{% if tamanho > 32 %} destaque-titulo--muito-longo{% elif tamanho > 16 %} destaque-titulo--longo{% endif %}">{{ spotlight.name }}</h1>
+    <p class="destaque-meta">
+      {% if spotlight.year %}<span>{{ spotlight.year }}</span>{% endif %}
+      {% for genre in spotlight.genres[:2] %}<span>{{ genre }}</span>{% endfor %}
+      {% if spotlight.rating %}<span class="nota">★ {{ spotlight.rating|nota }}</span>{% endif %}
+    </p>
+    <p class="destaque-sinopse">{{ spotlight.overview }}</p>
+    <div class="destaque-acoes">
+      <a class="botao" href="/serie/{{ spotlight.id }}">Ver detalhes</a>
+      {% if spotlight.providers %}
+        <span class="destaque-onde">
+          Disponível em
+          {% for p in spotlight.providers %}
+            {% if p.logo_url %}<img src="{{ p.logo_url }}" alt="{{ p.name }}" title="{{ p.name }}" width="30" height="30">{% else %}<span class="logo-texto">{{ p.name }}</span>{% endif %}
+          {% endfor %}
+        </span>
+      {% endif %}
+    </div>
+  </div>
+  <div class="pausa" aria-hidden="true"><span class="pausa-feito"></span></div>
+</section>
+{% endif %}
+
+<section class="vitrine" aria-labelledby="titulo-vitrine">
+  <div class="vitrine-topo">
+    <h2 id="titulo-vitrine" class="vitrine-titulo">Séries no streaming agora</h2>
+    <a id="limpar-filtros" href="/" class="limpar"{% if not filters.active_count %} hidden{% endif %}>Limpar filtros ({{ filters.active_count }})</a>
+  </div>
+
+  <form id="filtros" class="filtros" action="/" method="get" novalidate
         hx-get="/" hx-trigger="change" hx-target="#grade" hx-push-url="true">
 
-    <aside class="lateral" aria-label="Filtros">
-      <fieldset>
-        <legend>Serviços</legend>
-        {% if providers is none %}
-          <p class="indisponivel">indisponível no momento</p>
-        {% else %}
-          {% macro servico(p) %}
-            <label class="servico" title="{{ p.name }}">
-              <input type="checkbox" name="servicos" value="{{ p.id }}"{% if p.id in filters.providers %} checked{% endif %}>
-              {% if p.logo_url %}<img src="{{ p.logo_url }}" alt="{{ p.name }}" loading="lazy">{% else %}<span class="logo-texto">{{ p.name }}</span>{% endif %}
-            </label>
-          {% endmacro %}
-          <div class="servicos">
-            {% for p in providers[:VISIBLE_PROVIDERS] %}{{ servico(p) }}{% endfor %}
+    {% if providers is none %}
+      <p class="indisponivel">Lista de serviços indisponível no momento</p>
+    {% else %}
+      <div class="servicos" role="group" aria-label="Serviços">
+        {% for p in visible_providers %}{{ servico(p) }}{% endfor %}
+        {% if more_providers %}
+          <button type="button" class="mais-servicos" popovertarget="menu-servicos">Mais serviços</button>
+        {% endif %}
+      </div>
+      {% if more_providers %}
+        <div id="menu-servicos" class="menu menu-servicos" popover aria-label="Mais serviços">
+          <p class="menu-titulo">Mais serviços</p>
+          <div class="servicos-grade">
+            {% for p in more_providers %}{{ servico(p) }}{% endfor %}
           </div>
-          {% if providers|length > VISIBLE_PROVIDERS %}
-            <details{% if filters.providers|select("in", providers[VISIBLE_PROVIDERS:]|map(attribute="id")|list)|list %} open{% endif %}>
-              <summary>ver todos ({{ providers|length }})</summary>
-              <div class="servicos">
-                {% for p in providers[VISIBLE_PROVIDERS:] %}{{ servico(p) }}{% endfor %}
-              </div>
-            </details>
-          {% endif %}
-        {% endif %}
-      </fieldset>
+        </div>
+      {% endif %}
+    {% endif %}
 
-      <fieldset>
-        <legend>Gênero</legend>
+    <div class="seletores">
+      <button type="button" id="botao-generos" class="seletor" popovertarget="menu-generos">Gênero{% if filters.genres %} ({{ filters.genres|length }}){% endif %}</button>
+      <div id="menu-generos" class="menu menu-generos" popover aria-label="Gêneros">
         {% if genres is none %}
-          <p class="indisponivel">indisponível no momento</p>
+          <p class="indisponivel">Lista de gêneros indisponível no momento</p>
         {% else %}
-          <details{% if filters.genres %} open{% endif %}>
-            <summary>{% if filters.genres %}{{ filters.genres|length }} selecionado(s){% else %}Todos os gêneros{% endif %}</summary>
+          <div class="pilulas">
             {% for g in genres %}
-              <label class="opcao"><input type="checkbox" name="generos" value="{{ g.id }}"{% if g.id in filters.genres %} checked{% endif %}> {{ g.name }}</label>
+              <label class="pilula"><input type="checkbox" name="generos" value="{{ g.id }}"{% if g.id in filters.genres %} checked{% endif %}><span>{{ g.name }}</span></label>
             {% endfor %}
-          </details>
+          </div>
         {% endif %}
-      </fieldset>
+      </div>
 
-      <fieldset>
-        <legend>Nota mínima</legend>
-        <select name="nota" aria-label="Nota mínima">
-          <option value="">Qualquer nota</option>
-          {% for n in RATINGS %}
-            <option value="{{ n }}"{% if filters.min_rating == n %} selected{% endif %}>★ {{ n }}+</option>
-          {% endfor %}
-        </select>
-      </fieldset>
+      <select name="nota" class="seletor" aria-label="Nota mínima">
+        <option value="">Qualquer nota</option>
+        {% for n in RATINGS %}
+          <option value="{{ n }}"{% if filters.min_rating == n %} selected{% endif %}>★ {{ n }} ou mais</option>
+        {% endfor %}
+      </select>
 
-      <a href="/" class="limpar">Limpar filtros</a>
-    </aside>
-
-    <div class="barra">
-      <label id="botao-filtros" for="mostrar-filtros" class="botao-filtros">Filtros ({{ filters.active_count }})</label>
-      <select name="ordem" aria-label="Ordenar por">
+      <select name="ordem" class="seletor" aria-label="Ordenar por">
         {% for key, label in SORT_LABELS.items() %}
           <option value="{{ key }}"{% if filters.sort == key %} selected{% endif %}>{{ label }}</option>
         {% endfor %}
@@ -70,8 +93,8 @@
     </div>
   </form>
 
-  <section id="grade" class="grade" aria-live="polite">
+  <div id="grade" class="grade">
     {% include "_grade.html" %}
-  </section>
-</div>
+  </div>
+</section>
 {% endblock %}

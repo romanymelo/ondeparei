@@ -3,7 +3,9 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0e1430">
   <title>{% block title %}{{ APP_NAME }}{% endblock %}</title>
+  <link rel="preload" href="/static/fonts/archivo-latin.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="stylesheet" href="/static/style.css">
   {# Voltar/avançar recarrega a URL em vez de restaurar um snapshot do HTMX (que perde o estado dos checkboxes). #}
   <meta name="htmx-config" content='{"historyCacheSize":0,"refreshOnHistoryMiss":true}'>
@@ -11,10 +13,13 @@
 </head>
 <body>
   <header class="topo">
-    <a href="/" class="logo">{{ APP_NAME }}</a>
+    <a href="/" class="marca" aria-label="{{ APP_NAME }}, voltar ao catálogo">
+      <span class="marca-nome">{{ APP_NAME }}</span>
+      <span class="marca-barra" aria-hidden="true"></span>
+    </a>
     <form action="/buscar" method="get" role="search" class="busca">
       <input type="search" name="q" value="{{ q or '' }}" maxlength="100"
-             placeholder="Buscar série pelo nome…" aria-label="Buscar série pelo nome">
+             placeholder="Buscar série pelo nome" aria-label="Buscar série pelo nome">
     </form>
     <div class="menu-usuario"></div>
   </header>
