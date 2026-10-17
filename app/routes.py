@@ -51,12 +51,14 @@ def split_providers(providers: Sequence[Provider], selected: Sequence[int],
 
 
 @router.get("/")
-async def catalog_page(request: Request, catalog: Catalog = Depends(get_catalog)):
+async def catalog_page(request: Request, catalog: Catalog = Depends(get_catalog),
+                       tracking: TrackingService = Depends(get_tracking)):
     filters = parse_filters(query_dict(request))
     page = await catalog.discover(filters)
     context = {
         "filters": filters,
         "page": page,
+        "marks": tracking.marks_for([card.id for card in page.items]),
         "has_next": page.page < page.total_pages,
         "next_url": next_page_url(request.url.path, request.query_params.multi_items(), page.page + 1),
     }
@@ -77,7 +79,8 @@ async def catalog_page(request: Request, catalog: Catalog = Depends(get_catalog)
 
 
 @router.get("/buscar")
-async def search_page(request: Request, catalog: Catalog = Depends(get_catalog)):
+async def search_page(request: Request, catalog: Catalog = Depends(get_catalog),
+                      tracking: TrackingService = Depends(get_tracking)):
     q = request.query_params.get("q", "").strip()
     if not q:
         return RedirectResponse("/", status_code=303)
@@ -86,6 +89,7 @@ async def search_page(request: Request, catalog: Catalog = Depends(get_catalog))
     context = {
         "q": q,
         "page": page,
+        "marks": tracking.marks_for([card.id for card in page.items]),
         "has_next": page.page < page.total_pages,
         "next_url": next_page_url(request.url.path, request.query_params.multi_items(), page.page + 1),
     }

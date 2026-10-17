@@ -5,7 +5,7 @@ import pytest
 from app.tmdb.client import TMDBUnavailable
 from app.tracking.db import connect
 from app.tracking.repository import TrackingRepository
-from tests.fakes import HX, tracked_catalog, tracked_detail
+from tests.fakes import HX, FakeCatalog, make_detail, make_page, tracked_catalog, tracked_detail
 
 ID = 100088
 
@@ -165,3 +165,13 @@ def test_tmdb_down_on_action_saves_nothing(make_client, tmp_path):
     r = c.post(f"/serie/{ID}/status", data={"status": "want"}, headers=HX)
     assert r.status_code == 200 and "A TMDB não respondeu" in r.text
     assert saved_marks(db) == {}
+
+
+def test_catalog_more_and_search_show_badges(make_client, tmp_path):
+    db = tmp_path / "s.db"
+    seed(db, 1, name="Série 1", status="watching", favorite=True)
+    c = make_client(FakeCatalog(discover=make_page(), search=make_page(), detail=make_detail()), db=db)
+    for url, headers in [("/", {}), ("/?pagina=2", HX), ("/buscar?q=serie", {})]:
+        t = c.get(url, headers=headers).text
+        assert t.count('class="selo"') == 2, url
+        assert 'aria-label="Assistindo"' in t and 'aria-label="Favorita"' in t

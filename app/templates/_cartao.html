@@ -1,5 +1,13 @@
+{% from "_icones.html" import icone %}
 <a class="cartao{% if card.providers is not none and not card.providers %} esmaecido{% endif %}" href="/serie/{{ card.id }}">
   <span class="cartao-quadro">
+    {% set m = marks.get(card.id) if marks else none %}
+    {% if m and (m.status or m.favorite) %}
+      <span class="selos">
+        {%- if m.status %}<span class="selo" role="img" aria-label="{{ MARK_LABELS[m.status] }}">{{ icone(m.status) }}</span>{% endif -%}
+        {%- if m.favorite %}<span class="selo" role="img" aria-label="Favorita">{{ icone("favorite") }}</span>{% endif -%}
+      </span>
+    {% endif %}
     {% if card.poster_url %}
       <img class="poster" src="{{ card.poster_url }}" loading="lazy" alt="{{ card.name }}" width="342" height="513">
     {% else %}

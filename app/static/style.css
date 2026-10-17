@@ -709,6 +709,22 @@ a.temporada:hover .titulo { color: var(--projetor); }
 }
 .ate-aqui:hover { color: var(--projetor); }
 
+/* selos de status e favorita no canto do pôster */
+.selos { position: absolute; top: 8px; left: 8px; z-index: 1; display: flex; gap: 4px; }
+.selo {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: rgba(14, 20, 48, 0.85);
+  color: var(--projetor);
+  box-shadow: 0 0 0 1px rgba(255, 181, 71, 0.25);
+}
+.selo .icone { width: 14px; height: 14px; }
+.selo .icone-favorite, .selo .icone-watching { fill: currentColor; }
+
 /* cabeçalho e Minhas séries */
 .link-topo {
   padding: 6px 2px;
