@@ -21,6 +21,9 @@ dev = [
 testpaths = ["tests"]
 pythonpath = ["."]
 asyncio_mode = "auto"
-addopts = "-m 'not tmdb'"
-markers = ["tmdb: chama a API real da TMDB (requer TMDB_TOKEN)"]
+addopts = "-m 'not tmdb and not supabase'"
+markers = [
+    "tmdb: chama a API real da TMDB (requer TMDB_TOKEN)",
+    "supabase: chama o projeto real do Supabase (requer as chaves no .env)",
+]
 filterwarnings = ["ignore:Using `httpx` with `starlette.testclient` is deprecated"]
