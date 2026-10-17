@@ -39,7 +39,7 @@ Permitir marcar cada série como **Quero assistir**, **Assistindo** ou **Assisti
 - **Episódio exibido** é todo episódio `(t, e)` com `t ≥ 1` e `(t, e) ≤ last_episode_to_air` (comparação primeiro pela temporada, depois pelo episódio). Esse campo vem dos detalhes da série na TMDB e é a **única** referência para saber o que já foi ao ar, tanto nas regras quanto na tela.
 - Os episódios de cada temporada são numerados de 1 a `episode_count`, que é o padrão da TMDB.
 - **Especiais** (temporada 0) podem ser vistos e marcados, mas **não contam** para progresso, status automático nem "próximo episódio". Como o `last_episode_to_air` não cobre a temporada 0, um especial conta como exibido quando a data de exibição é anterior ou igual à data de hoje (`air_date ≤ hoje`). Essa data vem de `/tv/{id}/season/0`.
-- Marcar "Assistido" à mão marca todos os episódios já exibidos das temporadas ≥ 1 (Especiais não). Trocar depois para outro status, ou desmarcar o "Assistido", não desmarca episódios. *(Alterado em 2026-10-17 a pedido do usuário, pensando no contador de horas.)*
+- Marcar "Assistido" à mão marca todos os episódios já exibidos das temporadas ≥ 1 (Especiais não). Sair de "Assistido" (desmarcar, ou trocar para "Quero assistir" ou "Assistindo") desmarca todos os episódios, inclusive Especiais. Outras trocas de status não mexem nos episódios. *(Alterado em 2026-10-17 a pedido do usuário.)*
 - Quando sai uma temporada nova de uma série "Assistida", o status não muda sozinho.
 - O nome e o pôster da série são guardados no banco (snapshot) e atualizados a cada ação, para "Minhas séries" abrir sem chamar a TMDB para cada série.
 

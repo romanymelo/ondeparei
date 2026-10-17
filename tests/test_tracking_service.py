@@ -84,11 +84,23 @@ async def test_marking_watched_skips_specials(repo):
     assert repo.watched(ID) == {(1, 1), (1, 2), (1, 3)}
 
 
-async def test_leaving_watched_keeps_the_episodes(repo):
-    s = service(repo)
+@pytest.mark.parametrize(("new_status", "expected"), [("watched", None), ("want", "want"), ("watching", "watching")])
+async def test_leaving_watched_clears_every_episode(repo, new_status, expected):
+    detail = make_detail(seasons=(Season(0, "Especiais", None, 2, None), Season(1, "Temporada 1", 2023, 3, None)),
+                         last_aired=(1, 3))
+    s = service(repo, FakeCatalog(detail=detail, seasons={0: make_season(0, 2), 1: make_season(1, 3)}))
     await s.set_status(ID, "watched")
-    assert (await s.set_status(ID, "watching")).marks.status == "watching"
-    assert len(repo.watched(ID)) == 5
+    await s.toggle_episode(ID, 0, 1)  # especial marcado à mão
+    t = await s.set_status(ID, new_status)  # "watched" de novo = desmarcar Assistido
+    assert t.marks.status == expected and repo.watched(ID) == frozenset()
+    assert t.season_progress == {0: (0, 0), 1: (0, 3)}
+
+
+async def test_other_status_changes_keep_the_episodes(repo):
+    s = service(repo)
+    await s.toggle_episode(ID, 1, 1)  # Assistindo com T1E1
+    await s.set_status(ID, "want")
+    assert repo.watched(ID) == {(1, 1)}
 
 
 async def test_favorite_toggles_and_saves_snapshot(repo):
@@ -126,8 +138,8 @@ async def test_my_series_watching_tab(repo):
     details = {ID: tracked_detail(), 1399: tracked_detail(id=1399, name="Outra")}
     s = service(repo, tracked_catalog(details=details))
     await s.toggle_episode(ID, 1, 1)
-    await s.mark_up_to(1399, 2, 2)
-    await s.set_status(1399, "watching")  # tudo visto, mas ainda "Assistindo": em dia
+    repo.save(1399, name="Outra", poster_path=None, status="watching", favorite=False,  # tudo visto: em dia
+              add=[(1, 1), (1, 2), (1, 3), (2, 1), (2, 2)])
     repo.save(777, name="Sumiu", poster_path=None, status="watching", favorite=False)  # some da TMDB
     view = await s.my_series("assistindo")
     by_id = {i.tmdb_id: i for i in view.items}
