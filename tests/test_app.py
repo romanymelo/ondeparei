@@ -71,3 +71,9 @@ def test_format_thousands(n, s):
 
 def test_format_rating():
     assert format_rating(8.64) == "8,6"
+
+
+def test_footer_signature_keeps_required_attribution(client):
+    t = client.get("/").text.split("<footer")[1]
+    assert 'Desenvolvido sob o efeito de "só mais um episódio" por Romany Melo 📺✨' in t.replace("&#34;", '"')
+    assert "não é endossado nem certificado pela TMDB" in t and "JustWatch" in t
