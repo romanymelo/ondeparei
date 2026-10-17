@@ -6,6 +6,7 @@ import pytest
 from app.tmdb.client import TMDBUnavailable
 from app.tracking.db import connect
 from app.tracking.repository import TrackingRepository
+from app.tracking.store import TrackingUnavailable, VisitorStore
 from app.auth.client import User
 from tests.fakes import HX, TEST_USER, FakeCatalog, make_detail, make_page, tracked_catalog, tracked_detail
 
@@ -67,16 +68,31 @@ def test_series_without_aired_episodes_says_soon(make_client):
     assert t.count("Em breve") == 2 and "--pausa" not in t.split('class="temporadas"')[1]
 
 
-def test_save_failure_shows_friendly_message(make_client, monkeypatch):
-    def broken_save(self, *args, **kwargs):
-        raise sqlite3.OperationalError("disco cheio")
+class BrokenSaveStore(VisitorStore):
+    async def save(self, tmdb_id, **kw):
+        raise TrackingUnavailable("fora")
 
-    monkeypatch.setattr(TrackingRepository, "save", broken_save)
+
+class BrokenCounterStore(VisitorStore):
+    async def watch_time(self):
+        raise TrackingUnavailable("fora")
+
+
+def test_tracking_unavailable_message(make_client):
     c = make_client(tracked_catalog())
+    c.app.state.stores = lambda user, token: BrokenSaveStore()
+    message = "Não foi possível falar com o servidor de contas. Tente novamente em instantes."
     r = c.post(f"/serie/{ID}/status", data={"status": "want"}, headers=HX)
-    assert r.status_code == 200 and "Não foi possível salvar sua marcação. Tente novamente." in r.text
-    assert c.post(f"/serie/{ID}/status", data={"status": "want"}).status_code == 500
+    assert r.status_code == 200 and message in r.text
+    page = c.post(f"/serie/{ID}/status", data={"status": "want"})
+    assert page.status_code == 503 and message in page.text
 
+
+def test_header_counter_hidden_when_store_fails(make_client):
+    c = make_client(tracked_catalog(discover=make_page()))
+    c.app.state.stores = lambda user, token: BrokenCounterStore()
+    r = c.get("/")
+    assert r.status_code == 200 and "contador-topo" not in r.text
 
 def test_season_page_lists_episodes(make_client):
     t = make_client(tracked_catalog()).get(f"/serie/{ID}/temporada/2").text
@@ -222,7 +238,6 @@ def test_stylesheet_url_changes_with_the_file_so_browsers_reload_it(client):
 
 
 # Contador também no cabeçalho
-@pytest.mark.xfail(strict=True, reason="Task 7: contador do cabeçalho por conta")
 def test_header_shows_the_watch_time_and_links_to_my_series(make_client, tmp_path):
     db = tmp_path / "h.db"
     episodes = [(1, 1), (1, 2), (1, 3), (2, 1), (2, 2)]
@@ -234,7 +249,6 @@ def test_header_shows_the_watch_time_and_links_to_my_series(make_client, tmp_pat
     assert "Tempo de séries: 4 horas" in header
 
 
-@pytest.mark.xfail(strict=True, reason="Task 7: contador do cabeçalho por conta")
 def test_header_counter_does_not_animate_outside_home(make_client, tmp_path):
     db = tmp_path / "h.db"
     seed(db, status="watched", add=[(1, 1)], runtimes={(1, 1): 120})
@@ -246,7 +260,6 @@ def test_header_hides_the_counter_with_nothing_watched(make_client):
     assert "contador-topo" not in make_client(tracked_catalog(discover=make_page())).get("/").text
 
 
-@pytest.mark.xfail(strict=True, reason="Task 7: contador do cabeçalho por conta")
 def test_marking_watched_fills_runtimes_right_after_the_click(make_client):
     c = make_client(tracked_catalog(discover=make_page()))
     c.post(f"/serie/{ID}/status", data={"status": "watched"})  # 5 episódios, duração buscada depois da resposta

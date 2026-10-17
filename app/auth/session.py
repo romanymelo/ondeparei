@@ -102,7 +102,7 @@ class SessionMiddleware(BaseHTTPMiddleware):
                                                 request.cookies.get(REFRESH_COOKIE))
         request.state.user = resolution.user
         request.state.access_token = resolution.access_token
-        request.state.watch_time = None
+        request.state.watch_time = await self._header_watch_time(request, resolution)
         response = await call_next(request)
         if getattr(request.state, "session_written", False):
             return response  # a rota (entrar, sair, nova senha) já decidiu os cookies
@@ -111,6 +111,20 @@ class SessionMiddleware(BaseHTTPMiddleware):
         elif resolution.clear:
             clear_session_cookies(response)
         return response
+
+
+    @staticmethod
+    async def _header_watch_time(request: Request, resolution: Resolution) -> tuple[int, int] | None:
+        """Tempo de séries do cabeçalho: só em página inteira de quem está logado; falha some com o contador."""
+        from app.tracking.store import TrackingUnavailable  # store.py importa LoginRequired daqui
+
+        stores = getattr(request.app.state, "stores", None)
+        if resolution.user is None or stores is None or request.method != "GET" or is_htmx(request):
+            return None
+        try:
+            return await stores(resolution.user, resolution.access_token).watch_time()
+        except TrackingUnavailable:
+            return None
 
 
 def _relative(url: str | None) -> str:

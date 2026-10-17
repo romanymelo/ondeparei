@@ -1,5 +1,4 @@
 import logging
-import sqlite3
 from contextlib import asynccontextmanager
 from pathlib import Path
 from urllib.parse import urlsplit
@@ -20,13 +19,14 @@ from app.auth.routes import router as auth_router
 from app.routes import router
 from app.tracking.routes import router as tracking_router
 from app.tracking.service import InvalidAction
-from app.tracking.store import StoreFactory
+from app.tracking.store import StoreFactory, TrackingUnavailable
+from app.tracking.supabase_repository import SupabaseTrackingRepository
 from app.templating import APP_NAME, VARY_HX, is_htmx, templates
 from app.tmdb.cache import TTLCache
 from app.tmdb.client import TMDBAuthError, TMDBClient, TMDBNotFound, TMDBUnavailable, create_http_client
 
 STATIC_DIR = Path(__file__).parent / "static"
-SAVE_ERROR = "Não foi possível salvar sua marcação. Tente novamente."
+TRACKING_UNAVAILABLE = "Não foi possível falar com o servidor de contas. Tente novamente em instantes."
 
 logger = logging.getLogger(__name__)
 
@@ -69,10 +69,10 @@ def _register_error_handlers(app: FastAPI) -> None:
         # 400 também com HTMX: o HTMX não troca o conteúdo em 4xx, então a tela fica como estava
         return _error_response(request, 400, "Ação inválida", retry=False, htmx_status=400)
 
-    @app.exception_handler(sqlite3.Error)
-    async def database_error(request: Request, exc: sqlite3.Error):
-        logger.error("Falha ao gravar a marcação no banco: %s", exc)
-        return _error_response(request, 500, SAVE_ERROR, retry=False)
+    @app.exception_handler(TrackingUnavailable)
+    async def tracking_unavailable(request: Request, exc: TrackingUnavailable):
+        logger.warning("Supabase (marcações) indisponível: %s", exc)
+        return _error_response(request, 503, TRACKING_UNAVAILABLE, retry=False)
 
     @app.exception_handler(StarletteHTTPException)
     async def http_error(request: Request, exc: StarletteHTTPException):
@@ -103,7 +103,8 @@ def create_app(settings: Settings | None = None, catalog: Catalog | None = None,
         supabase_http = httpx.AsyncClient(timeout=10)
         app.state.auth = SupabaseAuth(supabase_http, config.supabase_url, config.supabase_publishable_key)
         app.state.resolver = UserResolver(app.state.auth)
-        app.state.stores = None  # Task 7: SupabaseTrackingRepository
+        url, key = config.supabase_url, config.supabase_publishable_key
+        app.state.stores = lambda user, token: SupabaseTrackingRepository(supabase_http, url, key, token)
         try:
             yield
         finally:
