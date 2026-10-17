@@ -16,6 +16,7 @@ from app.auth.csrf import CSRFMiddleware
 from app.auth.session import LoginRequired, SessionMiddleware, UserResolver, login_redirect
 from app.catalog import Catalog
 from app.config import ConfigError, Settings, load_settings
+from app.auth.routes import router as auth_router
 from app.routes import router
 from app.tracking.routes import router as tracking_router
 from app.tracking.service import InvalidAction
@@ -113,6 +114,7 @@ def create_app(settings: Settings | None = None, catalog: Catalog | None = None,
     app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
     app.include_router(router)
     app.include_router(tracking_router)
+    app.include_router(auth_router)
     # o último adicionado fica por fora: o CSRF recusa antes de qualquer outra coisa
     app.add_middleware(SessionMiddleware)
     app.add_middleware(CSRFMiddleware)

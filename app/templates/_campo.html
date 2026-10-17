@@ -1,0 +1,10 @@
+{#- Campo de formulário de conta: rótulo, entrada e a mensagem de erro ligada a ela. -#}
+{% macro campo(nome, rotulo, tipo="text", valor="", erro=None, autocomplete=None) -%}
+<div class="campo{% if erro %} campo--erro{% endif %}">
+  <label for="campo-{{ nome }}">{{ rotulo }}</label>
+  <input id="campo-{{ nome }}" name="{{ nome }}" type="{{ tipo }}"{% if valor %} value="{{ valor }}"{% endif %}
+         {%- if autocomplete %} autocomplete="{{ autocomplete }}"{% endif %}
+         {%- if erro %} aria-invalid="true" aria-describedby="erro-{{ nome }}"{% endif %}>
+  {% if erro %}<p class="campo-erro" id="erro-{{ nome }}">{{ erro }}</p>{% endif %}
+</div>
+{%- endmacro %}

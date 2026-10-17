@@ -35,8 +35,23 @@
       <input type="search" name="q" value="{{ q or '' }}" maxlength="100"
              placeholder="Buscar série pelo nome" aria-label="Buscar série pelo nome">
     </form>
+    {% set usuario = request.state.user %}
     <div class="menu-usuario">
-      <a class="link-topo" href="/minhas-series"{% if request.url.path == "/minhas-series" %} aria-current="page"{% endif %}>Minhas séries</a>
+      {% if usuario %}
+        <a class="link-topo" href="/minhas-series"{% if request.url.path == "/minhas-series" %} aria-current="page"{% endif %}>Minhas séries</a>
+        <button type="button" class="usuario-botao" popovertarget="menu-usuario" aria-label="Conta de {{ usuario.first_name or usuario.email }}">
+          <span class="usuario-inicial" aria-hidden="true">{{ (usuario.first_name or usuario.email)[:1]|upper }}</span>
+          <span class="usuario-nome">{{ usuario.first_name or usuario.email }}</span>
+        </button>
+        <div id="menu-usuario" class="menu menu-conta" popover>
+          <p class="menu-titulo">{{ usuario.email }}</p>
+          <a class="menu-item" href="/minhas-series">Minhas séries</a>
+          <form method="post" action="/sair"><button class="menu-item menu-sair">Sair</button></form>
+        </div>
+      {% else %}
+        <a class="link-topo" href="{{ login_url(request) }}">Entrar</a>
+        <a class="botao botao--pequeno" href="/criar-conta">Criar conta</a>
+      {% endif %}
     </div>
   </header>
 

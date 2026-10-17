@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% from "_campo.html" import campo %}
+
+{% block title %}Entrar · {{ APP_NAME }}{% endblock %}
+
+{% block content %}
+<section class="conta" aria-labelledby="titulo-conta">
+  <div class="conta-cartao">
+    <h1 id="titulo-conta" class="vitrine-titulo">Entrar</h1>
+    <p class="conta-apoio">Para marcar o que você assiste e ver o seu tempo de séries.</p>
+    {% if erro_geral %}<p class="conta-alerta" role="alert">{{ erro_geral }}</p>{% endif %}
+    <form method="post" action="/entrar" novalidate>
+      <input type="hidden" name="proximo" value="{{ proximo }}">
+      {{ campo("email", "E-mail", "email", valores.email, erros.email, "email") }}
+      {{ campo("senha", "Senha", "password", "", erros.senha, "current-password") }}
+      <button class="botao botao--largo">Entrar</button>
+    </form>
+    <p class="conta-links"><a href="/esqueci-senha">Esqueci minha senha</a></p>
+    <p class="conta-rodape">Ainda não tem conta? <a href="/criar-conta{% if proximo != '/' %}?proximo={{ proximo|urlencode }}{% endif %}">Criar conta</a></p>
+  </div>
+</section>
+{% endblock %}

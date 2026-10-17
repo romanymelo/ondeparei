@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% from "_campo.html" import campo %}
+
+{% block title %}Nova senha · {{ APP_NAME }}{% endblock %}
+
+{% block content %}
+<section class="conta" aria-labelledby="titulo-conta">
+  <div class="conta-cartao">
+    <h1 id="titulo-conta" class="vitrine-titulo">Nova senha</h1>
+    {% if erro_geral %}<p class="conta-alerta" role="alert">{{ erro_geral }}</p>{% endif %}
+    {% if expirado %}
+      <p class="conta-alerta" role="alert">Este link expirou.</p>
+      <a class="botao botao--largo" href="/esqueci-senha">Pedir outro link</a>
+    {% else %}
+      <form method="post" action="/nova-senha" novalidate>
+        {{ campo("senha", "Nova senha", "password", "", erros.senha, "new-password") }}
+        {{ campo("confirmacao", "Confirme a senha", "password", "", erros.confirmacao, "new-password") }}
+        <button class="botao botao--largo">Salvar senha</button>
+      </form>
+    {% endif %}
+  </div>
+</section>
+{% endblock %}

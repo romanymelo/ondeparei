@@ -1,4 +1,5 @@
 from datetime import date
+from urllib.parse import quote
 from pathlib import Path
 
 from fastapi import Request
@@ -80,6 +81,18 @@ def static_url(name: str) -> str:
     return f"/static/{name}?v={int((STATIC_DIR / name).stat().st_mtime)}"
 
 
+ACCOUNT_PAGES = ("/entrar", "/criar-conta", "/esqueci-senha", "/nova-senha")
+
+
+def login_url(request: Request) -> str:
+    """Link "Entrar" do cabeçalho, voltando para a página atual depois do login."""
+    path = request.url.path
+    if path.startswith(ACCOUNT_PAGES):
+        return "/entrar"
+    here = f"{path}?{request.url.query}" if request.url.query else path
+    return f"/entrar?proximo={quote(here, safe='')}"
+
+
 VARY_HX = {"Vary": "HX-Request"}
 # páginas com marcações: o Voltar do navegador não pode mostrar uma cópia antiga
 NO_STORE = {"Cache-Control": "no-store"}
@@ -99,6 +112,7 @@ templates.env.globals.update(
     VISIBLE_PROVIDERS=VISIBLE_PROVIDERS,
     MARK_LABELS=MARK_LABELS,
     static_url=static_url,
+    login_url=login_url,
     TAB_LABELS=TAB_LABELS,
     TAB_ICONS=TAB_ICONS,
 )

@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% from "_campo.html" import campo %}
+
+{% block title %}Criar conta · {{ APP_NAME }}{% endblock %}
+
+{% block content %}
+<section class="conta" aria-labelledby="titulo-conta">
+  <div class="conta-cartao">
+    <h1 id="titulo-conta" class="vitrine-titulo">Criar conta</h1>
+    <p class="conta-apoio">Suas marcações, favoritas e tempo de séries ficam guardados na sua conta.</p>
+    {% if erro_geral %}
+      <p class="conta-alerta" role="alert">{{ erro_geral }}{% if email_em_uso %} <a href="/entrar{% if proximo != '/' %}?proximo={{ proximo|urlencode }}{% endif %}">Entrar</a>{% endif %}</p>
+    {% endif %}
+    <form method="post" action="/criar-conta" novalidate>
+      <input type="hidden" name="proximo" value="{{ proximo }}">
+      <div class="campos-lado">
+        {{ campo("nome", "Nome", "text", valores.nome, erros.nome, "given-name") }}
+        {{ campo("sobrenome", "Sobrenome", "text", valores.sobrenome, erros.sobrenome, "family-name") }}
+      </div>
+      {{ campo("email", "E-mail", "email", valores.email, erros.email, "email") }}
+      {{ campo("senha", "Senha", "password", "", erros.senha, "new-password") }}
+      {{ campo("confirmacao", "Confirme a senha", "password", "", erros.confirmacao, "new-password") }}
+      <button class="botao botao--largo">Criar conta</button>
+    </form>
+    <p class="conta-rodape">Já tem conta? <a href="/entrar{% if proximo != '/' %}?proximo={{ proximo|urlencode }}{% endif %}">Entrar</a></p>
+  </div>
+</section>
+{% endblock %}

@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% from "_campo.html" import campo %}
+
+{% block title %}Esqueci minha senha · {{ APP_NAME }}{% endblock %}
+
+{% block content %}
+<section class="conta" aria-labelledby="titulo-conta">
+  <div class="conta-cartao">
+    <h1 id="titulo-conta" class="vitrine-titulo">Esqueci minha senha</h1>
+    {% if enviado %}
+      <p class="conta-aviso" role="status">{{ enviado }}</p>
+      <p class="conta-rodape"><a href="/entrar">Entrar</a></p>
+    {% else %}
+      <p class="conta-apoio">Informe o e-mail da sua conta para receber um link e criar uma senha nova.</p>
+      {% if erro_geral %}<p class="conta-alerta" role="alert">{{ erro_geral }}</p>{% endif %}
+      <form method="post" action="/esqueci-senha" novalidate>
+        {{ campo("email", "E-mail", "email", valores.email, erros.email, "email") }}
+        <button class="botao botao--largo">Enviar link</button>
+      </form>
+      <p class="conta-rodape"><a href="/entrar">Entrar</a></p>
+    {% endif %}
+  </div>
+</section>
+{% endblock %}

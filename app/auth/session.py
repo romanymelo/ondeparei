@@ -104,6 +104,8 @@ class SessionMiddleware(BaseHTTPMiddleware):
         request.state.access_token = resolution.access_token
         request.state.watch_time = None
         response = await call_next(request)
+        if getattr(request.state, "session_written", False):
+            return response  # a rota (entrar, sair, nova senha) já decidiu os cookies
         if resolution.new_session is not None:
             set_session_cookies(response, resolution.new_session, secure=request.url.scheme == "https")
         elif resolution.clear:
