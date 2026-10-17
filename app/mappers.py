@@ -1,5 +1,6 @@
 """Conversão das respostas JSON da TMDB nos modelos do domínio."""
 
+import re
 from collections.abc import Mapping, Sequence
 
 from app.filters import MAX_PAGE
@@ -58,6 +59,29 @@ def _by_priority(items: Sequence[Mapping]) -> list[Mapping]:
     return sorted(items, key=lambda i: i.get("display_priority", 0))
 
 
+# Variações de um mesmo serviço na TMDB: "Paramount+ Amazon Channel", "Paramount Plus Apple TV channel",
+# "Paramount Plus Premium", "Netflix Standard with Ads"... Todas viram "paramount plus" / "netflix".
+_PLUS = re.compile(r"\s*\+")
+_VARIANT = re.compile(r"\s+(amazon channel|apple tv channel|channel|premium|standard with ads|basic with ads|with ads)$")
+
+
+def _service(name: str) -> tuple[str, bool]:
+    """Chave do serviço e se o nome já é o do serviço principal (sem sufixo de variação)."""
+    plain = _PLUS.sub(" plus", name.lower()).strip()
+    key = _VARIANT.sub("", plain)
+    return key, key == plain
+
+
+def merge_variants(providers: Sequence[Provider]) -> tuple[Provider, ...]:
+    """Um logo por serviço, na ordem em que o serviço aparece; o principal no lugar das variações."""
+    chosen: dict[str, Provider] = {}
+    for provider in providers:
+        key, main = _service(provider.name)
+        if key not in chosen or (main and not _service(chosen[key].name)[1]):
+            chosen[key] = provider
+    return tuple(chosen.values())
+
+
 def to_card(item: Mapping) -> SeriesCard:
     return SeriesCard(
         id=item["id"],
@@ -93,7 +117,7 @@ def to_watch_options(region_data: Mapping | None) -> WatchOptions:
     if not region_data:
         return WatchOptions(None, {})
     by_type = {
-        kind: tuple(_provider(item) for item in _by_priority(region_data[kind]))
+        kind: merge_variants([_provider(item) for item in _by_priority(region_data[kind])])
         for kind in ALL_TYPES
         if region_data.get(kind)
     }
@@ -101,11 +125,8 @@ def to_watch_options(region_data: Mapping | None) -> WatchOptions:
 
 
 def card_providers(region_data: Mapping | None, limit: int = 4) -> tuple[Provider, ...]:
-    unique: dict[int, Provider] = {}
-    for providers in to_watch_options(region_data).by_type.values():
-        for provider in providers:
-            unique.setdefault(provider.id, provider)
-    return tuple(unique.values())[:limit]
+    by_type = to_watch_options(region_data).by_type.values()
+    return merge_variants([provider for providers in by_type for provider in providers])[:limit]
 
 
 def pick_trailer(videos: Sequence[Mapping]) -> str | None:

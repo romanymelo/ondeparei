@@ -67,6 +67,31 @@ def test_card_providers_unique_limited_to_4():
     assert card_providers(None) == ()
 
 
+
+def named(i, name, prio=0):
+    return {"provider_id": i, "provider_name": name, "logo_path": f"/{i}.png", "display_priority": prio}
+
+
+def test_watch_options_merge_variants_into_main_service():
+    w = to_watch_options({"flatrate": [
+        named(582, "Paramount+ Amazon Channel", 1), named(531, "Paramount Plus", 2),
+        named(1853, "Paramount Plus Apple TV channel", 3), named(2303, "Paramount Plus Premium", 4),
+        named(8, "Netflix", 5), named(1796, "Netflix Standard with Ads", 6)]})
+    assert [x.id for x in w.by_type["flatrate"]] == [531, 8]
+
+
+def test_variant_is_kept_when_main_service_is_absent():
+    w = to_watch_options({"flatrate": [named(1825, "HBO Max Amazon Channel"),
+                                       named(2141, "MGM Plus Amazon Channel", 1),
+                                       named(2142, "MGM+ Apple TV Channel", 2)]})
+    assert [x.id for x in w.by_type["flatrate"]] == [1825, 2141]
+
+
+def test_card_providers_merge_variants_across_types_but_not_different_services():
+    d = {"flatrate": [named(119, "Amazon Prime Video")], "ads": [named(2100, "Amazon Prime Video with Ads")],
+         "rent": [named(10, "Amazon Video")], "buy": [named(2243, "Apple TV Amazon Channel"), named(350, "Apple TV", 1)]}
+    assert [x.id for x in card_providers(d)] == [119, 10, 350]
+
 def v(key, lang, type_="Trailer", site="YouTube"):
     return {"key": key, "iso_639_1": lang, "type": type_, "site": site}
 

@@ -129,6 +129,7 @@ Dataclasses imutáveis (`frozen=True`):
 
 - **`Filters`**: `providers: tuple[int, ...]`, `types: tuple[str, ...]`, `genres: tuple[int, ...]`, `year_from: int | None`, `year_to: int | None`, `min_rating: int | None`, `sort: str`, `page: int`.
 - **`Provider`**: `id`, `name`, `logo_url`.
+  Variações de um mesmo serviço ("Paramount+ Amazon Channel", "Paramount Plus Apple TV channel", "Paramount Plus Premium", "Netflix Standard with Ads"...) aparecem como um logo só, o do serviço principal quando ele está na lista (`merge_variants` em `mappers.py`). Vale para os cartões, o destaque e a página da série; o filtro de serviços continua listando cada um. *(Adicionado em 2026-10-17.)*
 - **`SeriesCard`**: `id`, `name`, `year: int | None`, `rating: float | None` (None quando não há votos), `poster_url: str | None`, `providers: tuple[Provider, ...] | None`. `None` = não consultado (catálogo) ou consulta falhou; tupla vazia = não está em nenhum streaming no BR.
 - **`CatalogPage`**: `items: tuple[SeriesCard, ...]`, `page`, `total_pages` (limitado a 500), `total_results`.
 - **`WatchOptions`**: `link: str | None` (página da TMDB com os links para os serviços), `by_type: dict[str, tuple[Provider, ...]]`, na ordem flatrate, free, ads, rent, buy, só com os tipos não vazios.
