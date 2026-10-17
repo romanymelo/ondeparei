@@ -1024,6 +1024,31 @@ a.temporada:hover .titulo { color: var(--projetor); }
 .campo input:focus { outline: none; border-color: var(--projetor); box-shadow: 0 0 0 3px var(--projetor-brilho); }
 .campo--erro input { border-color: #ffb3a6; }
 .campo-erro { margin: 0; color: #ffb3a6; font-size: 0.84rem; }
+/* senha com o olho para mostrar ou ocultar */
+.campo-senha { position: relative; }
+.campo-senha input { padding-right: 48px; }
+.campo-olho {
+  position: absolute;
+  top: 50%;
+  right: 6px;
+  transform: translateY(-50%);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border: 0;
+  border-radius: 10px;
+  background: none;
+  color: var(--nevoa);
+  cursor: pointer;
+}
+.campo-olho:hover, .campo-olho:focus-visible { color: var(--projetor); }
+.campo-olho:focus-visible { outline: 2px solid var(--projetor); outline-offset: 1px; }
+.campo-olho .icone { width: 20px; height: 20px; }
+.campo-olho[aria-pressed="false"] .icone-olho-fechado,
+.campo-olho[aria-pressed="true"] .icone-olho { display: none; }
 .botao--largo { display: block; width: 100%; margin-top: 6px; text-align: center; text-decoration: none; }
 .botao--pequeno { padding: 7px 16px; font-size: 0.88rem; text-decoration: none; white-space: nowrap; }
 

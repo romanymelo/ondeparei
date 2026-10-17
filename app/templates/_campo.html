@@ -1,10 +1,20 @@
 {#- Campo de formulário de conta: rótulo, entrada e a mensagem de erro ligada a ela. -#}
+{% from "_icones.html" import icone %}
 {% macro campo(nome, rotulo, tipo="text", valor="", erro=None, autocomplete=None) -%}
 <div class="campo{% if erro %} campo--erro{% endif %}">
   <label for="campo-{{ nome }}">{{ rotulo }}</label>
+  {% if tipo == "password" %}<div class="campo-senha">{% endif %}
   <input id="campo-{{ nome }}" name="{{ nome }}" type="{{ tipo }}"{% if valor %} value="{{ valor }}"{% endif %}
          {%- if autocomplete %} autocomplete="{{ autocomplete }}"{% endif %}
          {%- if erro %} aria-invalid="true" aria-describedby="erro-{{ nome }}"{% endif %}>
+  {% if tipo == "password" -%}
+    {#- segunda exceção à regra de JavaScript (a primeira é o "← Voltar"): mostrar ou ocultar a senha -#}
+    <button type="button" class="campo-olho" aria-label="Mostrar senha" aria-pressed="false"
+            onclick="const i = this.previousElementSibling, ver = i.type === 'password'; i.type = ver ? 'text' : 'password'; this.setAttribute('aria-pressed', ver); this.setAttribute('aria-label', ver ? 'Ocultar senha' : 'Mostrar senha')">
+      {{- icone("olho") }}{{ icone("olho-fechado") -}}
+    </button>
+  </div>
+  {%- endif %}
   {% if erro %}<p class="campo-erro" id="erro-{{ nome }}">{{ erro }}</p>{% endif %}
 </div>
 {%- endmacro %}

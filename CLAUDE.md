@@ -46,7 +46,7 @@ uv run python -m app.importar email@x.com      # importação única do data/cat
 
 - Identificadores em inglês; textos da tela, nomes de templates e parâmetros de URL em português.
 - TDD: escreva o teste, veja falhar, implemente, veja passar, rode a suíte inteira.
-- Sem JavaScript próprio além do HTMX (exceção: o `onclick` do "← Voltar").
+- Sem JavaScript próprio além do HTMX (exceções: o `onclick` do "← Voltar" e o do olho que mostra a senha, na macro `campo()`).
 - Fragmentos HTMX respondem 200 (inclusive os de erro), menos "Ação inválida" (400). Sem HTMX, ações POST respondem 303.
 - Visual "a sala escura, a tela acesa": tokens de cor em `:root` (`--meia-noite`, `--veludo`, `--fio`, `--tela`, `--nevoa`, `--projetor` âmbar), fonte Archivo local. A barra âmbar "onde parei" (`--pausa`) só mostra progresso real. Ícones são SVG da macro `icone()`, nunca emoji na interface.
 - Mensagens de commit terminam com `Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>`.

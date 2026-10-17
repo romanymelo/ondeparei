@@ -163,3 +163,18 @@ def test_recovery_code_without_verifier_cookie_is_expired(make_client):
     r = c.get("/nova-senha?code=abc")
     assert "Este link expirou." in r.text
     assert not any(name == "exchange_code" for name, _ in c.app.state.auth.calls)
+
+
+def _eye_buttons(html):
+    return html.count('class="campo-olho"')
+
+
+def test_every_password_field_has_an_eye_and_email_does_not(make_client):
+    c = visitor(make_client)
+    login = c.get("/entrar").text
+    assert _eye_buttons(login) == 1
+    assert _eye_buttons(c.get("/criar-conta").text) == 2
+    assert _eye_buttons(c.get("/nova-senha?token_hash=th&type=recovery").text) == 2
+    assert _eye_buttons(c.get("/esqueci-senha").text) == 0
+    eye = login.split('class="campo-olho"')[0].rsplit("<button", 1)[1] + login.split('class="campo-olho"')[1].split(">")[0]
+    assert 'type="button"' in eye and 'aria-label="Mostrar senha"' in eye and 'aria-pressed="false"' in eye
