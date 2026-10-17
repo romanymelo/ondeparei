@@ -6,7 +6,7 @@
 {% block content %}
 <article class="serie">
   <div class="fundo"{% if serie.backdrop_url %} style="background-image: url('{{ serie.backdrop_url }}')"{% endif %}>
-    <a href="{{ back_url }}" class="voltar"{% if back_is_previous %} onclick="history.back(); return false;"{% endif %}>← Voltar</a>
+    <a href="{{ back_url or "/" }}" class="voltar"{% if back_is_previous %} onclick="history.back(); return false;"{% endif %}>← Voltar</a>
   </div>
 
   <header class="cabecalho-serie">

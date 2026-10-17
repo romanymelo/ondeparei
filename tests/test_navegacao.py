@@ -4,7 +4,11 @@ import re
 
 import pytest
 
-from tests.fakes import HX, make_page, tracked_catalog
+from starlette.requests import Request
+
+from app.models import Marks, SeriesTracking
+from app.templating import templates
+from tests.fakes import HX, make_detail, make_page, tracked_catalog
 
 ID = 100088
 
@@ -58,3 +62,12 @@ def test_coming_straight_from_the_list_uses_browser_back_to_keep_scroll(c):
 def test_unsafe_or_unknown_cookie_falls_back_to_home(c, cookie):
     c.cookies.set("ultima_lista", cookie)
     assert 'href="/"' in back_link(c.get(f"/serie/{ID}").text)
+
+
+def test_back_link_never_renders_empty_even_without_back_url():
+    """Servidor com código antigo e template novo (sem --reload) não pode gerar um Voltar que não sai do lugar."""
+    request = Request({"type": "http", "method": "GET", "path": "/serie/1", "headers": [], "query_string": b""})
+    tracking = SeriesTracking(Marks(), None, None, {})
+    html = templates.get_template("serie.html").render(request=request, serie=make_detail(), series_id=1,
+                                                       tracking=tracking)
+    assert 'href="/" class="voltar"' in html
