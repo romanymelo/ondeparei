@@ -210,7 +210,8 @@ Base: `https://api.themoviedb.org/3`, cabeçalho `Authorization: Bearer <TMDB_TO
 **HTMX:**
 - O formulário de filtros tem `hx-get="/" hx-trigger="change" hx-target="#grade" hx-push-url="true"`.
 - Pedido com `HX-Request` e `pagina=1` → `_grade.html` (contador + cartões + botão).
-- O botão "Carregar mais" faz `hx-get` da próxima página com `hx-swap="outerHTML"`. Pedido com `HX-Request` e `pagina>1` → `_cartoes.html` (cartões + novo botão), que substitui o botão antigo. O botão some quando `pagina >= total_pages`, com `total_pages` limitado a 500.
+- O botão "Carregar mais" faz `hx-get` da próxima página com `hx-swap="outerHTML"`. Pedido com `HX-Request` e `pagina>1` → `_cartoes.html` (cartões + novo botão), que substitui o botão antigo. O botão some quando `pagina >= total_pages`.
+- **Tamanho da página do catálogo: 50 séries** *(alterado em 2026-10-16 a pedido do usuário)*. A TMDB devolve 20 por página, então a página N do app junta as páginas da TMDB que cobrem as séries (N−1)×50+1 a N×50 (página 1 → TMDB 1–3; página 2 → TMDB 3–5), buscando primeiro a inicial e depois as demais em paralelo, só até o total de páginas da TMDB. `total_pages` = ⌈min(total_results, 10 000) ÷ 50⌉ (no máximo 200).
 - Pedido sem `HX-Request` → `catalogo.html` completo, com os filtros preenchidos a partir da URL.
 
 **Cartão:** pôster (placeholder quando não há imagem), nome, ano e nota. Leva para `/serie/{id}`.
@@ -223,7 +224,7 @@ Base: `https://api.themoviedb.org/3`, cabeçalho `Authorization: Bearer <TMDB_TO
   - Nenhum provedor → cartão esmaecido com "Fora do streaming no BR".
   - Consulta falhou → cartão normal, sem logos e sem aviso.
 - Mantém a ordem de relevância da TMDB. Mostra "N resultados para "q" · a busca ignora os filtros do catálogo".
-- "Carregar mais" funciona igual ao catálogo.
+- "Carregar mais" funciona igual ao catálogo, mas a busca continua com **20 por página** (cada resultado exige uma consulta extra de disponibilidade).
 
 ### 8.4 Detalhes (`GET /serie/{id}`)
 

@@ -26,11 +26,68 @@ def mock():
 
 
 async def test_discover_sends_translated_params(catalog, mock):
-    route = mock.get("/discover/tv").respond(json=load_fixture("discover.json"))
+    data = load_fixture("discover.json")
+    route = mock.get("/discover/tv").respond(json=data)
     page = await catalog.discover(Filters(providers=(8,), sort="nota"))
-    params = route.calls.last.request.url.params
-    assert params["with_watch_providers"] == "8" and params["vote_count.gte"] == "50" and params["watch_region"] == "BR"
-    assert len(page.items) == 3
+    for call in route.calls:
+        params = call.request.url.params
+        assert params["with_watch_providers"] == "8" and params["vote_count.gte"] == "50"
+        assert params["watch_region"] == "BR"
+    assert page.items[0].id == data["results"][0]["id"]
+
+
+def tmdb_page(n: int, total_results: int) -> dict:
+    """Página n da TMDB (20 por página) de um resultado com `total_results` séries numeradas a partir de 1."""
+    first = (n - 1) * 20 + 1
+    last = min(n * 20, total_results)
+    results = [{"id": i, "name": f"S{i}", "first_air_date": "", "vote_average": 0, "vote_count": 0,
+                "poster_path": None} for i in range(first, last + 1)]
+    return {"page": n, "total_pages": -(-total_results // 20), "total_results": total_results, "results": results}
+
+
+def mock_discover(mock, total_results: int):
+    def respond(request):
+        return httpx.Response(200, json=tmdb_page(int(request.url.params["page"]), total_results))
+    return mock.get("/discover/tv").mock(side_effect=respond)
+
+
+def requested_pages(route) -> list[int]:
+    return sorted(int(call.request.url.params["page"]) for call in route.calls)
+
+
+async def test_first_page_joins_three_tmdb_pages(catalog, mock):
+    route = mock_discover(mock, total_results=16000)
+    page = await catalog.discover(Filters())
+    assert requested_pages(route) == [1, 2, 3]
+    assert [c.id for c in page.items] == list(range(1, 51)) and page.page == 1
+
+
+async def test_second_page_continues_at_51(catalog, mock):
+    route = mock_discover(mock, total_results=16000)
+    page = await catalog.discover(Filters(page=2))
+    assert requested_pages(route) == [3, 4, 5]
+    assert [c.id for c in page.items] == list(range(51, 101)) and page.page == 2
+
+
+@pytest.mark.parametrize("total_results, total_pages", [(16000, 200), (120, 3), (50, 1), (0, 0)])
+async def test_total_pages_counts_50_per_page(catalog, mock, total_results, total_pages):
+    mock_discover(mock, total_results=total_results)
+    page = await catalog.discover(Filters())
+    assert (page.total_results, page.total_pages) == (total_results, total_pages)
+
+
+async def test_few_results_do_not_request_missing_pages(catalog, mock):
+    route = mock_discover(mock, total_results=35)
+    page = await catalog.discover(Filters())
+    assert requested_pages(route) == [1, 2]
+    assert len(page.items) == 35 and page.total_pages == 1
+
+
+async def test_page_beyond_tmdb_cap_requests_nothing_above_500(catalog, mock):
+    route = mock_discover(mock, total_results=16000)
+    page = await catalog.discover(Filters(page=201))
+    assert max(requested_pages(route)) <= 500
+    assert page.items == () and page.total_pages == 200
 
 
 async def test_providers_and_genres(catalog, mock):
