@@ -36,6 +36,15 @@ Depois, abra http://localhost:8000.
 
 > No Windows, o `--reload` às vezes detecta a mudança ("Reloading...") mas não sobe o processo novo, e o app continua com o código antigo. Se isso acontecer, pare com Ctrl+C e rode o comando de novo.
 
+## Marcações
+
+Na página de cada série dá para marcar **Quero assistir**, **Assistindo** ou **Assistido** e favoritar. Clicando numa temporada, você marca episódio por episódio (ou "até aqui", ou a temporada inteira); a página **Minhas séries** mostra tudo e o próximo episódio de cada série.
+
+- As marcações ficam num banco SQLite em `data/catalogo.db` (outro caminho: variável `DATABASE_PATH` no `.env`).
+- **Backup:** com o app parado, copie o arquivo `data/catalogo.db`.
+- **Recomeçar do zero:** com o app parado, apague esse arquivo.
+- Ainda sem login: quem abrir o app no seu computador vê e altera as marcações.
+
 ## Testes
 
 ```
@@ -55,6 +64,7 @@ uv run python -m tests.fixtures.capturar
 app/
   main.py          # cria o app, lifespan, páginas de erro
   routes.py        # rotas: /, /buscar, /serie/{id}
+  tracking/        # marcações: regras, banco SQLite, serviço e rotas
   catalog.py       # serviço: orquestra as chamadas à TMDB
   filters.py       # URL → Filters → parâmetros do /discover/tv
   mappers.py       # JSON da TMDB → modelos
@@ -74,7 +84,9 @@ tests/             # pytest + respx (TMDB simulada) + fixtures reais
 - A busca por nome ignora os filtros do catálogo.
 - O catálogo vai até a página 500 (10 mil séries por combinação de filtros).
 - A disponibilidade pode estar algumas horas desatualizada (cache de até 6 h).
-- A TMDB não fornece link direto para cada serviço. O botão "Ver opções de streaming" abre a página da TMDB, que tem esses links.
+- A TMDB não fornece link direto para cada serviço.
+- O que conta como episódio "já exibido" vem da TMDB e pode atrasar algumas horas.
+- Uma série "Assistida" não volta sozinha para "Assistindo" quando sai temporada nova.
 
 ---
 

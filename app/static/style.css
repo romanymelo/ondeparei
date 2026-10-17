@@ -769,3 +769,15 @@ a.temporada:hover .titulo { color: var(--projetor); }
 @media (prefers-reduced-motion: reduce) {
   .status-opcao, .favorita, .marcar { transition: none; }
 }
+/* no celular, o bloco de status sai da coluna estreita ao lado do pôster e ocupa a largura toda */
+@media (max-width: 767px) {
+  .cabecalho-serie { display: grid; grid-template-columns: 112px minmax(0, 1fr); align-items: end; }
+  .cabecalho-serie .info { display: contents; }
+  .info-texto { grid-column: 2; padding-top: 72px; }
+  .status-serie { grid-column: 1 / -1; margin-top: 4px; align-items: stretch; }
+  .status-opcoes { flex: 1 1 0; min-width: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; }
+  .status-opcao { flex-direction: column; justify-content: center; gap: 3px; padding: 8px 4px; border-radius: 12px; font-size: 0.8rem; text-align: center; }
+  .status-serie > form:last-of-type { display: flex; }
+  .favorita { flex-shrink: 0; width: 48px; height: auto; min-height: 44px; border-radius: 12px; }
+}
+

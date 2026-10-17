@@ -16,6 +16,7 @@
       <div class="poster-grande poster-vazio" aria-hidden="true"><span>{{ serie.name }}</span></div>
     {% endif %}
     <div class="info">
+      <div class="info-texto">
       <h1>{{ serie.name }}</h1>
       {% if serie.original_name and serie.original_name != serie.name %}
         <p class="nome-original">{{ serie.original_name }}</p>
@@ -31,6 +32,7 @@
           <li><span class="nota">★ {{ serie.rating|nota }}</span> ({{ serie.vote_count|milhar }} votos)</li>
         {% endif %}
       </ul>
+      </div>
       {% include "_status.html" %}
     </div>
   </header>

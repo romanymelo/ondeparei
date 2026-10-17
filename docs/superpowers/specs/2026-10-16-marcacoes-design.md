@@ -1,7 +1,7 @@
 # Marcações e acompanhamento de episódios — Design (Fase 2a)
 
 - **Data:** 2026-10-16 (telas revistas em 2026-10-17 para a identidade visual nova da fase 1)
-- **Status:** aguardando revisão
+- **Status:** implementada (branch `feat/fase-2a-marcacoes`)
 - **Depende de:** Fase 1, Catálogo (`2026-10-16-catalogo-series-design.md`), já implementada no branch `feat/fase-1-catalogo`
 
 ## 1. Objetivo
