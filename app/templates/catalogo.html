@@ -34,13 +34,6 @@
       </fieldset>
 
       <fieldset>
-        <legend>Tipo</legend>
-        {% for t in ALL_TYPES %}
-          <label class="opcao"><input type="checkbox" name="tipos" value="{{ t }}"{% if t in filters.types %} checked{% endif %}> {{ WATCH_TYPE_LABELS[t] }}</label>
-        {% endfor %}
-      </fieldset>
-
-      <fieldset>
         <legend>Gênero</legend>
         {% if genres is none %}
           <p class="indisponivel">indisponível no momento</p>
@@ -52,16 +45,6 @@
             {% endfor %}
           </details>
         {% endif %}
-      </fieldset>
-
-      <fieldset>
-        <legend>Ano de estreia</legend>
-        <div class="anos">
-          <input type="number" name="ano_de" min="1900" max="{{ current_year + 1 }}" placeholder="de"
-                 aria-label="Ano de estreia a partir de" value="{{ filters.year_from or '' }}">
-          <input type="number" name="ano_ate" min="1900" max="{{ current_year + 1 }}" placeholder="até"
-                 aria-label="Ano de estreia até" value="{{ filters.year_to or '' }}">
-        </div>
       </fieldset>
 
       <fieldset>

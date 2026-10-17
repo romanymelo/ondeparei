@@ -68,7 +68,7 @@ tests/             # pytest + respx (TMDB simulada) + fixtures reais
 
 ## Limitações conhecidas
 
-- A TMDB aplica os filtros de serviço e de tipo de forma independente. A página de detalhes mostra o quadro exato.
+- O catálogo inclui séries disponíveis para alugar ou comprar, e o filtro de serviço não distingue o tipo. A página de detalhes mostra o quadro exato.
 - A busca por nome ignora os filtros do catálogo.
 - O catálogo vai até a página 500 (10 mil séries por combinação de filtros).
 - A disponibilidade pode estar algumas horas desatualizada (cache de até 6 h).

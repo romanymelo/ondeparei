@@ -43,10 +43,22 @@ def test_invalid_query_uses_defaults(client, fake):
 
 
 def test_filters_prefilled(client):
-    t = client.get("/?servicos=8&nota=7&tipos=flatrate").text
+    t = client.get("/?servicos=8&nota=7&generos=18").text
     assert 'name="servicos" value="8" checked' in t and 'value="7" selected' in t
-    assert 'name="tipos" value="flatrate" checked' in t and 'name="tipos" value="buy" checked' not in t
+    assert 'name="generos" value="18" checked' in t
     assert "Filtros (3)" in t
+
+
+def test_only_service_genre_and_rating_filters(client):
+    t = client.get("/").text
+    assert 'name="servicos"' in t and 'name="generos"' in t and 'name="nota"' in t
+    assert 'name="tipos"' not in t and 'name="ano_de"' not in t and 'name="ano_ate"' not in t
+    assert "Ano de estreia" not in t
+
+
+def test_old_links_with_removed_filters_still_work(client, fake):
+    assert client.get("/?tipos=rent&ano_de=2015&ano_ate=2020").status_code == 200
+    assert ("discover", (Filters(),)) in fake.calls
 
 
 def test_provider_list_failure_still_renders(make_client):

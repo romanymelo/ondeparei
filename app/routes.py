@@ -1,5 +1,4 @@
 from collections.abc import Awaitable, Sequence
-from datetime import date
 from typing import TypeVar
 from urllib.parse import urlencode
 
@@ -42,8 +41,7 @@ async def _or_none(call: Awaitable[T]) -> T | None:
 
 @router.get("/")
 async def catalog_page(request: Request, catalog: Catalog = Depends(get_catalog)):
-    current_year = date.today().year
-    filters = parse_filters(query_dict(request), current_year)
+    filters = parse_filters(query_dict(request))
     page = await catalog.discover(filters)
     context = {
         "filters": filters,
@@ -58,7 +56,6 @@ async def catalog_page(request: Request, catalog: Catalog = Depends(get_catalog)
     context |= {
         "providers": await _or_none(catalog.providers()),
         "genres": await _or_none(catalog.genres()),
-        "current_year": current_year,
     }
     return templates.TemplateResponse(request, "catalogo.html", context, headers=VARY_HX)
 

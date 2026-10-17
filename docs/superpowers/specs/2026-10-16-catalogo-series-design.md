@@ -21,7 +21,7 @@ Um app web pessoal que mostra as séries disponíveis **agora** nos serviços de
 ## 2. Escopo da Fase 1
 
 **Inclui:**
-- Catálogo em grade de pôsteres com filtros por serviço, tipo de disponibilidade, gênero, ano de estreia e nota mínima, além de ordenação.
+- Catálogo em grade de pôsteres com filtros por serviço, gênero e nota mínima, além de ordenação. *(Alterado em 2026-10-16: os filtros de tipo de disponibilidade e de ano de estreia foram removidos a pedido do usuário.)*
 - Busca por nome.
 - Página de detalhes da série com "onde assistir no Brasil".
 - Layout responsivo (computador e celular).
@@ -190,26 +190,20 @@ Base: `https://api.themoviedb.org/3`, cabeçalho `Authorization: Bearer <TMDB_TO
 | Parâmetro | Valores | Vira na TMDB |
 |---|---|---|
 | `servicos` | ids de provedor | `with_watch_providers=8\|1899` (OU) |
-| `tipos` | `flatrate`, `free`, `ads`, `rent`, `buy` | `with_watch_monetization_types=...` (OU) |
 | `generos` | ids de gênero | `with_genres=18\|35` (OU) |
-| `ano_de` | ano | `first_air_date.gte=AAAA-01-01` |
-| `ano_ate` | ano | `first_air_date.lte=AAAA-12-31` |
 | `nota` | `5`, `6`, `7`, `8` | `vote_average.gte=N` |
 | `ordem` | `popularidade` (padrão), `nota`, `recentes`, `nome` | `popularity.desc`, `vote_average.desc`, `first_air_date.desc`, `name.asc` |
 | `pagina` | 1–500 | `page` |
 
 **Regras de tradução (`catalog.py`):**
-1. Sempre envia `watch_region=BR`, `language=pt-BR` e `with_watch_monetization_types`. É isso que garante "disponível em streaming".
-2. Nenhum tipo marcado (ou só valores inválidos) = todos os cinco tipos.
-3. Quando há `nota` ou `ordem=nota`, adiciona `vote_count.gte=50`, para evitar séries obscuras com 1 voto e nota 10.
-4. `ordem=recentes` adiciona `first_air_date.lte=<hoje>` para não listar estreias futuras.
-5. **Valores inválidos são ignorados** e voltam ao padrão, sem erro: ids não numéricos, tipo desconhecido, ano fora de 1900..(ano atual + 1), nota fora da lista, ordem desconhecida, página fora de 1..500. Se `ano_de > ano_ate`, os dois são trocados.
+1. Sempre envia `watch_region=BR`, `language=pt-BR` e `with_watch_monetization_types=flatrate|free|ads|rent|buy` (todos os tipos, inclusive aluguel e compra). É isso que garante "disponível em streaming".
+2. Quando há `nota` ou `ordem=nota`, adiciona `vote_count.gte=50`, para evitar séries obscuras com 1 voto e nota 10.
+3. `ordem=recentes` adiciona `first_air_date.lte=<hoje>` para não listar estreias futuras.
+4. **Valores inválidos são ignorados** e voltam ao padrão, sem erro: ids não numéricos ou ≤ 0, nota fora da lista, ordem desconhecida, página fora de 1..500. Os parâmetros removidos (`tipos`, `ano_de`, `ano_ate`) são ignorados, então links antigos continuam funcionando.
 
 **Filtros na tela:**
 - **Serviços:** logos vindos de `/watch/providers/tv`, ordenados pela prioridade de exibição no BR. Os 12 primeiros ficam visíveis e o resto aparece em "ver todos".
-- **Tipo:** cinco checkboxes (Assinatura, Grátis, Com anúncios, Aluguel, Compra), todas marcadas por padrão.
 - **Gênero:** lista de `/genre/tv/list` em pt-BR, recolhível.
-- **Ano de estreia:** "de" e "até".
 - **Nota mínima:** select.
 - **Ordenação:** select acima da grade, parte do mesmo formulário dos filtros (atributo `form`), então mudar a ordem também atualiza só a grade.
 
@@ -286,7 +280,7 @@ Handlers de exceção registrados em `main.py`:
 |---|---|
 | `test_cache.py` | expiração por TTL com relógio falso; descarte LRU ao passar do limite; chaves independem da ordem dos parâmetros |
 | `test_client.py` | cabeçalho Bearer; a segunda chamada idêntica vem do cache; erros não vão para o cache; 429 → nova tentativa → sucesso; 429 duas vezes → `TMDBUnavailable`; 401/404/5xx/timeout → exceção certa |
-| `test_catalog.py` | `Filters` → parâmetros (cada filtro, OU com `\|`, tipos vazios = todos, regra do `vote_count.gte`, `recentes` com `lte`, `watch_region` sempre presente); JSON → modelos (sem pôster, sem data, sem votos); agrupamento do "onde assistir"; escolha do trailer; sinopse em inglês quando falta a de pt-BR; status traduzido; temporada 0 no fim; busca: provedores por cartão, cartão sem provedores, consulta que falhou |
+| `test_catalog.py` | `Filters` → parâmetros (cada filtro, OU com `\|`, todos os tipos sempre enviados, regra do `vote_count.gte`, `recentes` com `lte`, `watch_region` sempre presente); JSON → modelos (sem pôster, sem data, sem votos); agrupamento do "onde assistir"; escolha do trailer; sinopse em inglês quando falta a de pt-BR; status traduzido; temporada 0 no fim; busca: provedores por cartão, cartão sem provedores, consulta que falhou |
 | `test_routes.py` | parsing da URL com valores inválidos; `HX-Request` + `pagina=1` → `_grade`; `pagina>1` → `_cartoes`; sem HX → página inteira; `q` vazio → redirect; 404 de série; erro da TMDB em HTMX → fragmento com status 200; rodapé com as atribuições |
 | `test_tmdb_contract.py` | `@pytest.mark.tmdb`, roda só com `pytest -m tmdb` e token real: confirma as suposições da §12. Fica fora da execução padrão via `addopts = "-m 'not tmdb'"` no `pyproject.toml` (o `-m` da linha de comando prevalece). |
 
@@ -294,7 +288,7 @@ Handlers de exceção registrados em `main.py`:
 
 ## 11. Limitações conhecidas
 
-- **Filtros de serviço e de tipo são independentes na TMDB:** "Netflix + Aluguel" pode trazer uma série que está na Netflix por assinatura e para alugar em outro serviço. A página de detalhes mostra o quadro exato.
+- **O filtro de serviço não distingue o tipo de disponibilidade:** filtrar por "Apple TV" pode trazer uma série que só está lá para alugar ou comprar. A página de detalhes mostra o quadro exato.
 - **A busca ignora os filtros do catálogo** (o `/search/tv` não os aceita).
 - **O `/discover/tv` vai até a página 500** (10 mil resultados). Segundo o fórum da TMDB, não está na documentação oficial. Com filtros, isso raramente importa.
 - **A disponibilidade pode estar algumas horas desatualizada** (JustWatch → TMDB → nosso cache de até 6 h).

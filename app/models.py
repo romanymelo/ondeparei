@@ -6,23 +6,14 @@ ALL_TYPES = ("flatrate", "free", "ads", "rent", "buy")
 @dataclass(frozen=True)
 class Filters:
     providers: tuple[int, ...] = ()
-    types: tuple[str, ...] = ALL_TYPES
     genres: tuple[int, ...] = ()
-    year_from: int | None = None
-    year_to: int | None = None
     min_rating: int | None = None
     sort: str = "popularidade"
     page: int = 1
 
     @property
     def active_count(self) -> int:
-        return sum((
-            bool(self.providers),
-            set(self.types) != set(ALL_TYPES),
-            bool(self.genres),
-            self.year_from is not None or self.year_to is not None,
-            self.min_rating is not None,
-        ))
+        return sum((bool(self.providers), bool(self.genres), self.min_rating is not None))
 
 
 @dataclass(frozen=True)
