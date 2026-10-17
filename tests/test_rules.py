@@ -51,7 +51,9 @@ def test_season_episodes():
     (None, set(), None),
     ("want", set(), "want"),
     ("want", {(0, 1)}, "want"),         # especiais não contam
-    ("watched", {(3, 1)}, "watched"),   # marcado fora dos exibidos não conta
+    ("watched", {(3, 1)}, None),        # marcado fora dos exibidos não conta: ficou sem nada → sem status
+    ("watched", set(), None),           # desmarcou tudo: "Assistido" sem nada assistido vira sem status
+    ("watching", set(), None),          # idem para "Assistindo" sem nada marcado
 ])
 def test_auto_status(current, watched, expected):
     assert auto_status(current, AIRED, watched) == expected

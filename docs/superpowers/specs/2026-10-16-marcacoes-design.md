@@ -138,7 +138,7 @@ Todas são funções puras. Os episódios são representados por pares `(tempora
 |---|---|
 | há episódios exibidos e **todos** estão marcados | `watched` |
 | **alguns** marcados | `watching` (vale também se estava `want` ou `watched`) |
-| **nenhum** marcado | `current` (não muda) |
+| **nenhum** marcado | `want` continua `want`; `watching` e `watched` ficam sem status (`NULL`) *(decidido pelo usuário em 2026-10-17)* |
 
 **Ações nos episódios**, todas seguidas de `auto_status`:
 

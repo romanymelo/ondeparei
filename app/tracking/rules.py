@@ -35,13 +35,14 @@ def season_episodes(aired: Sequence[Ep], season: int) -> list[Ep]:
 
 
 def auto_status(current: str | None, aired: Sequence[Ep], watched: Collection[Ep]) -> str | None:
-    """Status depois de uma ação nos episódios: todos os exibidos → watched; alguns → watching; nenhum → mantém."""
+    """Status depois de uma ação nos episódios: todos os exibidos → watched; alguns → watching; nenhum → só
+    "Quero assistir" se mantém (sem nada assistido, "Assistindo" e "Assistido" ficam sem status)."""
     seen = sum(1 for episode in aired if episode in watched)
     if aired and seen == len(aired):
         return "watched"
     if seen:
         return "watching"
-    return current
+    return "want" if current == "want" else None
 
 
 def progress(aired: Iterable[Ep], watched: Collection[Ep]) -> tuple[int, int]:

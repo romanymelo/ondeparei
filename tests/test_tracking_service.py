@@ -134,3 +134,11 @@ async def test_specials_keep_manual_status_with_normal_episodes_marked(repo):
     await s.set_status(ID, "want")
     assert (await s.toggle_episode(ID, 0, 1)).marks.status == "want"
     assert (await s.toggle_episode(ID, 0, 1)).marks.status == "want"
+
+
+async def test_unmarking_a_whole_watched_series_clears_the_status(repo):
+    s = service(repo)
+    assert (await s.mark_up_to(ID, 2, 2)).marks.status == "watched"
+    await s.toggle_season(ID, 2)
+    assert (await s.toggle_season(ID, 1)).marks.status is None
+    assert repo.marks_for([ID]) == {}  # sem status, favorito nem episódios: a linha some
