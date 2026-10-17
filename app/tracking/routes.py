@@ -6,6 +6,7 @@ from fastapi import APIRouter, Depends, Request
 from fastapi.responses import RedirectResponse
 from starlette.exceptions import HTTPException
 
+from app.navigation import remember_list
 from app.templating import NO_STORE, VARY_HX, is_htmx, templates
 from app.tmdb.client import TMDBNotFound
 from app.tracking.service import InvalidAction, TrackingService
@@ -87,4 +88,5 @@ async def toggle_season(request: Request, series_id: int, number: int,
 @router.get("/minhas-series")
 async def my_series_page(request: Request, tracking: TrackingService = Depends(get_tracking)):
     view = await tracking.my_series(request.query_params.get("aba", ""))
-    return templates.TemplateResponse(request, "minhas_series.html", {"view": view}, headers=VARY_HX | NO_STORE)
+    response = templates.TemplateResponse(request, "minhas_series.html", {"view": view}, headers=VARY_HX | NO_STORE)
+    return remember_list(request, response)

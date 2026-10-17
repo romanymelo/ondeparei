@@ -8,6 +8,7 @@ from fastapi.responses import RedirectResponse
 from app.catalog import Catalog
 from app.filters import parse_filters, parse_page
 from app.models import Provider
+from app.navigation import back_target, remember_list
 from app.templating import NO_STORE, POPULAR_PROVIDERS, VARY_HX, VISIBLE_PROVIDERS, is_htmx, templates
 from app.tmdb.client import TMDBError
 from app.tracking.routes import get_tracking
@@ -67,7 +68,8 @@ async def catalog_page(request: Request, catalog: Catalog = Depends(get_catalog)
     }
     if is_htmx(request):
         template = "_cartoes.html" if filters.page > 1 else "_grade.html"
-        return templates.TemplateResponse(request, template, context | {"oob": True}, headers=VARY_HX)
+        return remember_list(request, templates.TemplateResponse(request, template, context | {"oob": True},
+                                                                 headers=VARY_HX))
 
     providers = await _or_none(catalog.providers())
     visible, rest = split_providers(providers or (), filters.providers)
@@ -78,7 +80,7 @@ async def catalog_page(request: Request, catalog: Catalog = Depends(get_catalog)
         "genres": await _or_none(catalog.genres()),
         "spotlight": await _or_none(catalog.spotlight()),
     }
-    return templates.TemplateResponse(request, "catalogo.html", context, headers=VARY_HX)
+    return remember_list(request, templates.TemplateResponse(request, "catalogo.html", context, headers=VARY_HX))
 
 
 @router.get("/buscar")
@@ -97,8 +99,8 @@ async def search_page(request: Request, catalog: Catalog = Depends(get_catalog),
         "next_url": next_page_url(request.url.path, request.query_params.multi_items(), page.page + 1),
     }
     if is_htmx(request) and page_number > 1:
-        return templates.TemplateResponse(request, "_cartoes.html", context, headers=VARY_HX)
-    return templates.TemplateResponse(request, "busca.html", context, headers=VARY_HX)
+        return remember_list(request, templates.TemplateResponse(request, "_cartoes.html", context, headers=VARY_HX))
+    return remember_list(request, templates.TemplateResponse(request, "busca.html", context, headers=VARY_HX))
 
 
 @router.get("/serie/{series_id:int}")
@@ -106,4 +108,6 @@ async def series_page(request: Request, series_id: int, catalog: Catalog = Depen
                       tracking: TrackingService = Depends(get_tracking)):
     serie = await catalog.detail(series_id)
     context = {"serie": serie, "series_id": serie.id, "tracking": await tracking.series(serie)}
+    back_url, back_is_previous = back_target(request)
+    context |= {"back_url": back_url, "back_is_previous": back_is_previous}
     return templates.TemplateResponse(request, "serie.html", context, headers=NO_STORE)

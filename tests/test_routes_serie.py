@@ -9,7 +9,7 @@ def test_detail_main_sections(make_client):
     t = make_client(FakeCatalog(detail=make_detail())).get("/serie/100088").text
     for s in ("The Last of Us", "2023–", "Em exibição", "Onde assistir no Brasil", 'title="Max (assinatura)"',
               "youtube-nocookie.com/embed/abc123", "Dados de disponibilidade: JustWatch",
-              "Temporada 1", "Pedro Pascal", "Joel", "history.back()", "← Voltar", "★ 8,6"):
+              "Temporada 1", "Pedro Pascal", "Joel", "← Voltar", "★ 8,6"):
         assert s in t, s
 
 
