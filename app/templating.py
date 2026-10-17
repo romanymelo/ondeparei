@@ -4,7 +4,7 @@ from fastapi import Request
 from fastapi.templating import Jinja2Templates
 
 from app.filters import RATINGS
-from app.mappers import WATCH_TYPE_LABELS
+from app.mappers import WATCH_TYPE_LABELS, watch_services
 
 APP_NAME = "OndeParei"
 SORT_LABELS = {
@@ -43,4 +43,4 @@ templates.env.globals.update(
     RATINGS=RATINGS,
     VISIBLE_PROVIDERS=VISIBLE_PROVIDERS,
 )
-templates.env.filters.update(milhar=format_thousands, nota=format_rating)
+templates.env.filters.update(milhar=format_thousands, nota=format_rating, servicos=watch_services)

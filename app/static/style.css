@@ -487,11 +487,9 @@ select.seletor {
 .trailer { aspect-ratio: 16 / 9; border-radius: 10px; overflow: hidden; background: #000; }
 .trailer iframe { width: 100%; height: 100%; border: 0; }
 .onde-assistir { align-self: start; padding: 20px; border: 1px solid var(--fio); border-radius: 14px; background: var(--veludo); }
-.linha-assistir { display: flex; align-items: center; gap: 12px; margin: 10px 0; }
-.linha-assistir .rotulo { width: 104px; flex-shrink: 0; color: var(--nevoa); font-size: 0.88rem; }
-.linha-assistir .logos img { width: 34px; height: 34px; border-radius: 8px; }
-.onde-assistir .botao { margin-top: 14px; }
-.fonte { margin: 14px 0 0; color: var(--nevoa); font-size: var(--t-0); }
+.onde-assistir h2 { margin-bottom: 14px; }
+.onde-assistir .logos { gap: 10px; }
+.onde-assistir .logos img { width: 44px; height: 44px; border-radius: 10px; }
 .secao { padding: 0 var(--margem) 28px; }
 .temporadas, .elenco { display: grid; gap: 14px; }
 .temporadas { grid-template-columns: repeat(auto-fill, minmax(112px, 1fr)); }

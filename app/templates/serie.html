@@ -50,24 +50,16 @@
 
     <aside class="onde-assistir">
       <h2>Onde assistir no Brasil</h2>
-      {% if serie.watch.by_type %}
-        {% for kind, providers in serie.watch.by_type.items() %}
-          <div class="linha-assistir">
-            <span class="rotulo">{{ WATCH_TYPE_LABELS[kind] }}</span>
-            <span class="logos">
-              {% for p in providers %}
-                {% if p.logo_url %}<img src="{{ p.logo_url }}" alt="{{ p.name }}" title="{{ p.name }}">{% else %}<span class="logo-texto">{{ p.name }}</span>{% endif %}
-              {% endfor %}
-            </span>
-          </div>
-        {% endfor %}
+      {% set servicos = serie.watch|servicos %}
+      {% if servicos %}
+        <div class="logos">
+          {% for p, como in servicos %}
+            {% if p.logo_url %}<img src="{{ p.logo_url }}" alt="{{ p.name }} ({{ como }})" title="{{ p.name }} ({{ como }})" width="44" height="44">{% else %}<span class="logo-texto" title="{{ p.name }} ({{ como }})">{{ p.name }}</span>{% endif %}
+          {% endfor %}
+        </div>
       {% else %}
         <p class="indisponivel">Não disponível em streaming no Brasil no momento</p>
       {% endif %}
-      {% if serie.watch.link %}
-        <a class="botao" href="{{ serie.watch.link }}" target="_blank" rel="noopener">Ver opções de streaming ↗</a>
-      {% endif %}
-      <p class="fonte">Disponibilidade fornecida pelo JustWatch.</p>
     </aside>
   </div>
 

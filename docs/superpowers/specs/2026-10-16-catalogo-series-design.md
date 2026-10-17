@@ -45,7 +45,7 @@ Um app web pessoal que mostra as séries disponíveis **agora** nos serviços de
 2. Filtrar "Netflix + Max, Assinatura, Drama, nota ≥ 7" mostra só séries que atendem aos filtros (conferível na página de detalhes de cada uma).
 3. Mudar um filtro atualiza só a grade, sem recarregar a página; a URL reflete os filtros, e o botão voltar do navegador funciona.
 4. Buscar "office" lista as séries com esse nome e mostra onde cada uma está no BR (ou "Fora do streaming no BR").
-5. A página de uma série mostra sinopse, temporadas, elenco, trailer (quando houver) e onde assistir, agrupado por tipo.
+5. A página de uma série mostra sinopse, temporadas, elenco, trailer (quando houver) e onde assistir, com um logo por serviço.
 6. Com a TMDB fora do ar, o app mostra uma mensagem amigável em vez de quebrar.
 7. `uv run pytest` passa sem acessar a internet.
 
@@ -249,8 +249,7 @@ Base: `https://api.themoviedb.org/3`, cabeçalho `Authorization: Bearer <TMDB_TO
 
   Qualquer outro valor é exibido como veio.
 - **Sinopse** e **trailer:** primeiro vídeo `site=YouTube` e `type=Trailer`, preferindo o idioma `pt`, depois `en`, depois qualquer outro; se não houver trailer, aceita `type=Teaser`. É incorporado via `youtube-nocookie.com/embed/{key}` com `loading="lazy"`. Se não houver vídeo, a seção não aparece.
-- **Onde assistir no Brasil:** `watch/providers.results.BR`, agrupado por tipo (Assinatura, Grátis, Com anúncios, Aluguel, Compra), com logos.
-  - O botão "Ver opções de streaming ↗" abre o `link` da TMDB, que tem os links para cada serviço. **A TMDB não fornece link direto para cada serviço.**
+- **Onde assistir no Brasil:** `watch/providers.results.BR`, só o título e uma fileira de logos, um por serviço (variações juntas, ver `Provider`). O tipo (assinatura, grátis, com anúncios, aluguel, compra) fica no `title`/`alt` de cada logo, por exemplo "Amazon Video (aluguel ou compra)" (`watch_services` em `mappers.py`). *(Alterado em 2026-10-17 a pedido do usuário: saíram os rótulos por tipo, o botão para a TMDB e a frase do JustWatch no quadro; a atribuição ao JustWatch continua no rodapé.)*
   - Sem dados no BR: "Não disponível em streaming no Brasil no momento".
 - **Temporadas:** cartões com nome, ano e número de episódios; a temporada 0 ("Especiais") vai para o fim.
 - **Elenco principal:** os 10 primeiros de `aggregate_credits.cast` (todas as temporadas), com nome e personagem (primeiro papel em `roles`).

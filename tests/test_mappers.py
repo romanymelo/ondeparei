@@ -9,6 +9,7 @@ from app.mappers import (
     to_detail,
     to_provider_list,
     to_watch_options,
+    watch_services,
     years_label,
 )
 from app.models import SeriesCard, WatchOptions
@@ -91,6 +92,16 @@ def test_card_providers_merge_variants_across_types_but_not_different_services()
     d = {"flatrate": [named(119, "Amazon Prime Video")], "ads": [named(2100, "Amazon Prime Video with Ads")],
          "rent": [named(10, "Amazon Video")], "buy": [named(2243, "Apple TV Amazon Channel"), named(350, "Apple TV", 1)]}
     assert [x.id for x in card_providers(d)] == [119, 10, 350]
+
+
+def test_watch_services_one_logo_per_service_with_how_to_watch():
+    w = to_watch_options({"flatrate": [named(8, "Netflix"), named(531, "Paramount Plus", 1)],
+                          "free": [named(10, "Amazon Video")],
+                          "ads": [named(1796, "Netflix Standard with Ads")],
+                          "rent": [named(10, "Amazon Video")], "buy": [named(10, "Amazon Video")]})
+    assert [(x.id, how) for x, how in watch_services(w)] == [
+        (8, "assinatura ou com anúncios"), (531, "assinatura"), (10, "grátis, aluguel ou compra")]
+    assert watch_services(WatchOptions(None, {})) == ()
 
 def v(key, lang, type_="Trailer", site="YouTube"):
     return {"key": key, "iso_639_1": lang, "type": type_, "site": site}

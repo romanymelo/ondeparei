@@ -129,6 +129,22 @@ def card_providers(region_data: Mapping | None, limit: int = 4) -> tuple[Provide
     return merge_variants([provider for providers in by_type for provider in providers])[:limit]
 
 
+
+def watch_services(watch: WatchOptions) -> tuple[tuple[Provider, str], ...]:
+    """Um logo por serviço (variações juntas) e como assistir nele: "assinatura", "aluguel ou compra"..."""
+    kinds: dict[str, list[str]] = {}
+    for kind, providers in watch.by_type.items():
+        for provider in providers:
+            how = kinds.setdefault(_service(provider.name)[0], [])
+            if WATCH_TYPE_LABELS[kind].lower() not in how:
+                how.append(WATCH_TYPE_LABELS[kind].lower())
+    merged = merge_variants([provider for providers in watch.by_type.values() for provider in providers])
+    return tuple((provider, _join_or(kinds[_service(provider.name)[0]])) for provider in merged)
+
+
+def _join_or(words: Sequence[str]) -> str:
+    return words[0] if len(words) == 1 else f"{', '.join(words[:-1])} ou {words[-1]}"
+
 def pick_trailer(videos: Sequence[Mapping]) -> str | None:
     youtube = [v for v in videos if v.get("site") == "YouTube"]
     for kind in ("Trailer", "Teaser"):

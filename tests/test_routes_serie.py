@@ -7,11 +7,17 @@ from tests.fakes import FakeCatalog, make_detail
 
 def test_detail_main_sections(make_client):
     t = make_client(FakeCatalog(detail=make_detail())).get("/serie/100088").text
-    for s in ("The Last of Us", "2023–", "Em exibição", "Onde assistir no Brasil", "Assinatura", 'alt="Max"',
-              "youtube-nocookie.com/embed/abc123", "Ver opções de streaming ↗",
-              'href="https://www.themoviedb.org/tv/100088/watch?locale=BR"', "Disponibilidade fornecida pelo JustWatch.",
+    for s in ("The Last of Us", "2023–", "Em exibição", "Onde assistir no Brasil", 'title="Max (assinatura)"',
+              "youtube-nocookie.com/embed/abc123", "Dados de disponibilidade: JustWatch",
               "Temporada 1", "Pedro Pascal", "Joel", "history.back()", "← Voltar", "★ 8,6"):
         assert s in t, s
+
+
+def test_where_to_watch_shows_only_title_and_logos(make_client):
+    t = make_client(FakeCatalog(detail=make_detail())).get("/serie/100088").text
+    for gone in ("Ver opções de streaming", "themoviedb.org/tv/100088/watch", "Disponibilidade fornecida",
+                 ">Assinatura<"):
+        assert gone not in t, gone
 
 
 def test_without_trailer_and_providers(make_client):
