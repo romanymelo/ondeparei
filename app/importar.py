@@ -97,6 +97,8 @@ async def import_local(db_path: str | Path, email: str, http: httpx.AsyncClient,
 
 def main(argv: list[str] | None = None, env_file: str | None = ".env") -> int:
     args = sys.argv[1:] if argv is None else argv
+    if hasattr(sys.stdout, "reconfigure"):
+        sys.stdout.reconfigure(encoding="utf-8", errors="replace")  # terminal do Windows (cp1252) e a seta do resumo
     if len(args) != 1:
         print("Uso: uv run python -m app.importar seu@email.com", file=sys.stderr)
         return 2
