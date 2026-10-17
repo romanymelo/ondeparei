@@ -1,0 +1,101 @@
+{
+  "id": 144593,
+  "_id": "5e614cd3357c00001631a6ef",
+  "air_date": "2023-01-15",
+  "episodes": [
+    {
+      "episode_number": 1,
+      "season_number": 1,
+      "name": "Quando Você Estiver Perdido na Escuridão",
+      "overview": "Vinte anos após um surto fúngico devastar o planeta, os sobreviventes Joel e Tess recebem uma missão que pode mudar tudo.",
+      "air_date": "2023-01-15",
+      "runtime": 81,
+      "still_path": "/3VeY1k8wFyhcrMyQ8jpGegh9beU.jpg"
+    },
+    {
+      "episode_number": 2,
+      "season_number": 1,
+      "name": "Infectados",
+      "overview": "Após escaparem da zona de quarentena, Joel e Tess discutem sobre o destino de Ellie enquanto transitam pelas ruínas de uma Boston abandonada há muito tempo.",
+      "air_date": "2023-01-22",
+      "runtime": 53,
+      "still_path": "/vGf7chl6XL7o3yYc8A5m3kjz8px.jpg"
+    },
+    {
+      "episode_number": 3,
+      "season_number": 1,
+      "name": "Por Muito, Muito Tempo",
+      "overview": "Quando um estranho se aproxima do alojamento de Bill, um aficionado por preparativos para cenários apocalípticos, ambos forjam uma conexão pouco provável. Mais tarde, Joel e Ellis buscam a orientação de Bill.",
+      "air_date": "2023-01-29",
+      "runtime": 77,
+      "still_path": "/fmaiMjbLXaeRyq2so0EXf3hrpyc.jpg"
+    },
+    {
+      "episode_number": 4,
+      "season_number": 1,
+      "name": "Por Favor, Segure a Minha Mão",
+      "overview": "Depois de abandonar sua caminhonete em Kansas City, Joel e Ellie tentam escapar sem chamar a atenção de uma vingativa líder rebelde.",
+      "air_date": "2023-02-05",
+      "runtime": 47,
+      "still_path": "/nYPkaj0a5m4Y9xHdDADtnzh6zOL.jpg"
+    },
+    {
+      "episode_number": 5,
+      "season_number": 1,
+      "name": "Resistir e Sobreviver",
+      "overview": "Enquanto tentam fugir dos rebeldes, Joel e Ellie cruzam com o homem mais procurado de Kansas City. Kathleen continua sua caçada.",
+      "air_date": "2023-02-12",
+      "runtime": 60,
+      "still_path": "/ztzxqW4IAVQRVimxhIfryP4CuI9.jpg"
+    },
+    {
+      "episode_number": 6,
+      "season_number": 1,
+      "name": "Parentesco",
+      "overview": "Após ignorar os conselhos dos locais, Joel e Ellie adentram em território perigoso na busca pelos Vaga-Lumes... e de Tommy.",
+      "air_date": "2023-02-19",
+      "runtime": 61,
+      "still_path": "/zW9AIy0PVhYfmukqBcUvlvi4mKc.jpg"
+    },
+    {
+      "episode_number": 7,
+      "season_number": 1,
+      "name": "O Que Deixamos Para Trás",
+      "overview": "Enquanto Joel luta para sobreviver, Ellie se recorda da noite em que tudo mudou.",
+      "air_date": "2023-02-26",
+      "runtime": 57,
+      "still_path": "/oNyC68bnOoVAiJnKVsRNY9YDbl6.jpg"
+    },
+    {
+      "episode_number": 8,
+      "season_number": 1,
+      "name": "Quando Mais Precisamos",
+      "overview": "Ellie cruza com um vingativo grupo de sobreviventes e chama a atenção de seu líder. Um debilitado Joel enfrenta uma nova ameaça.",
+      "air_date": "2023-03-05",
+      "runtime": 52,
+      "still_path": "/iNbhbEOt1KAeqr5iyL9QOAZzgzT.jpg"
+    },
+    {
+      "episode_number": 9,
+      "season_number": 1,
+      "name": "Procure a Luz",
+      "overview": "Uma Anna grávida deposita sua confiança em uma amiga de longa data. Mais tarde, Joel e Ellie se aproximam do fim de sua jornada.",
+      "air_date": "2023-03-12",
+      "runtime": 46,
+      "still_path": "/4WZ9E8IGl9tkka9JPh325Lc1kfh.jpg"
+    }
+  ],
+  "name": "Temporada 1",
+  "networks": [
+    {
+      "id": 49,
+      "logo_path": "/tuomPhY2UtuPTqqFnKMVHvSb724.png",
+      "name": "HBO",
+      "origin_country": "US"
+    }
+  ],
+  "overview": "Joel, um sobrevivente duro e cínico, e a jovem e impetuosa Ellie se conectam pela dificuldade do mundo onde vivem. Juntos, eles enfrentam circunstâncias brutais e monstros impiedosos durante uma difícil jornada pelos EUA após um surto apocalíptico.",
+  "poster_path": "/mb75VyQbh1QzhBt0C3Li4SxVevr.jpg",
+  "season_number": 1,
+  "vote_average": 7.8
+}

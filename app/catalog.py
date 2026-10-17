@@ -13,9 +13,11 @@ from app.mappers import (
     to_detail,
     to_genres,
     to_provider_list,
+    to_season_detail,
     to_spotlight,
 )
-from app.models import CatalogPage, Filters, Genre, Provider, SeriesCard, SeriesDetail, Spotlight
+from app.models import (CatalogPage, Filters, Genre, Provider, SeasonDetail, SeriesCard, SeriesDetail,
+                        Spotlight)
 from app.tmdb.client import TMDBClient, TMDBError
 
 TTL_LISTS = 24 * 3600
@@ -138,3 +140,9 @@ class Catalog:
             except TMDBError:
                 pass
         return to_detail(data, self._region, overview_fallback=fallback)
+
+    async def season(self, series_id: int, season_number: int) -> SeasonDetail:
+        """Episódios de uma temporada. Temporada inexistente: TMDBNotFound."""
+        data = await self._client.get(f"/tv/{series_id}/season/{season_number}", {"language": self._language},
+                                      ttl=TTL_DETAIL)
+        return to_season_detail(data, series_id)

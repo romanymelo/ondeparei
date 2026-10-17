@@ -2,15 +2,18 @@
 
 import re
 from collections.abc import Mapping, Sequence
+from datetime import date
 
 from app.filters import MAX_PAGE
 from app.models import (
     ALL_TYPES,
     CastMember,
     CatalogPage,
+    Episode,
     Genre,
     Provider,
     Season,
+    SeasonDetail,
     SeriesCard,
     SeriesDetail,
     Spotlight,
@@ -45,6 +48,13 @@ def _year(date_str: str | None) -> int | None:
     if date_str and date_str[:4].isdigit():
         return int(date_str[:4])
     return None
+
+
+def _date(value: str | None) -> date | None:
+    try:
+        return date.fromisoformat(value) if value else None
+    except ValueError:
+        return None
 
 
 def _rating(item: Mapping) -> float | None:
@@ -178,6 +188,40 @@ def _season(item: Mapping) -> Season:
     )
 
 
+def _last_aired(data: Mapping) -> tuple[int, int] | None:
+    """(temporada, episódio) do último episódio exibido. Quando ele é um especial, vale o fim da última
+    temporada normal que estreou até a data desse especial."""
+    last = data.get("last_episode_to_air") or {}
+    season, episode = last.get("season_number"), last.get("episode_number")
+    if season is None or episode is None:
+        return None
+    if season >= 1:
+        return season, episode
+    special_date = _date(last.get("air_date"))
+    started = [(s.get("season_number", 0), s.get("episode_count") or 0) for s in data.get("seasons") or []
+               if s.get("season_number", 0) >= 1 and special_date is not None
+               and (premiere := _date(s.get("air_date"))) is not None and premiere <= special_date]
+    return max(started) if started else None
+
+
+def _episode(item: Mapping, season: int) -> Episode:
+    return Episode(
+        season=season,
+        number=item["episode_number"],
+        name=item.get("name") or "",
+        overview=item.get("overview") or "",
+        air_date=_date(item.get("air_date")),
+        runtime=item.get("runtime") or None,
+        still_url=image_url(item.get("still_path"), "w300"),
+    )
+
+
+def to_season_detail(data: Mapping, series_id: int) -> SeasonDetail:
+    number = data.get("season_number", 0)
+    episodes = sorted((_episode(item, number) for item in data.get("episodes") or []), key=lambda e: e.number)
+    return SeasonDetail(series_id, number, data.get("name") or "", tuple(episodes))
+
+
 def _cast_member(item: Mapping) -> CastMember:
     roles = item.get("roles") or []
     character = roles[0].get("character", "") if roles else item.get("character", "")
@@ -214,6 +258,8 @@ def to_detail(data: Mapping, region: str, overview_fallback: str = "") -> Series
         seasons=tuple(seasons),
         cast=tuple(_cast_member(c) for c in cast[:MAX_CAST]),
         watch=to_watch_options(region_watch),
+        poster_path=data.get("poster_path"),
+        last_aired=_last_aired(data),
     )
 
 

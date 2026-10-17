@@ -233,3 +233,17 @@ async def test_spotlight_none_without_backdrops(catalog, mock):
     mock.get("/discover/tv").respond(json={"page": 1, "total_pages": 1, "total_results": 1,
                                            "results": [spotlight_result(1, None)]})
     assert await catalog.spotlight() is None
+
+
+# Temporadas
+async def test_season_maps_episodes_in_pt_br(catalog, mock):
+    route = mock.get("/tv/100088/season/1").respond(json=load_fixture("season_100088_1.json"))
+    s = await catalog.season(100088, 1)
+    assert (s.number, len(s.episodes)) == (1, 9)
+    assert route.calls.last.request.url.params["language"] == "pt-BR"
+
+
+async def test_unknown_season_raises_not_found(catalog, mock):
+    mock.get("/tv/100088/season/9").respond(404, json={"status_code": 34})
+    with pytest.raises(TMDBNotFound):
+        await catalog.season(100088, 9)

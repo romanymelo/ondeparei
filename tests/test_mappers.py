@@ -1,3 +1,5 @@
+from datetime import date
+
 import pytest
 
 from app.mappers import (
@@ -8,6 +10,7 @@ from app.mappers import (
     to_catalog_page,
     to_detail,
     to_provider_list,
+    to_season_detail,
     to_watch_options,
     watch_services,
     years_label,
@@ -160,3 +163,40 @@ def test_years_label_closed_when_ended():
     data = {"id": 1, "name": "X", "first_air_date": "2019-01-01", "last_air_date": "2024-05-01",
             "in_production": False, "status": "Ended"}
     assert to_detail(data, "BR").years_label == "2019–2024"
+
+
+def test_to_season_detail_from_fixture():
+    s = to_season_detail(load_fixture("season_100088_1.json"), series_id=100088)
+    assert (s.series_id, s.number, len(s.episodes)) == (100088, 1, 9)
+    first = s.episodes[0]
+    assert (first.season, first.number, first.air_date) == (1, 1, date(2023, 1, 15))
+    assert first.still_url.startswith("https://image.tmdb.org/t/p/w300/")
+
+
+def test_to_season_detail_tolerates_missing_fields():
+    s = to_season_detail({"season_number": 0, "name": "Especiais", "episodes": [
+        {"episode_number": 2, "name": "B", "air_date": "", "still_path": None},
+        {"episode_number": 1, "name": "A"}]}, series_id=5)
+    assert [e.number for e in s.episodes] == [1, 2]
+    second = s.episodes[1]
+    assert (second.air_date, second.still_url, second.runtime, second.overview) == (None, None, None, "")
+
+
+def test_detail_reads_last_aired_and_poster_path():
+    data = load_fixture("tv_100088.json")
+    d = to_detail(data, "BR")
+    assert d.last_aired == (2, 7) and d.poster_path == data["poster_path"]
+
+
+def test_last_aired_is_none_without_last_episode():
+    data = load_fixture("tv_100088.json")
+    data["last_episode_to_air"] = None
+    assert to_detail(data, "BR").last_aired is None
+
+
+def test_last_aired_when_last_episode_is_a_special():
+    data = load_fixture("tv_100088.json")
+    data["last_episode_to_air"] = {"season_number": 0, "episode_number": 3, "air_date": "2024-12-25"}
+    data["seasons"] = [{"season_number": 1, "episode_count": 9, "air_date": "2023-01-15", "name": "T1"},
+                       {"season_number": 2, "episode_count": 7, "air_date": "2025-04-13", "name": "T2"}]
+    assert to_detail(data, "BR").last_aired == (1, 9)

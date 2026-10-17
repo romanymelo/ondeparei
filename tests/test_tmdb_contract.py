@@ -42,3 +42,15 @@ def test_trending_tv_day_has_spotlight_fields(api):
     assert r.status_code == 200
     item = r.json()["results"][0]
     assert {"id", "name", "backdrop_path", "overview", "genre_ids", "first_air_date", "vote_average"} <= item.keys()
+
+
+def test_season_has_episode_numbers_and_dates(api):
+    r = api.get("/tv/100088/season/1", params={"language": "pt-BR"})
+    assert r.status_code == 200
+    episode = r.json()["episodes"][0]
+    assert {"episode_number", "season_number", "air_date", "name", "runtime", "still_path"} <= episode.keys()
+
+
+def test_details_have_last_episode_to_air(api):
+    r = api.get("/tv/100088")
+    assert {"season_number", "episode_number"} <= r.json()["last_episode_to_air"].keys()

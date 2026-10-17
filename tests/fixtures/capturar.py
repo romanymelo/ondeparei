@@ -16,6 +16,7 @@ from app.tmdb.client import BASE_URL
 
 FIXTURES = Path(__file__).parent
 DETAIL_ID = 100088
+SEASON_FIELDS = ("episode_number", "season_number", "name", "overview", "air_date", "runtime", "still_path")
 
 
 def save(name: str, data: dict) -> None:
@@ -66,6 +67,11 @@ def main() -> None:
         detail["videos"]["results"] = detail["videos"]["results"][:5]
         detail["watch/providers"]["results"] = only_region(detail["watch/providers"]["results"], region)
         save(f"tv_{DETAIL_ID}.json", detail)
+
+        for number in (1, 2):
+            season = get(f"/tv/{DETAIL_ID}/season/{number}", language=language)
+            season["episodes"] = [{k: e.get(k) for k in SEASON_FIELDS} for e in season["episodes"]]
+            save(f"season_{DETAIL_ID}_{number}.json", season)
 
 
 if __name__ == "__main__":
