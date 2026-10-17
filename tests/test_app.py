@@ -31,7 +31,7 @@ def test_layout_has_attributions_search_and_htmx(client):
     t = client.get("/nao-existe").text
     assert "Este produto usa a API da TMDB, mas não é endossado nem certificado pela TMDB." in t
     assert "Dados de disponibilidade: JustWatch" in t and 'src="/static/tmdb-logo.svg"' in t
-    assert 'action="/buscar"' in t and 'src="/static/htmx.min.js"' in t and "OndeParei" in t and "SériesBR" not in t
+    assert 'action="/buscar"' in t and 'src="/static/htmx.min.js?v=' in t and "OndeParei" in t and "SériesBR" not in t
 
 
 @pytest.mark.parametrize("kind, status, text", [
