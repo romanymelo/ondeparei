@@ -6,7 +6,7 @@ from fastapi.templating import Jinja2Templates
 from app.filters import RATINGS
 from app.mappers import WATCH_TYPE_LABELS
 
-APP_NAME = "SériesBR"
+APP_NAME = "OndeParei"
 SORT_LABELS = {
     "popularidade": "Popularidade",
     "nota": "Nota",

@@ -1,4 +1,4 @@
-# SériesBR — catálogo de séries no streaming
+# OndeParei — catálogo de séries no streaming
 
 App web pessoal que mostra as séries disponíveis **agora** nos serviços de streaming do Brasil, com filtros, busca por nome e página de detalhes. Os dados vêm da [API da TMDB](https://developer.themoviedb.org/docs/getting-started); a disponibilidade vem do JustWatch.
 
@@ -33,6 +33,8 @@ uv run uvicorn app.main:app --reload
 ```
 
 Depois, abra http://localhost:8000.
+
+> No Windows, o `--reload` às vezes detecta a mudança ("Reloading...") mas não sobe o processo novo, e o app continua com o código antigo. Se isso acontecer, pare com Ctrl+C e rode o comando de novo.
 
 ## Testes
 
