@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <!-- a barrinha "onde parei" da marca: assistido em âmbar até o ponto onde parou -->
+  <rect width="32" height="32" rx="7" fill="#0e1430"/>
+  <rect x="5" y="13.5" width="22" height="5" rx="2.5" fill="#2b3570"/>
+  <rect x="5" y="13.5" width="13.6" height="5" rx="2.5" fill="#ffb547"/>
+  <circle cx="18.6" cy="16" r="5.5" fill="#ffb547" stroke="#0e1430" stroke-width="1.5"/>
+</svg>

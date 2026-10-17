@@ -77,3 +77,15 @@ def test_footer_signature_keeps_required_attribution(client):
     t = client.get("/").text.split("<footer")[1]
     assert 'Desenvolvido sob o efeito de "só mais um episódio" por Romany Melo 📺✨' in t.replace("&#34;", '"')
     assert "não é endossado nem certificado pela TMDB" in t and "JustWatch" in t
+
+
+def test_layout_declares_svg_favicon(client):
+    head = client.get("/").text.split("</head>")[0]
+    assert 'rel="icon"' in head and "/static/favicon.svg?v=" in head and 'type="image/svg+xml"' in head
+
+
+def test_favicon_ico_redirects_to_svg(client):
+    r = client.get("/favicon.ico", follow_redirects=False)
+    assert r.status_code == 301 and r.headers["location"] == "/static/favicon.svg"
+    svg = client.get("/static/favicon.svg")
+    assert svg.status_code == 200 and svg.headers["content-type"].startswith("image/svg+xml")

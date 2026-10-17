@@ -54,6 +54,12 @@ def split_providers(providers: Sequence[Provider], selected: Sequence[int],
     return visible, rest
 
 
+@router.get("/favicon.ico", include_in_schema=False)
+async def favicon():
+    """Quem pede o /favicon.ico direto (sem ler o <link rel="icon">) vai para o SVG."""
+    return RedirectResponse("/static/favicon.svg", status_code=301)
+
+
 @router.get("/")
 async def catalog_page(request: Request, catalog: Catalog = Depends(get_catalog),
                        tracking: TrackingService = Depends(page_tracking)):

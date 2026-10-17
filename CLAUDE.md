@@ -56,4 +56,5 @@ uv run python -m app.importar email@x.com      # importação única do data/cat
 - A Vercel publica sozinha a cada push no `main` (região São Paulo, `gru1`, em `vercel.json`).
 - Variáveis na Vercel: `TMDB_TOKEN`, `SUPABASE_URL`, `SUPABASE_PUBLISHABLE_KEY`.
 - No Supabase (Authentication → URL Configuration): Site URL do site e Redirect URLs com `/nova-senha` (localhost e Vercel).
-- Recuperação de senha usa PKCE (cookie `op_pkce`). Sem SMTP próprio, o Supabase só envia e-mail para membros da organização.
+- Recuperação de senha usa PKCE (cookie `op_pkce`): o link precisa ser aberto no mesmo navegador do pedido.
+- E-mails do Supabase saem pelo Gmail do dono (SMTP com senha de app, em Authentication → Emails → SMTP Settings; a senha fica só no painel). No modelo "Reset Password", o link tem que continuar sendo `{{ .ConfirmationURL }}`.

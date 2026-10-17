@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#0e1430">
   <title>{% block title %}{{ APP_NAME }}{% endblock %}</title>
+  <link rel="icon" href="{{ static_url('favicon.svg') }}" type="image/svg+xml">
   <link rel="preload" href="/static/fonts/archivo-latin.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="stylesheet" href="{{ static_url('style.css') }}">
   {# Voltar/avançar recarrega a URL em vez de restaurar um snapshot do HTMX (que perde o estado dos checkboxes). #}
