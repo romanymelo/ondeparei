@@ -51,6 +51,18 @@ class InvalidRecoveryLink(AuthError):
     pass
 
 
+class ConfirmationRequired(AuthError):
+    """O cadastro funcionou, mas o Supabase exige confirmar o e-mail antes de entrar."""
+
+
+class InvalidEmail(AuthError):
+    pass
+
+
+class SamePassword(AuthError):
+    pass
+
+
 class InvalidSession(AuthError):
     """Token de acesso ou de renovação recusado: a pessoa precisa entrar de novo."""
 
@@ -60,6 +72,8 @@ _BY_CODE = {
     "user_already_exists": EmailTaken,
     "email_exists": EmailTaken,
     "weak_password": WeakPassword,
+    "email_address_invalid": InvalidEmail,
+    "same_password": SamePassword,
     "otp_expired": InvalidRecoveryLink,
     "refresh_token_not_found": InvalidSession,
 }
@@ -112,6 +126,8 @@ class SupabaseAuth:
     async def sign_up(self, email: str, password: str, first_name: str, last_name: str) -> Session:
         data = await self._call("POST", "/signup", json={
             "email": email, "password": password, "data": {"first_name": first_name, "last_name": last_name}})
+        if not data.get("access_token"):
+            raise ConfirmationRequired("cadastro sem sessão: o projeto pede confirmação de e-mail")
         return _session(data)
 
     async def sign_in(self, email: str, password: str) -> Session:

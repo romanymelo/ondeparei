@@ -12,7 +12,7 @@ from fastapi import Request, Response
 from fastapi.responses import RedirectResponse
 from starlette.middleware.base import BaseHTTPMiddleware
 
-from app.auth.client import AuthUnavailable, InvalidSession, Session, User
+from app.auth.client import AuthError, AuthUnavailable, InvalidSession, Session, User
 from app.auth.forms import safe_next
 from app.templating import is_htmx
 from app.tmdb.cache import TTLCache
@@ -21,6 +21,8 @@ ACCESS_COOKIE = "op_acesso"
 REFRESH_COOKIE = "op_renovacao"
 REFRESH_MAX_AGE = 180 * 24 * 3600
 USER_CACHE_TTL = 300
+EXPIRY_MARGIN = 60  # token com menos que isso de vida é renovado antes (relógio e latência)
+SKIP_PREFIXES = ("/static/", "/favicon.ico")
 
 
 class LoginRequired(Exception):
@@ -33,6 +35,7 @@ class Resolution:
     access_token: str | None
     new_session: Session | None = None
     clear: bool = False
+    unavailable: bool = False  # Supabase não respondeu: não dá para saber se há alguém logado
 
 
 def set_session_cookies(response: Response, session: Session, secure: bool) -> None:
@@ -64,19 +67,24 @@ class UserResolver:
 
     async def resolve(self, access: str | None, refresh: str | None) -> Resolution:
         if access:
+            expiry = _token_expiry(access)
+            near_expiry = expiry is not None and expiry - self._clock() < EXPIRY_MARGIN
             key = hashlib.sha256(access.encode()).hexdigest()
-            cached = self._cache.get(key)
+            cached = None if near_expiry else self._cache.get(key)
             if cached is not None:
                 return Resolution(cached, access)
-            try:
-                user = await self._auth.get_user(access)
-            except AuthUnavailable:
-                return Resolution(None, None)
-            except InvalidSession:
-                user = None
+            user = None
+            if not (near_expiry and refresh):
+                try:
+                    user = await self._auth.get_user(access)
+                except InvalidSession:
+                    pass
+                except AuthUnavailable:
+                    return Resolution(None, None, unavailable=True)
+                except AuthError:  # limite de tentativas e afins: visitante neste pedido, sem apagar nada
+                    return Resolution(None, None)
             if user is not None:
-                expiry = _token_expiry(access)
-                ttl = USER_CACHE_TTL if expiry is None else min(USER_CACHE_TTL, expiry - self._clock())
+                ttl = USER_CACHE_TTL if expiry is None else min(USER_CACHE_TTL, expiry - self._clock() - EXPIRY_MARGIN)
                 if ttl > 0:
                     self._cache.set(key, user, ttl)
                 return Resolution(user, access)
@@ -84,10 +92,12 @@ class UserResolver:
             return Resolution(None, None, clear=bool(access))
         try:
             session = await self._auth.refresh(refresh)
-        except AuthUnavailable:
-            return Resolution(None, None)
         except InvalidSession:
             return Resolution(None, None, clear=True)
+        except AuthUnavailable:
+            return Resolution(None, None, unavailable=True)
+        except AuthError:
+            return Resolution(None, None)
         return Resolution(session.user, session.access_token, new_session=session)
 
 
@@ -95,6 +105,8 @@ class SessionMiddleware(BaseHTTPMiddleware):
     """Preenche request.state.user e access_token; regrava ou apaga os cookies na resposta."""
 
     async def dispatch(self, request: Request, call_next):
+        if request.url.path.startswith(SKIP_PREFIXES):
+            return await call_next(request)  # arquivos estáticos não precisam saber quem é a pessoa
         resolver: UserResolver | None = getattr(request.app.state, "resolver", None)
         resolution = Resolution(None, None)
         if resolver is not None:
@@ -102,6 +114,7 @@ class SessionMiddleware(BaseHTTPMiddleware):
                                                 request.cookies.get(REFRESH_COOKIE))
         request.state.user = resolution.user
         request.state.access_token = resolution.access_token
+        request.state.auth_unavailable = resolution.unavailable
         request.state.watch_time = await self._header_watch_time(request, resolution)
         response = await call_next(request)
         if getattr(request.state, "session_written", False):

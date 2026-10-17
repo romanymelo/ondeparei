@@ -3,8 +3,9 @@
 from fastapi import APIRouter, Request
 from fastapi.responses import RedirectResponse
 
-from app.auth.client import (AuthError, AuthUnavailable, EmailTaken, InvalidCredentials, InvalidRecoveryLink,
-                             InvalidSession, RateLimited, WeakPassword)
+from app.auth.client import (AuthError, AuthUnavailable, ConfirmationRequired, EmailTaken, InvalidCredentials,
+                             InvalidEmail, InvalidRecoveryLink, InvalidSession, RateLimited, SamePassword,
+                             WeakPassword)
 from app.auth.forms import safe_next, validate_login, validate_new_password, validate_signup
 from app.auth.session import clear_session_cookies, set_session_cookies
 from app.templating import NO_STORE, templates
@@ -19,6 +20,9 @@ _MESSAGES = {
     InvalidCredentials: "E-mail ou senha incorretos.",
     EmailTaken: "Já existe uma conta com este e-mail.",
     WeakPassword: "Use uma senha mais forte (mínimo de 8 caracteres).",
+    ConfirmationRequired: "Conta criada. Confirme o e-mail que enviamos e depois entre.",
+    InvalidEmail: "Informe um e-mail válido.",
+    SamePassword: "Use uma senha diferente da atual.",
     RateLimited: RATE_LIMITED,
     AuthUnavailable: UNAVAILABLE,
 }

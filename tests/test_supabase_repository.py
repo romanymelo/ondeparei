@@ -109,3 +109,20 @@ async def test_failures_are_tracking_unavailable(repo, mock, response):
     route.mock(side_effect=response) if isinstance(response, Exception) else route.mock(return_value=response)
     with pytest.raises(TrackingUnavailable):
         await repo.watched(7)
+
+
+async def test_watched_reads_every_page(repo, mock):
+    page1 = [{"season": 1, "episode": n} for n in range(1, 1001)]
+    route = mock.get("/watched_episodes").mock(side_effect=[httpx.Response(200, json=page1),
+                                                            httpx.Response(200, json=[{"season": 2, "episode": 1}])])
+    assert len(await repo.watched(7)) == 1001
+    first, second = (call.request.url.params for call in route.calls)
+    assert first["order"] == "season,episode" and first["limit"] == "1000" and first["offset"] == "0"
+    assert second["offset"] == "1000"
+
+
+@pytest.mark.parametrize("status", [403, 404])
+async def test_save_when_schema_or_grant_is_missing_is_unavailable(repo, mock, status):
+    mock.post("/rpc/save_tracking").respond(status, json={"code": "PGRST202"})
+    with pytest.raises(TrackingUnavailable):
+        await repo.save(7, name="X", poster_path=None, status="want", favorite=False)

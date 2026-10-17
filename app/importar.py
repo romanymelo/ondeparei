@@ -47,7 +47,8 @@ async def _find_user(http: httpx.AsyncClient, url: str, headers: dict, email: st
 
 
 async def _upsert(http: httpx.AsyncClient, url: str, headers: dict, table: str, conflict: str, rows: list[dict]):
-    upsert = headers | {"Prefer": "resolution=merge-duplicates,return=minimal"}
+    # ignore-duplicates: rodar de novo não traz o estado antigo por cima do que mudou no app
+    upsert = headers | {"Prefer": "resolution=ignore-duplicates,return=minimal"}
     for start in range(0, len(rows), BATCH):
         response = await http.post(f"{url}/rest/v1/{table}", params={"on_conflict": conflict},
                                    json=rows[start:start + BATCH], headers=upsert)
@@ -58,7 +59,8 @@ async def _minutes_in_account(http: httpx.AsyncClient, url: str, headers: dict, 
     total, offset = 0, 0
     while True:
         response = await http.get(f"{url}/rest/v1/watched_episodes", headers=headers, params={
-            "select": "runtime", "user_id": f"eq.{user_id}", "limit": str(READ_PAGE), "offset": str(offset)})
+            "select": "runtime", "user_id": f"eq.{user_id}", "order": "tmdb_id,season,episode",
+            "limit": str(READ_PAGE), "offset": str(offset)})
         response.raise_for_status()
         rows = response.json()
         total += sum(row.get("runtime") or 0 for row in rows)

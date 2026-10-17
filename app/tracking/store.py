@@ -1,5 +1,6 @@
 """Onde ficam as marcações de uma pessoa: a interface comum e o "store" de quem não está logado."""
 
+import logging
 from collections.abc import Callable, Iterable, Mapping, Sequence
 from typing import Protocol
 
@@ -8,6 +9,8 @@ from app.auth.session import LoginRequired
 from app.models import Marks, TrackedSeries
 
 Ep = tuple[int, int]
+
+logger = logging.getLogger(__name__)
 
 
 class TrackingUnavailable(Exception):
@@ -68,3 +71,25 @@ class VisitorStore:
 
     async def set_runtimes(self, tmdb_id: int, runtimes: Mapping[Ep, int]) -> None:
         raise LoginRequired()
+
+
+class ReadSafeStore:
+    """Envolve o store de quem está logado nas páginas abertas a todos: leituras que falham viram "nada
+    marcado" (com aviso no log); gravações seguem normais e mostram o erro."""
+
+    def __init__(self, inner: TrackingStore) -> None:
+        self._inner = inner
+        self._visitor = VisitorStore()
+
+    def __getattr__(self, name):
+        target = getattr(self._inner, name)
+        if name in ("save", "set_runtimes"):
+            return target
+
+        async def safe(*args, **kwargs):
+            try:
+                return await target(*args, **kwargs)
+            except TrackingUnavailable as exc:
+                logger.warning("Marcações indisponíveis (%s): página aberta sem elas", exc)
+                return await getattr(self._visitor, name)(*args, **kwargs)
+        return safe

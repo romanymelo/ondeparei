@@ -287,3 +287,32 @@ def test_two_users_do_not_see_each_other(make_client, tmp_path):
     other = User("00000000-0000-0000-0000-000000000002", "outro@teste.com", "Ana", "Silva")
     page = make_client(tracked_catalog(), db=db, user=other).get(f"/serie/{ID}").text
     assert 'value="want" aria-pressed="true"' not in page
+
+
+# Correções da revisão final
+class BrokenReadStore(VisitorStore):
+    async def marks(self, tmdb_id):
+        raise TrackingUnavailable("fora")
+
+    async def marks_for(self, tmdb_ids):
+        raise TrackingUnavailable("fora")
+
+    async def watched(self, tmdb_id):
+        raise TrackingUnavailable("fora")
+
+
+def test_logged_user_still_browses_when_tracking_reads_fail(make_client):
+    c = make_client(tracked_catalog(discover=make_page()))
+    c.app.state.stores = lambda user, token: BrokenReadStore()
+    for url in ("/", f"/serie/{ID}", f"/serie/{ID}/temporada/1"):
+        assert c.get(url).status_code == 200, url
+
+
+def test_auth_down_on_action_shows_message_instead_of_login(make_client):
+    from app.auth.client import AuthUnavailable
+    c = make_client(tracked_catalog())
+    c.app.state.auth.error = AuthUnavailable()
+    message = "Não foi possível falar com o servidor de contas. Tente novamente em instantes."
+    r = c.post(f"/serie/{ID}/status", data={"status": "want"}, headers=HX)
+    assert r.status_code == 200 and message in r.text and "hx-redirect" not in r.headers
+    assert c.get("/minhas-series", follow_redirects=False).status_code == 503

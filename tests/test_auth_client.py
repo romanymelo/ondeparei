@@ -135,3 +135,20 @@ def test_admin_headers_new_and_legacy_keys():
     from app.auth.client import admin_headers
     assert admin_headers("sb_secret_abc") == {"apikey": "sb_secret_abc"}
     assert admin_headers("eyJ.legacy") == {"apikey": "eyJ.legacy", "Authorization": "Bearer eyJ.legacy"}
+
+
+async def test_sign_up_without_session_means_confirmation_required(auth, mock):
+    from app.auth.client import ConfirmationRequired
+    mock.post("/signup").respond(json={"id": "u-1", "email": "eu@x.com", "user_metadata": {}})
+    with pytest.raises(ConfirmationRequired):
+        await auth.sign_up("eu@x.com", "segredo123", "R", "M")
+
+
+@pytest.mark.parametrize(("code", "error_name"), [("email_address_invalid", "InvalidEmail"),
+                                                 ("same_password", "SamePassword")])
+async def test_more_error_codes(auth, mock, code, error_name):
+    import app.auth.client as client
+    mock.post("/signup").respond(400, json={"error_code": code})
+    error = getattr(client, error_name)
+    with pytest.raises(error):
+        await auth.sign_up("eu@x.com", "segredo123", "R", "M")

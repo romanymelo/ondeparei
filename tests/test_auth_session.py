@@ -114,3 +114,23 @@ def test_visitor_action_page_gets_303_to_login(make_client):
 def test_visitor_my_series_redirects_to_login(make_client):
     r = make_client(tracked_catalog(), user=None).get("/minhas-series?aba=quero", follow_redirects=False)
     assert r.status_code == 303 and r.headers["location"] == "/entrar?proximo=%2Fminhas-series%3Faba%3Dquero"
+
+
+async def test_other_auth_errors_are_visitor_without_clearing():
+    from app.auth.client import RateLimited
+    r = await UserResolver(FakeAuth(error=RateLimited()), clock=FakeClock(1000)).resolve("tok", "ref")
+    assert (r.user, r.clear, r.new_session) == (None, False, None)
+
+
+async def test_token_close_to_expiry_is_refreshed_early():
+    auth = FakeAuth({"ref-ok": TEST_USER})
+    token = jwt_with_exp(1030)
+    auth.users_by_token[token] = TEST_USER
+    r = await UserResolver(auth, clock=FakeClock(1000)).resolve(token, "ref-ok")
+    assert r.new_session is not None and [n for n, _ in auth.calls] == ["refresh"]
+
+
+def test_static_files_skip_the_session(make_client):
+    c = make_client(tracked_catalog())
+    assert c.get("/static/style.css").status_code == 200
+    assert c.app.state.auth.calls == []

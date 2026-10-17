@@ -11,6 +11,7 @@ from app.tracking.service import InvalidAction
 from app.tracking.store import TrackingUnavailable
 
 Ep = tuple[int, int]
+READ_PAGE = 1000  # máximo de linhas por resposta do PostgREST
 
 _TAB_FILTERS = {
     "watching": ("status", "eq.watching"),
@@ -33,8 +34,9 @@ class SupabaseTrackingRepository:
                                                 headers=self._headers)
         except httpx.HTTPError as exc:
             raise TrackingUnavailable(str(exc)) from exc
-        if response.status_code >= 500 or response.status_code == 401:
-            raise TrackingUnavailable(f"{response.status_code}")
+        if response.status_code >= 500 or response.status_code in (401, 403, 404):
+            # 403/404: SQL ainda não aplicado ou grant faltando; não é erro de quem clicou
+            raise TrackingUnavailable(f"{response.status_code} {response.text[:200]}")
         if response.status_code >= 400:
             if invalid_is_action:
                 raise InvalidAction(response.text[:200])
@@ -60,9 +62,16 @@ class SupabaseTrackingRepository:
         return {row["tmdb_id"]: Marks(row["status"], bool(row["favorite"])) for row in rows or []}
 
     async def watched(self, tmdb_id: int) -> frozenset[Ep]:
-        rows = await self._request("GET", "/watched_episodes",
-                                   params={"select": "season,episode", "tmdb_id": f"eq.{tmdb_id}"})
-        return frozenset((row["season"], row["episode"]) for row in rows or [])
+        episodes: set[Ep] = set()
+        offset = 0
+        while True:  # em páginas: séries longas passam de 1000 episódios
+            rows = await self._request("GET", "/watched_episodes", params={
+                "select": "season,episode", "tmdb_id": f"eq.{tmdb_id}", "order": "season,episode",
+                "limit": str(READ_PAGE), "offset": str(offset)}) or []
+            episodes.update((row["season"], row["episode"]) for row in rows)
+            if len(rows) < READ_PAGE:
+                return frozenset(episodes)
+            offset += READ_PAGE
 
     async def save(self, tmdb_id: int, *, name: str, poster_path: str | None, status: str | None, favorite: bool,
                    add: Iterable[Ep] = (), remove: Iterable[Ep] = (),

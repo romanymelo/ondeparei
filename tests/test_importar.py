@@ -47,7 +47,9 @@ async def test_imports_with_upsert_and_user_id(local_db, mock):
     assert summary == Summary(series=2, episodes=3, minutes_before=106, minutes_after=106)
     series = mock.routes[3].calls.last.request
     assert series.url.params["on_conflict"] == "user_id,tmdb_id"
-    assert "resolution=merge-duplicates" in series.headers["prefer"] and series.headers["apikey"] == "sb_secret_x"
+    assert "resolution=ignore-duplicates" in series.headers["prefer"] and series.headers["apikey"] == "sb_secret_x"
+    totals = mock.routes[5].calls.last.request.url.params
+    assert totals["order"] == "tmdb_id,season,episode"
     rows = sorted(json.loads(series.content), key=lambda r: r["tmdb_id"])
     assert rows[0] | {"updated_at": None} == {"user_id": UID, "tmdb_id": 1396, "status": "watched", "favorite": True,
                                              "name": "Breaking Bad", "poster_path": "/bb.jpg", "updated_at": None}

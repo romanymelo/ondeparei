@@ -124,3 +124,12 @@ def test_html_in_name_is_escaped(make_client):
     user = User("00000000-0000-0000-0000-000000000009", "x@x.com", "<b>Ro</b>", "M")
     t = make_client(tracked_catalog(), user=user).get(f"/serie/{ID}").text
     assert "&lt;b&gt;Ro&lt;/b&gt;" in t and "<b>Ro</b>" not in t
+
+
+def test_confirmation_required_and_invalid_email_messages(make_client):
+    from app.auth.client import ConfirmationRequired, InvalidEmail
+    c = visitor(make_client)
+    c.app.state.auth.error = ConfirmationRequired()
+    assert "Conta criada. Confirme o e-mail que enviamos e depois entre." in c.post("/criar-conta", data=SIGNUP).text
+    c.app.state.auth.error = InvalidEmail()
+    assert "Informe um e-mail válido." in c.post("/criar-conta", data=SIGNUP).text

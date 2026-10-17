@@ -11,7 +11,7 @@ from app.navigation import remember_list
 from app.templating import NO_STORE, VARY_HX, is_htmx, templates
 from app.tmdb.client import TMDBNotFound
 from app.tracking.service import InvalidAction, TrackingService
-from app.tracking.store import TrackingUnavailable, VisitorStore
+from app.tracking.store import ReadSafeStore, TrackingUnavailable, VisitorStore
 
 router = APIRouter()
 
@@ -20,6 +20,8 @@ def get_tracking(request: Request) -> TrackingService:
     """Marcações da pessoa logada; visitante é levado ao login."""
     user = getattr(request.state, "user", None)
     if user is None:
+        if getattr(request.state, "auth_unavailable", False):
+            raise TrackingUnavailable("Supabase Auth fora do ar")  # não é caso de pedir login
         raise LoginRequired()
     stores = getattr(request.app.state, "stores", None)
     if stores is None:
@@ -33,7 +35,8 @@ def page_tracking(request: Request) -> TrackingService:
     stores = getattr(request.app.state, "stores", None)
     if user is None or stores is None:
         return TrackingService(request.app.state.catalog, VisitorStore())
-    return TrackingService(request.app.state.catalog, stores(user, request.state.access_token))
+    # se o banco das marcações cair, a página abre como para visitante (o catálogo continua navegável)
+    return TrackingService(request.app.state.catalog, ReadSafeStore(stores(user, request.state.access_token)))
 
 
 async def read_form(request: Request) -> dict[str, str]:
