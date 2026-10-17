@@ -1,0 +1,62 @@
+{% from "_icones.html" import icone %}
+{% set serie_id = view.detail.id %}
+{% set numero = view.season.number %}
+{% set marcados, exibidos = view.progress %}
+<div id="temporada" class="temporada-bloco">
+  <div class="temporada-progresso">
+    <p class="contador">{{ marcados }} de {{ exibidos }} assistidos</p>
+    {% if exibidos %}
+      <form method="post" action="/serie/{{ serie_id }}/temporada/{{ numero }}/toda"
+            hx-post="/serie/{{ serie_id }}/temporada/{{ numero }}/toda" hx-target="#temporada" hx-swap="outerHTML">
+        <button class="botao-contorno">{{ icone("watched") }}<span>{{ "Desmarcar temporada" if view.complete else "Marcar temporada inteira" }}</span></button>
+      </form>
+    {% endif %}
+    <span class="progresso progresso--topo" aria-hidden="true"><span class="progresso-feito" style="--pausa: {{ view.progress|porcento }}"></span></span>
+  </div>
+
+  <ol class="episodios">
+    {% for e in view.season.episodes %}
+      {% set ep = (numero, e.number) %}
+      {% set exibido = ep in view.aired %}
+      {% set marcado = ep in view.watched %}
+      {% set proximo = view.next_episode == ep %}
+      <li id="ep-{{ e.number }}" class="episodio{% if proximo %} episodio--proximo{% endif %}{% if not exibido %} episodio--futuro{% endif %}">
+        {% if exibido %}
+          <form method="post" action="/serie/{{ serie_id }}/episodio"
+                hx-post="/serie/{{ serie_id }}/episodio" hx-target="#temporada" hx-swap="outerHTML">
+            <input type="hidden" name="temporada" value="{{ numero }}">
+            <input type="hidden" name="episodio" value="{{ e.number }}">
+            <button class="marcar" aria-pressed="{{ 'true' if marcado else 'false' }}" aria-label="Marcar E{{ e.number }} como assistido">{{ icone("watched") }}</button>
+          </form>
+        {% else %}
+          <span class="marcar-vazio" aria-hidden="true"></span>
+        {% endif %}
+        {% if e.still_url %}
+          <img class="episodio-imagem" src="{{ e.still_url }}" alt="" loading="lazy" width="300" height="169">
+        {% else %}
+          <span class="episodio-imagem episodio-imagem--vazia" aria-hidden="true"></span>
+        {% endif %}
+        <div class="episodio-texto">
+          <p class="episodio-titulo">E{{ e.number }} · {{ e.name }}{% if proximo %} <span class="rotulo-proximo">próximo</span>{% endif %}</p>
+          <p class="episodio-meta">
+            {%- if exibido %}{% if e.air_date %}{{ e.air_date|data }}{% endif %}
+            {%- elif e.air_date %}Estreia em {{ e.air_date|data }}
+            {%- else %}Data a definir{% endif %}
+            {%- if e.runtime %} · {{ e.runtime }} min{% endif -%}
+          </p>
+          {% if e.overview %}
+            <details class="episodio-sinopse"><summary>Sinopse</summary><p>{{ e.overview }}</p></details>
+          {% endif %}
+          {% if exibido and not marcado %}
+            <form method="post" action="/serie/{{ serie_id }}/ate-aqui"
+                  hx-post="/serie/{{ serie_id }}/ate-aqui" hx-target="#temporada" hx-swap="outerHTML">
+              <input type="hidden" name="temporada" value="{{ numero }}">
+              <input type="hidden" name="episodio" value="{{ e.number }}">
+              <button class="ate-aqui">Marcar até aqui</button>
+            </form>
+          {% endif %}
+        </div>
+      </li>
+    {% endfor %}
+  </ol>
+</div>

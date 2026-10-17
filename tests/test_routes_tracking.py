@@ -76,6 +76,55 @@ def test_save_failure_shows_friendly_message(make_client, monkeypatch):
     assert c.post(f"/serie/{ID}/status", data={"status": "want"}).status_code == 500
 
 
+def test_season_page_lists_episodes(make_client):
+    t = make_client(tracked_catalog()).get(f"/serie/{ID}/temporada/2").text
+    assert 'id="ep-1"' in t and "E1 · Episódio 1" in t and "01/01/2023" in t and "0 de 2 assistidos" in t
+    assert "Estreia em 01/01/2027" in t and 'name="episodio" value="3"' not in t
+    assert "Marcar temporada inteira" in t and f'href="/serie/{ID}"' in t
+
+
+def test_toggle_episode_with_htmx_updates_block(make_client):
+    r = make_client(tracked_catalog()).post(f"/serie/{ID}/episodio", data={"temporada": 1, "episodio": 1},
+                                            headers=HX)
+    assert r.status_code == 200 and 'id="temporada"' in r.text and "<html" not in r.text
+    assert "1 de 3 assistidos" in r.text and 'style="--pausa: 33%"' in r.text
+    assert 'id="ep-2" class="episodio episodio--proximo"' in r.text
+
+
+@pytest.mark.parametrize(("path", "body"), [
+    ("/episodio", {"temporada": 1, "episodio": 2}),
+    ("/ate-aqui", {"temporada": 1, "episodio": 2}),
+    ("/temporada/1/toda", {}),
+])
+def test_episode_actions_without_htmx_redirect_to_season(make_client, path, body):
+    r = make_client(tracked_catalog()).post(f"/serie/{ID}{path}", data=body, follow_redirects=False)
+    assert r.status_code == 303 and r.headers["location"] == f"/serie/{ID}/temporada/1"
+
+
+def test_whole_season_button_flips(make_client):
+    t = make_client(tracked_catalog()).post(f"/serie/{ID}/temporada/1/toda", headers=HX).text
+    assert "3 de 3 assistidos" in t and "Desmarcar temporada" in t
+
+
+@pytest.mark.parametrize("body", [
+    {"temporada": "1", "episodio": "abc"}, {"temporada": "1"}, {"temporada": "1", "episodio": "-1"},
+    {"temporada": "1", "episodio": "1.5"}, {"temporada": "2", "episodio": "3"}, {"temporada": "9", "episodio": "1"},
+])
+def test_invalid_episode_is_400(make_client, body):
+    r = make_client(tracked_catalog()).post(f"/serie/{ID}/episodio", data=body, headers=HX)
+    assert r.status_code == 400 and "Ação inválida" in r.text
+
+
+def test_unknown_season_page_is_404(make_client):
+    r = make_client(tracked_catalog()).get(f"/serie/{ID}/temporada/9")
+    assert r.status_code == 404 and "Página não encontrada" in r.text
+
+
+def test_season_page_without_aired_episodes_has_no_actions(make_client):
+    t = make_client(tracked_catalog(detail=tracked_detail(last_aired=None))).get(f"/serie/{ID}/temporada/1").text
+    assert "Marcar temporada inteira" not in t and 'name="episodio"' not in t
+
+
 def test_tmdb_down_on_action_saves_nothing(make_client, tmp_path):
     db = tmp_path / "c.db"
     c = make_client(tracked_catalog(error=TMDBUnavailable("fora")), db=db)

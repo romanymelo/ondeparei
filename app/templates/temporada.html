@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+
+{% block title %}{{ view.season.name }} · {{ view.detail.name }} · {{ APP_NAME }}{% endblock %}
+
+{% block content %}
+<article class="pagina-temporada">
+  <header class="temporada-topo">
+    <a class="voltar-serie" href="/serie/{{ view.detail.id }}">← {{ view.detail.name }}</a>
+    <h1 class="vitrine-titulo">{{ view.season.name }}</h1>
+    {% if view.detail.seasons|length > 1 %}
+      <nav class="atalhos-temporadas" aria-label="Temporadas">
+        {% for season in view.detail.seasons %}
+          <a class="pilula-link" href="/serie/{{ view.detail.id }}/temporada/{{ season.number }}"{% if season.number == view.season.number %} aria-current="page"{% endif %}>
+            {{- "Especiais" if season.number == 0 else "T" ~ season.number -}}
+          </a>
+        {% endfor %}
+      </nav>
+    {% endif %}
+  </header>
+
+  {% include "_temporada.html" %}
+</article>
+{% endblock %}

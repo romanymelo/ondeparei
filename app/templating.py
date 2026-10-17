@@ -1,3 +1,4 @@
+from datetime import date
 from pathlib import Path
 
 from fastapi import Request
@@ -34,6 +35,10 @@ def format_percent(pair: tuple[int, int]) -> str:
     return f"{round(100 * done / total) if total else 0}%"
 
 
+def format_date(d: date) -> str:
+    return d.strftime("%d/%m/%Y")
+
+
 def format_episode(episode: tuple[int, int]) -> str:
     return f"T{episode[0]}E{episode[1]}"
 
@@ -56,4 +61,5 @@ templates.env.globals.update(
     MARK_LABELS=MARK_LABELS,
 )
 templates.env.filters.update(milhar=format_thousands, nota=format_rating, servicos=watch_services,
-                             porcento=format_percent, ep=format_episode)
+                             porcento=format_percent, ep=format_episode,
+                             data=format_date)

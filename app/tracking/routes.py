@@ -4,8 +4,10 @@ from urllib.parse import parse_qs
 
 from fastapi import APIRouter, Depends, Request
 from fastapi.responses import RedirectResponse
+from starlette.exceptions import HTTPException
 
 from app.templating import VARY_HX, is_htmx, templates
+from app.tmdb.client import TMDBNotFound
 from app.tracking.service import InvalidAction, TrackingService
 
 router = APIRouter()
@@ -45,3 +47,38 @@ async def set_status(request: Request, series_id: int, tracking: TrackingService
 @router.post("/serie/{series_id:int}/favorito")
 async def toggle_favorite(request: Request, series_id: int, tracking: TrackingService = Depends(get_tracking)):
     return _status_response(request, series_id, await tracking.toggle_favorite(series_id))
+
+
+@router.get("/serie/{series_id:int}/temporada/{number:int}")
+async def season_page(request: Request, series_id: int, number: int, tracking: TrackingService = Depends(get_tracking)):
+    try:
+        view = await tracking.season(series_id, number)
+    except TMDBNotFound:
+        raise HTTPException(status_code=404) from None
+    return templates.TemplateResponse(request, "temporada.html", {"view": view}, headers=VARY_HX)
+
+
+def _season_response(request: Request, series_id: int, season: int, view):
+    if is_htmx(request):
+        return templates.TemplateResponse(request, "_temporada.html", {"view": view}, headers=VARY_HX)
+    return RedirectResponse(f"/serie/{series_id}/temporada/{season}", status_code=303)
+
+
+@router.post("/serie/{series_id:int}/episodio")
+async def toggle_episode(request: Request, series_id: int, tracking: TrackingService = Depends(get_tracking)):
+    form = await read_form(request)
+    season, episode = int_field(form, "temporada"), int_field(form, "episodio")
+    return _season_response(request, series_id, season, await tracking.toggle_episode(series_id, season, episode))
+
+
+@router.post("/serie/{series_id:int}/ate-aqui")
+async def mark_up_to(request: Request, series_id: int, tracking: TrackingService = Depends(get_tracking)):
+    form = await read_form(request)
+    season, episode = int_field(form, "temporada"), int_field(form, "episodio")
+    return _season_response(request, series_id, season, await tracking.mark_up_to(series_id, season, episode))
+
+
+@router.post("/serie/{series_id:int}/temporada/{number:int}/toda")
+async def toggle_season(request: Request, series_id: int, number: int,
+                        tracking: TrackingService = Depends(get_tracking)):
+    return _season_response(request, series_id, number, await tracking.toggle_season(series_id, number))

@@ -612,6 +612,108 @@ a.temporada:hover .titulo { color: var(--projetor); }
 .progresso-texto { display: inline-flex; align-items: center; gap: 4px; color: var(--nevoa); }
 .progresso-texto .icone { width: 14px; height: 14px; color: var(--projetor); }
 
+/* página da temporada */
+.pagina-temporada { padding: 28px var(--margem) 48px; max-width: 1080px; }
+.temporada-topo { display: grid; gap: 10px; margin-bottom: 22px; }
+.voltar-serie { color: var(--nevoa); text-decoration: none; font-size: 0.92rem; }
+.voltar-serie:hover { color: var(--tela); }
+.atalhos-temporadas { display: flex; flex-wrap: wrap; gap: 6px; }
+.pilula-link {
+  padding: 5px 13px;
+  border: 1px solid var(--fio);
+  border-radius: 999px;
+  color: var(--tela);
+  font-size: 0.86rem;
+  text-decoration: none;
+}
+.pilula-link:hover { border-color: var(--nevoa); }
+.pilula-link[aria-current="page"] { background: var(--projetor); border-color: var(--projetor); color: var(--meia-noite); font-weight: 600; }
+.temporada-progresso { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 18px; }
+.temporada-progresso .contador { margin: 0; color: var(--tela); font-weight: 600; }
+.progresso--topo { position: relative; flex-basis: 100%; height: 4px; border-radius: 2px; }
+.progresso--topo .progresso-feito { border-radius: 2px; }
+.botao-contorno {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 8px 16px;
+  border: 1px solid var(--fio);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--tela);
+  font: inherit;
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+.botao-contorno:hover { border-color: var(--projetor); color: var(--projetor); }
+.episodios { display: grid; gap: 10px; margin: 0; padding: 0; list-style: none; }
+.episodio {
+  display: grid;
+  grid-template-columns: 40px 160px 1fr;
+  align-items: start;
+  gap: 16px;
+  padding: 12px 14px;
+  border: 1px solid var(--fio);
+  border-left: 3px solid transparent;
+  border-radius: 10px;
+  background: rgba(23, 31, 72, 0.55);
+  scroll-margin-top: 90px;
+}
+.episodio--proximo { border-left-color: var(--projetor); background: var(--veludo); }
+.episodio--futuro { opacity: 0.55; }
+.marcar, .marcar-vazio { width: 40px; height: 40px; }
+.marcar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: 1.5px solid var(--fio);
+  border-radius: 50%;
+  background: transparent;
+  color: var(--nevoa);
+  cursor: pointer;
+  transition: background-color 0.15s, color 0.15s, border-color 0.15s;
+}
+.marcar:hover { border-color: var(--projetor); color: var(--projetor); }
+.marcar[aria-pressed="true"] { background: var(--projetor); border-color: var(--projetor); color: var(--meia-noite); }
+.marcar:focus-visible, .ate-aqui:focus-visible, .botao-contorno:focus-visible { outline: 2px solid var(--tela); outline-offset: 2px; }
+.episodio-imagem { display: block; width: 160px; aspect-ratio: 16 / 9; height: auto; object-fit: cover; border-radius: 6px; background: var(--fio); }
+.episodio-texto { min-width: 0; }
+.episodio-titulo { margin: 0 0 3px; font-weight: 600; }
+.rotulo-proximo {
+  display: inline-block;
+  margin-left: 6px;
+  padding: 1px 8px;
+  border-radius: 999px;
+  background: var(--projetor);
+  color: var(--meia-noite);
+  font-size: 0.72rem;
+  font-weight: 700;
+  vertical-align: 2px;
+}
+.episodio-meta { margin: 0; color: var(--nevoa); font-size: 0.86rem; }
+.episodio-sinopse { margin-top: 6px; color: #d6daf3; font-size: 0.9rem; }
+.episodio-sinopse summary { color: var(--nevoa); cursor: pointer; }
+.episodio-sinopse p { margin: 6px 0 0; max-width: 70ch; }
+.ate-aqui {
+  margin-top: 6px;
+  padding: 2px 0;
+  border: 0;
+  background: none;
+  color: var(--nevoa);
+  font: inherit;
+  font-size: 0.84rem;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+.ate-aqui:hover { color: var(--projetor); }
+
+@media (max-width: 599px) {
+  .episodio { grid-template-columns: 40px 1fr; gap: 12px; }
+  .episodio-imagem { display: none; }
+}
+
 @media (prefers-reduced-motion: reduce) {
-  .status-opcao, .favorita { transition: none; }
+  .status-opcao, .favorita, .marcar { transition: none; }
 }
