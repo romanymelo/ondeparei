@@ -82,3 +82,9 @@ async def mark_up_to(request: Request, series_id: int, tracking: TrackingService
 async def toggle_season(request: Request, series_id: int, number: int,
                         tracking: TrackingService = Depends(get_tracking)):
     return _season_response(request, series_id, number, await tracking.toggle_season(series_id, number))
+
+
+@router.get("/minhas-series")
+async def my_series_page(request: Request, tracking: TrackingService = Depends(get_tracking)):
+    view = await tracking.my_series(request.query_params.get("aba", ""))
+    return templates.TemplateResponse(request, "minhas_series.html", {"view": view}, headers=VARY_HX)

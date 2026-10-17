@@ -15,6 +15,8 @@ SORT_LABELS = {
     "nome": "Nome A–Z",
 }
 VISIBLE_PROVIDERS = 12
+TAB_LABELS = {"assistindo": "Assistindo", "quero": "Quero assistir", "assistidas": "Assistidas", "favoritas": "Favoritas"}
+TAB_ICONS = {"assistindo": "watching", "quero": "want", "assistidas": "watched", "favoritas": "favorite"}
 MARK_LABELS = {"want": "Quero assistir", "watching": "Assistindo", "watched": "Assistido", "favorite": "Favorita"}
 TEMPLATES_DIR = Path(__file__).parent / "templates"
 
@@ -59,6 +61,8 @@ templates.env.globals.update(
     RATINGS=RATINGS,
     VISIBLE_PROVIDERS=VISIBLE_PROVIDERS,
     MARK_LABELS=MARK_LABELS,
+    TAB_LABELS=TAB_LABELS,
+    TAB_ICONS=TAB_ICONS,
 )
 templates.env.filters.update(milhar=format_thousands, nota=format_rating, servicos=watch_services,
                              porcento=format_percent, ep=format_episode,

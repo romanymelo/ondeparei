@@ -709,6 +709,42 @@ a.temporada:hover .titulo { color: var(--projetor); }
 }
 .ate-aqui:hover { color: var(--projetor); }
 
+/* cabeçalho e Minhas séries */
+.link-topo {
+  padding: 6px 2px;
+  border-bottom: 2px solid transparent;
+  color: var(--tela);
+  font-weight: 600;
+  font-size: 0.95rem;
+  text-decoration: none;
+  white-space: nowrap;
+}
+.link-topo:hover { color: var(--projetor); }
+.link-topo[aria-current="page"] { border-bottom-color: var(--projetor); }
+.abas { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 24px; }
+.aba {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 8px 15px;
+  border: 1px solid var(--fio);
+  border-radius: 999px;
+  color: var(--tela);
+  font-size: 0.92rem;
+  text-decoration: none;
+}
+.aba:hover { border-color: var(--nevoa); }
+.aba[aria-current="page"] { border-color: var(--projetor); box-shadow: inset 0 -2px 0 var(--projetor); }
+.aba[aria-current="page"] .icone { color: var(--projetor); }
+.contagem { color: var(--nevoa); font-variant-numeric: tabular-nums; }
+.cartao-minha a { color: inherit; text-decoration: none; }
+.cartao-minha .cartao-quadro:focus-visible { outline: none; box-shadow: 0 0 0 2px var(--projetor); }
+.cartao-minha .titulo:hover, .cartao-minha .titulo:focus-visible { color: var(--projetor); }
+.cartao-minha a.proximo-cartao { color: var(--projetor); font-size: var(--t-0); font-weight: 600; }
+.cartao-minha a.proximo-cartao:hover { text-decoration: underline; }
+.vazio-minhas { display: grid; justify-items: start; gap: 14px; }
+.vazio-minhas .vazio { margin: 0; }
+
 @media (max-width: 599px) {
   .episodio { grid-template-columns: 40px 1fr; gap: 12px; }
   .episodio-imagem { display: none; }

@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% from "_icones.html" import icone %}
+
+{% block title %}Minhas séries · {{ APP_NAME }}{% endblock %}
+
+{% block content %}
+<section class="vitrine minhas-series" aria-labelledby="titulo-minhas">
+  <div class="vitrine-topo">
+    <h1 id="titulo-minhas" class="vitrine-titulo">Minhas séries</h1>
+  </div>
+
+  <nav class="abas" aria-label="Listas">
+    {% for chave, rotulo in TAB_LABELS.items() %}
+      <a class="aba" href="/minhas-series?aba={{ chave }}"{% if chave == view.tab %} aria-current="page"{% endif %}>
+        {{- icone(TAB_ICONS[chave]) }}<span>{{ rotulo }}</span> <span class="contagem">{{ view.counts[chave] }}</span></a>
+    {% endfor %}
+  </nav>
+
+  {% if view.items %}
+    <div class="cartoes">
+      {% for item in view.items %}{% include "_cartao_minha.html" %}{% endfor %}
+    </div>
+  {% else %}
+    <div class="vazio-minhas">
+      <p class="vazio">Nenhuma série aqui ainda.</p>
+      <a class="botao" href="/">Explorar o catálogo</a>
+    </div>
+  {% endif %}
+</section>
+{% endblock %}

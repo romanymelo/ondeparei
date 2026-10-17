@@ -125,6 +125,40 @@ def test_season_page_without_aired_episodes_has_no_actions(make_client):
     assert "Marcar temporada inteira" not in t and 'name="episodio"' not in t
 
 
+def test_header_links_to_my_series(client):
+    assert 'href="/minhas-series"' in client.get("/").text
+
+
+def test_my_series_tabs_with_counts(make_client, tmp_path):
+    db = tmp_path / "m.db"
+    seed(db, status="watching", add=[(1, 1)])
+    seed(db, 1399, name="Outra", status="want", favorite=True)
+    details = {ID: tracked_detail(), 1399: tracked_detail(id=1399, name="Outra")}
+    c = make_client(tracked_catalog(details=details), db=db)
+    t = c.get("/minhas-series").text
+    assert 'href="/minhas-series?aba=assistindo" aria-current="page"' in t
+    assert t.count('<span class="contagem">1</span>') == 3 and '<span class="contagem">0</span>' in t
+    assert "The Last of Us" in t and "Próximo: T1E2" in t and 'style="--pausa: 20%"' in t and "Outra" not in t
+    t = c.get("/minhas-series?aba=quero").text
+    assert "Outra" in t and "The Last of Us" not in t
+
+
+def test_unknown_tab_shows_watching(make_client):
+    t = make_client(tracked_catalog()).get("/minhas-series?aba=xyz").text
+    assert 'href="/minhas-series?aba=assistindo" aria-current="page"' in t
+
+
+def test_empty_tab_points_to_catalog(make_client):
+    t = make_client(tracked_catalog()).get("/minhas-series?aba=favoritas").text
+    assert "Nenhuma série aqui ainda." in t and "Explorar o catálogo" in t
+
+
+def test_caught_up_series(make_client, tmp_path):
+    db = tmp_path / "e.db"
+    seed(db, status="watching", add=[(1, 1), (1, 2), (1, 3), (2, 1), (2, 2)])
+    assert "Em dia (aguardando episódios)" in make_client(tracked_catalog(), db=db).get("/minhas-series").text
+
+
 def test_tmdb_down_on_action_saves_nothing(make_client, tmp_path):
     db = tmp_path / "c.db"
     c = make_client(tracked_catalog(error=TMDBUnavailable("fora")), db=db)

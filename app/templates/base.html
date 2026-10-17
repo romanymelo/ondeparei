@@ -21,7 +21,9 @@
       <input type="search" name="q" value="{{ q or '' }}" maxlength="100"
              placeholder="Buscar série pelo nome" aria-label="Buscar série pelo nome">
     </form>
-    <div class="menu-usuario"></div>
+    <div class="menu-usuario">
+      <a class="link-topo" href="/minhas-series"{% if request.url.path == "/minhas-series" %} aria-current="page"{% endif %}>Minhas séries</a>
+    </div>
   </header>
 
   <main class="conteudo">

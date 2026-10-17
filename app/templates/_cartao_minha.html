@@ -1,0 +1,21 @@
+<div class="cartao cartao-minha">
+  <a class="cartao-quadro" href="/serie/{{ item.tmdb_id }}">
+    {% if item.poster_url %}
+      <img class="poster" src="{{ item.poster_url }}" loading="lazy" alt="{{ item.name }}" width="342" height="513">
+    {% else %}
+      <span class="poster poster-vazio" aria-hidden="true"><span>{{ item.name }}</span></span>
+    {% endif %}
+    {% if item.progress and item.progress[1] %}
+      <span class="progresso" aria-hidden="true"><span class="progresso-feito" style="--pausa: {{ item.progress|porcento }}"></span></span>
+    {% endif %}
+  </a>
+  <span class="cartao-info">
+    <a class="titulo" href="/serie/{{ item.tmdb_id }}">{{ item.name }}</a>
+    {% if item.next_episode %}
+      {% set t, e = item.next_episode %}
+      <a class="proximo-cartao" href="/serie/{{ item.tmdb_id }}/temporada/{{ t }}#ep-{{ e }}">Próximo: {{ item.next_episode|ep }}</a>
+    {% elif item.caught_up %}
+      <span class="meta">Em dia (aguardando episódios)</span>
+    {% endif %}
+  </span>
+</div>
