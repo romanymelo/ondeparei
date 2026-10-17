@@ -145,3 +145,12 @@ class SupabaseAuth:
 
     async def update_password(self, access_token: str, password: str) -> None:
         await self._call("PUT", "/user", json={"password": password}, token=access_token, session_call=True)
+
+
+def admin_headers(secret_key: str) -> dict[str, str]:
+    """Cabeçalhos da chave secreta (só importação e testes de contrato).
+    As chaves novas (sb_secret_...) vão só no apikey; as antigas (JWT service_role), também como Bearer."""
+    headers = {"apikey": secret_key}
+    if not secret_key.startswith("sb_secret_"):
+        headers["Authorization"] = f"Bearer {secret_key}"
+    return headers

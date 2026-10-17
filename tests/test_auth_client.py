@@ -129,3 +129,9 @@ async def test_sign_out_posts_logout_for_this_session_only(auth, mock):
     await auth.sign_out("a1")
     assert route.calls.last.request.url.params["scope"] == "local"
     assert route.calls.last.request.headers["authorization"] == "Bearer a1"
+
+
+def test_admin_headers_new_and_legacy_keys():
+    from app.auth.client import admin_headers
+    assert admin_headers("sb_secret_abc") == {"apikey": "sb_secret_abc"}
+    assert admin_headers("eyJ.legacy") == {"apikey": "eyJ.legacy", "Authorization": "Bearer eyJ.legacy"}
