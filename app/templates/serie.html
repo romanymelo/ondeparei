@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% from "_icones.html" import icone %}
 
 {% block title %}{{ serie.name }} · {{ APP_NAME }}{% endblock %}
 
@@ -30,7 +31,7 @@
           <li><span class="nota">★ {{ serie.rating|nota }}</span> ({{ serie.vote_count|milhar }} votos)</li>
         {% endif %}
       </ul>
-      {# fase 2: botões Assistida/Favorita aqui #}
+      {% include "_status.html" %}
     </div>
   </header>
 
@@ -68,15 +69,27 @@
       <h2>Temporadas</h2>
       <div class="temporadas">
         {% for season in serie.seasons %}
-          <div class="temporada">
-            {% if season.poster_url %}
-              <img src="{{ season.poster_url }}" alt="{{ season.name }}" loading="lazy">
-            {% else %}
-              <div class="poster-vazio" aria-hidden="true"></div>
-            {% endif %}
+          {% set marcados, exibidos = tracking.season_progress.get(season.number, (0, 0)) %}
+          <a class="temporada" href="/serie/{{ serie.id }}/temporada/{{ season.number }}">
+            <span class="temporada-capa">
+              {% if season.poster_url %}
+                <img src="{{ season.poster_url }}" alt="{{ season.name }}" loading="lazy">
+              {% else %}
+                <span class="poster-vazio" aria-hidden="true"></span>
+              {% endif %}
+              {% if season.number and exibidos %}
+                <span class="progresso" aria-hidden="true"><span class="progresso-feito" style="--pausa: {{ (marcados, exibidos)|porcento }}"></span></span>
+              {% endif %}
+            </span>
             <span class="titulo">{{ season.name }}</span>
             <span class="meta">{% if season.year %}{{ season.year }} · {% endif %}{{ season.episode_count }} ep.</span>
-          </div>
+            <span class="meta progresso-texto">
+              {%- if season.number == 0 %}{% if marcados %}{{ marcados }} marcados{% endif %}
+              {%- elif not exibidos %}Em breve
+              {%- elif marcados == exibidos %}{{ marcados }}/{{ exibidos }} {{ icone("watched") }}
+              {%- else %}{{ marcados }}/{{ exibidos }}{% endif -%}
+            </span>
+          </a>
         {% endfor %}
       </div>
     </section>

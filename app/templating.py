@@ -14,6 +14,7 @@ SORT_LABELS = {
     "nome": "Nome A–Z",
 }
 VISIBLE_PROVIDERS = 12
+MARK_LABELS = {"want": "Quero assistir", "watching": "Assistindo", "watched": "Assistido", "favorite": "Favorita"}
 TEMPLATES_DIR = Path(__file__).parent / "templates"
 
 templates = Jinja2Templates(directory=TEMPLATES_DIR)
@@ -25,6 +26,16 @@ def format_thousands(n: int) -> str:
 
 def format_rating(x: float) -> str:
     return f"{x:.1f}".replace(".", ",")
+
+
+def format_percent(pair: tuple[int, int]) -> str:
+    """(feitos, total) -> "33%"; total zero dá "0%"."""
+    done, total = pair
+    return f"{round(100 * done / total) if total else 0}%"
+
+
+def format_episode(episode: tuple[int, int]) -> str:
+    return f"T{episode[0]}E{episode[1]}"
 
 
 VARY_HX = {"Vary": "HX-Request"}
@@ -42,5 +53,7 @@ templates.env.globals.update(
     SORT_LABELS=SORT_LABELS,
     RATINGS=RATINGS,
     VISIBLE_PROVIDERS=VISIBLE_PROVIDERS,
+    MARK_LABELS=MARK_LABELS,
 )
-templates.env.filters.update(milhar=format_thousands, nota=format_rating, servicos=watch_services)
+templates.env.filters.update(milhar=format_thousands, nota=format_rating, servicos=watch_services,
+                             porcento=format_percent, ep=format_episode)

@@ -1,0 +1,10 @@
+{#- Ícones das marcações: SVG em linha, na cor do texto (currentColor). Nunca emoji. -#}
+{% macro icone(nome) -%}
+<svg class="icone icone-{{ nome }}" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  {%- if nome == "want" %}<path d="M6 3h12v18l-6-4-6 4z"/>
+  {%- elif nome == "watching" %}<path d="M7 4l13 8-13 8z"/>
+  {%- elif nome == "watched" %}<path d="M4 12.5l5 5L20 6.5"/>
+  {%- elif nome == "favorite" %}<path d="M12 20s-7-4.4-9.2-9A5 5 0 0 1 12 6a5 5 0 0 1 9.2 5c-2.2 4.6-9.2 9-9.2 9z"/>
+  {%- endif -%}
+</svg>
+{%- endmacro %}

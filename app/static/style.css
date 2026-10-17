@@ -552,3 +552,66 @@ select.seletor {
   .destaque-fundo, .pausa-feito { animation: none; }
   .cartao-info, .botao, .servico img { transition: none; }
 }
+
+/* Marcações ------------------------------------------------------------- */
+
+.icone { flex-shrink: 0; }
+
+/* a barra "onde parei" com o progresso real: mesmo visual da .pausa, sem animação */
+.progresso { position: absolute; left: 0; right: 0; bottom: 0; height: 3px; background: rgba(43, 53, 112, 0.85); }
+.progresso-feito {
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: var(--pausa);
+  background: var(--projetor);
+  box-shadow: 0 0 10px var(--projetor-brilho);
+}
+.progresso-feito::after {
+  content: "";
+  position: absolute;
+  right: -4px;
+  top: 50%;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--projetor);
+  transform: translateY(-50%);
+  box-shadow: 0 0 0 3px var(--projetor-brilho);
+}
+
+/* status e favorita na página da série */
+.status-serie { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin-top: 18px; }
+.status-opcoes { display: flex; flex-wrap: wrap; gap: 8px; }
+.status-opcao, .favorita {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  border: 1px solid var(--fio);
+  background: rgba(23, 31, 72, 0.6);
+  color: var(--tela);
+  font: inherit;
+  cursor: pointer;
+  transition: background-color 0.15s, color 0.15s, border-color 0.15s;
+}
+.status-opcao { padding: 8px 15px; border-radius: 999px; font-size: 0.92rem; }
+.status-opcao:hover, .favorita:hover { border-color: var(--nevoa); }
+.status-opcao[aria-pressed="true"] { background: var(--projetor); border-color: var(--projetor); color: var(--meia-noite); font-weight: 600; }
+.favorita { justify-content: center; width: 44px; height: 44px; border-radius: 50%; padding: 0; }
+.favorita[aria-pressed="true"] { border-color: var(--projetor); }
+.favorita[aria-pressed="true"] svg { fill: var(--projetor); stroke: var(--projetor); }
+.status-opcao:focus-visible, .favorita:focus-visible { outline: 2px solid var(--tela); outline-offset: 2px; }
+.proximo { display: flex; align-items: center; gap: 7px; flex-basis: 100%; margin: 4px 0 0; color: var(--projetor); font-weight: 600; text-decoration: none; }
+a.proximo:hover span { text-decoration: underline; }
+
+/* cartões de temporada viram links com a barra na capa */
+a.temporada { color: inherit; text-decoration: none; }
+.temporada-capa { position: relative; display: block; border-radius: 8px; overflow: hidden; }
+.temporada-capa img, .temporada-capa .poster-vazio { display: block; border-radius: 0; }
+a.temporada:hover .temporada-capa, a.temporada:focus-visible .temporada-capa { box-shadow: 0 0 0 2px var(--projetor); }
+a.temporada:hover .titulo { color: var(--projetor); }
+.progresso-texto { display: inline-flex; align-items: center; gap: 4px; color: var(--nevoa); }
+.progresso-texto .icone { width: 14px; height: 14px; color: var(--projetor); }
+
+@media (prefers-reduced-motion: reduce) {
+  .status-opcao, .favorita { transition: none; }
+}

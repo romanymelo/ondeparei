@@ -1,0 +1,21 @@
+{% from "_icones.html" import icone %}
+<div id="status-serie" class="status-serie">
+  <form class="status-opcoes" method="post" action="/serie/{{ series_id }}/status"
+        hx-post="/serie/{{ series_id }}/status" hx-target="#status-serie" hx-swap="outerHTML">
+    {% for value in ("want", "watching", "watched") %}
+      <button class="status-opcao" name="status" value="{{ value }}" aria-pressed="{{ 'true' if tracking.marks.status == value else 'false' }}">{{ icone(value) }}<span>{{ MARK_LABELS[value] }}</span></button>
+    {% endfor %}
+  </form>
+  <form method="post" action="/serie/{{ series_id }}/favorito"
+        hx-post="/serie/{{ series_id }}/favorito" hx-target="#status-serie" hx-swap="outerHTML">
+    <button class="favorita" aria-pressed="{{ 'true' if tracking.marks.favorite else 'false' }}" aria-label="Favorita" title="Favorita">{{ icone("favorite") }}</button>
+  </form>
+  {% if tracking.marks.status == "watching" %}
+    {% if tracking.next_episode %}
+      {% set t, e = tracking.next_episode %}
+      <a class="proximo" href="/serie/{{ series_id }}/temporada/{{ t }}#ep-{{ e }}">{{ icone("watching") }}<span>Próximo: {{ tracking.next_episode|ep }}{% if tracking.next_title %} — {{ tracking.next_title }}{% endif %}</span></a>
+    {% else %}
+      <p class="proximo">Em dia {{ icone("watched") }}</p>
+    {% endif %}
+  {% endif %}
+</div>

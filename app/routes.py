@@ -10,6 +10,8 @@ from app.filters import parse_filters, parse_page
 from app.models import Provider
 from app.templating import VARY_HX, VISIBLE_PROVIDERS, is_htmx, templates
 from app.tmdb.client import TMDBError
+from app.tracking.routes import get_tracking
+from app.tracking.service import TrackingService
 
 router = APIRouter()
 
@@ -93,6 +95,8 @@ async def search_page(request: Request, catalog: Catalog = Depends(get_catalog))
 
 
 @router.get("/serie/{series_id:int}")
-async def series_page(request: Request, series_id: int, catalog: Catalog = Depends(get_catalog)):
+async def series_page(request: Request, series_id: int, catalog: Catalog = Depends(get_catalog),
+                      tracking: TrackingService = Depends(get_tracking)):
     serie = await catalog.detail(series_id)
-    return templates.TemplateResponse(request, "serie.html", {"serie": serie})
+    context = {"serie": serie, "series_id": serie.id, "tracking": await tracking.series(serie)}
+    return templates.TemplateResponse(request, "serie.html", context)

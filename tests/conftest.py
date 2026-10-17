@@ -5,13 +5,13 @@ from tests.fakes import FakeCatalog, make_detail, make_page
 
 
 @pytest.fixture
-def make_client():
+def make_client(tmp_path):
     from app.main import create_app
 
     clients = []
 
-    def _make(fake):
-        client = TestClient(create_app(catalog=fake))
+    def _make(fake, db=None):
+        client = TestClient(create_app(catalog=fake, database_path=db or tmp_path / "catalogo.db"))
         client.__enter__()
         clients.append(client)
         return client
