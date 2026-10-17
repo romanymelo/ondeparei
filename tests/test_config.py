@@ -42,3 +42,11 @@ def test_reads_supabase_settings(monkeypatch):
     s = load_settings(env_file=None)
     assert (s.supabase_url, s.supabase_publishable_key) == ("https://proj.supabase.co", "pk")
     assert s.supabase_secret_key.get_secret_value() == "sk"
+
+
+@pytest.mark.parametrize("value", ["https://proj.supabase.co", "https://proj.supabase.co/",
+                                   "https://proj.supabase.co/rest/v1/", " https://proj.supabase.co/rest/v1 "])
+def test_supabase_url_is_normalized(monkeypatch, value):
+    monkeypatch.setenv("TMDB_TOKEN", "abc")
+    monkeypatch.setenv("SUPABASE_URL", value)
+    assert load_settings(env_file=None).supabase_url == "https://proj.supabase.co"

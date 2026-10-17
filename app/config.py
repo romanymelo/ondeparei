@@ -31,4 +31,7 @@ def load_settings(env_file: str | None = ".env") -> Settings:
         raise ConfigError(MISSING_TOKEN_MESSAGE)
     if not settings.supabase_url.strip() or not settings.supabase_publishable_key.strip():
         raise ConfigError(MISSING_SUPABASE_MESSAGE)
+    # o painel mostra a URL às vezes com /rest/v1 no fim; o app quer só a base do projeto
+    base = settings.supabase_url.strip().rstrip("/")
+    settings.supabase_url = base.removesuffix("/rest/v1").rstrip("/")
     return settings
