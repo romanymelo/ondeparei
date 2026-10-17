@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="catalogo">
+  <input type="checkbox" id="mostrar-filtros" class="toggle-filtros" hidden>
+
+  <form id="filtros" class="catalogo-form" action="/" method="get"
+        hx-get="/" hx-trigger="change" hx-target="#grade" hx-push-url="true">
+
+    <aside class="lateral" aria-label="Filtros">
+      <fieldset>
+        <legend>Serviços</legend>
+        {% if providers is none %}
+          <p class="indisponivel">indisponível no momento</p>
+        {% else %}
+          {% macro servico(p) %}
+            <label class="servico" title="{{ p.name }}">
+              <input type="checkbox" name="servicos" value="{{ p.id }}"{% if p.id in filters.providers %} checked{% endif %}>
+              {% if p.logo_url %}<img src="{{ p.logo_url }}" alt="{{ p.name }}" loading="lazy">{% else %}<span class="logo-texto">{{ p.name }}</span>{% endif %}
+            </label>
+          {% endmacro %}
+          <div class="servicos">
+            {% for p in providers[:VISIBLE_PROVIDERS] %}{{ servico(p) }}{% endfor %}
+          </div>
+          {% if providers|length > VISIBLE_PROVIDERS %}
+            <details{% if filters.providers|select("in", providers[VISIBLE_PROVIDERS:]|map(attribute="id")|list)|list %} open{% endif %}>
+              <summary>ver todos ({{ providers|length }})</summary>
+              <div class="servicos">
+                {% for p in providers[VISIBLE_PROVIDERS:] %}{{ servico(p) }}{% endfor %}
+              </div>
+            </details>
+          {% endif %}
+        {% endif %}
+      </fieldset>
+
+      <fieldset>
+        <legend>Tipo</legend>
+        {% for t in ALL_TYPES %}
+          <label class="opcao"><input type="checkbox" name="tipos" value="{{ t }}"{% if t in filters.types %} checked{% endif %}> {{ WATCH_TYPE_LABELS[t] }}</label>
+        {% endfor %}
+      </fieldset>
+
+      <fieldset>
+        <legend>Gênero</legend>
+        {% if genres is none %}
+          <p class="indisponivel">indisponível no momento</p>
+        {% else %}
+          <details{% if filters.genres %} open{% endif %}>
+            <summary>{% if filters.genres %}{{ filters.genres|length }} selecionado(s){% else %}Todos os gêneros{% endif %}</summary>
+            {% for g in genres %}
+              <label class="opcao"><input type="checkbox" name="generos" value="{{ g.id }}"{% if g.id in filters.genres %} checked{% endif %}> {{ g.name }}</label>
+            {% endfor %}
+          </details>
+        {% endif %}
+      </fieldset>
+
+      <fieldset>
+        <legend>Ano de estreia</legend>
+        <div class="anos">
+          <input type="number" name="ano_de" min="1900" max="{{ current_year + 1 }}" placeholder="de"
+                 aria-label="Ano de estreia a partir de" value="{{ filters.year_from or '' }}">
+          <input type="number" name="ano_ate" min="1900" max="{{ current_year + 1 }}" placeholder="até"
+                 aria-label="Ano de estreia até" value="{{ filters.year_to or '' }}">
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend>Nota mínima</legend>
+        <select name="nota" aria-label="Nota mínima">
+          <option value="">Qualquer nota</option>
+          {% for n in RATINGS %}
+            <option value="{{ n }}"{% if filters.min_rating == n %} selected{% endif %}>★ {{ n }}+</option>
+          {% endfor %}
+        </select>
+      </fieldset>
+
+      <a href="/" class="limpar">Limpar filtros</a>
+    </aside>
+
+    <div class="barra">
+      <label id="botao-filtros" for="mostrar-filtros" class="botao-filtros">Filtros ({{ filters.active_count }})</label>
+      <select name="ordem" aria-label="Ordenar por">
+        {% for key, label in SORT_LABELS.items() %}
+          <option value="{{ key }}"{% if filters.sort == key %} selected{% endif %}>{{ label }}</option>
+        {% endfor %}
+      </select>
+    </div>
+  </form>
+
+  <section id="grade" class="grade" aria-live="polite">
+    {% include "_grade.html" %}
+  </section>
+</div>
+{% endblock %}

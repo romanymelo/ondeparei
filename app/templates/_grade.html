@@ -1,0 +1,11 @@
+{% if oob %}
+<label id="botao-filtros" for="mostrar-filtros" class="botao-filtros" hx-swap-oob="true">Filtros ({{ filters.active_count }})</label>
+{% endif %}
+<p class="contador">{{ page.total_results|milhar }} {{ "série" if page.total_results == 1 else "séries" }}</p>
+{% if page.items %}
+  <div class="cartoes">
+    {% include "_cartoes.html" %}
+  </div>
+{% else %}
+  <p class="vazio">Nenhuma série encontrada com esses filtros.</p>
+{% endif %}
