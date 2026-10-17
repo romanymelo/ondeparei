@@ -15,6 +15,7 @@ class Settings(BaseSettings):
     tmdb_region: str = "BR"
     tmdb_language: str = "pt-BR"
     log_level: str = "INFO"
+    database_path: str = "data/catalogo.db"
 
 
 def load_settings(env_file: str | None = ".env") -> Settings:
