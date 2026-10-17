@@ -1,3 +1,4 @@
+import sqlite3
 from datetime import date
 from pathlib import Path
 
@@ -48,6 +49,26 @@ def watch_time_parts(minutes: int) -> tuple[int, int, int]:
     return months, days, hours
 
 
+_UNITS = (("mês", "meses"), ("dia", "dias"), ("hora", "horas"))
+
+
+def watch_time_units(minutes: int) -> list[tuple[int, str]]:
+    """Unidades do contador do cabeçalho, a partir da primeira não nula (horas sempre aparecem)."""
+    parts = list(zip(watch_time_parts(minutes), _UNITS))
+    first = next((i for i, (value, _) in enumerate(parts) if value), len(parts) - 1)
+    return [(value, singular if value == 1 else plural) for value, (singular, plural) in parts[first:]]
+
+
+def watch_time_of(request: Request) -> tuple[int, int] | None:
+    """(episódios, minutos) para o contador do cabeçalho; None se o banco não responder."""
+    app = request.scope.get("app")
+    tracking = getattr(app.state, "tracking", None) if app else None
+    try:
+        return tracking.watch_time() if tracking else None
+    except sqlite3.Error:
+        return None
+
+
 def format_watch_time(minutes: int) -> str:
     """Tempo assistido como no TV Time: "2 meses 5 dias 7 horas" (só as unidades não nulas)."""
     months, days, hours = watch_time_parts(minutes)
@@ -89,10 +110,11 @@ templates.env.globals.update(
     VISIBLE_PROVIDERS=VISIBLE_PROVIDERS,
     MARK_LABELS=MARK_LABELS,
     static_url=static_url,
+    tempo_de_series=watch_time_of,
     TAB_LABELS=TAB_LABELS,
     TAB_ICONS=TAB_ICONS,
 )
 templates.env.filters.update(milhar=format_thousands, nota=format_rating, servicos=watch_services,
                              porcento=format_percent, ep=format_episode,
                              data=format_date, tempo_tv=format_watch_time,
-                             tempo_partes=watch_time_parts)
+                             tempo_partes=watch_time_parts, tempo_unidades=watch_time_units)

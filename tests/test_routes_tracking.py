@@ -218,3 +218,32 @@ def test_watch_time_counter_with_nothing_watched(make_client):
 
 def test_stylesheet_url_changes_with_the_file_so_browsers_reload_it(client):
     assert re.search(r'href="/static/style\.css\?v=\d+"', client.get("/").text)
+
+
+# Contador também no cabeçalho
+def test_header_shows_the_watch_time_and_links_to_my_series(make_client, tmp_path):
+    db = tmp_path / "h.db"
+    episodes = [(1, 1), (1, 2), (1, 3), (2, 1), (2, 2)]
+    seed(db, status="watched", add=episodes, runtimes={ep: 50 for ep in episodes})  # 250 min
+    t = make_client(tracked_catalog(discover=make_page()), db=db).get("/").text
+    header = t.split("</header>")[0]
+    assert 'class="contador-topo contador-topo--anima" href="/minhas-series"' in header
+    assert re.findall(r'<span class="placa-mini"[^>]*>(\d)</span>', header) == ["0", "4"]
+    assert "Tempo de séries: 4 horas" in header
+
+
+def test_header_counter_does_not_animate_outside_home(make_client, tmp_path):
+    db = tmp_path / "h.db"
+    seed(db, status="watched", add=[(1, 1)], runtimes={(1, 1): 120})
+    header = make_client(tracked_catalog(), db=db).get(f"/serie/{ID}").text.split("</header>")[0]
+    assert 'class="contador-topo" href="/minhas-series"' in header
+
+
+def test_header_hides_the_counter_with_nothing_watched(make_client):
+    assert "contador-topo" not in make_client(tracked_catalog(discover=make_page())).get("/").text
+
+
+def test_marking_watched_fills_runtimes_right_after_the_click(make_client):
+    c = make_client(tracked_catalog(discover=make_page()))
+    c.post(f"/serie/{ID}/status", data={"status": "watched"})  # 5 episódios, duração buscada depois da resposta
+    assert "Tempo de séries: 4 horas" in c.get("/").text

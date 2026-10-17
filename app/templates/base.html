@@ -17,6 +17,20 @@
       <span class="marca-nome">{{ APP_NAME }}</span>
       <span class="marca-barra" aria-hidden="true"></span>
     </a>
+    {% set tempo = tempo_de_series(request) %}
+    {% if tempo and tempo[0] %}
+      <a class="contador-topo{% if request.url.path == '/' %} contador-topo--anima{% endif %}" href="/minhas-series"
+         aria-label="Tempo de séries: {{ tempo[1]|tempo_tv }}. Ver Minhas séries">
+        {%- for valor, unidade in tempo[1]|tempo_unidades %}
+          {% set u = loop.index0 %}
+          <span class="contador-unidade" aria-hidden="true">
+            {%- for digito in "%02d"|format(valor) %}<span class="placa-mini" style="--i: {{ u * 2 + loop.index0 }}">{{ digito }}</span>{% endfor -%}
+            <span class="contador-legenda">{{ unidade }}</span>
+          </span>
+        {%- endfor %}
+        <span class="contador-sufixo" aria-hidden="true">de séries</span>
+      </a>
+    {% endif %}
     <form action="/buscar" method="get" role="search" class="busca">
       <input type="search" name="q" value="{{ q or '' }}" maxlength="100"
              placeholder="Buscar série pelo nome" aria-label="Buscar série pelo nome">

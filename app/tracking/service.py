@@ -159,7 +159,7 @@ class TrackingService:
     # Minhas séries
     async def my_series(self, tab: str) -> MySeries:
         tab = tab if tab in TABS else DEFAULT_TAB
-        await self._fill_runtimes()
+        await self.fill_runtimes()
         counts = self._repo.counts()
         items = self._repo.list_tab(TABS[tab])
         if tab == "assistindo":
@@ -167,7 +167,11 @@ class TrackingService:
             items = await asyncio.gather(*(self._with_next(item, semaphore) for item in items))
         return MySeries(tab, {url: counts[key] for url, key in TABS.items()}, tuple(items), self._repo.watch_time())
 
-    async def _fill_runtimes(self) -> None:
+    def watch_time(self) -> tuple[int, int]:
+        """(episódios marcados, minutos assistidos) para o contador."""
+        return self._repo.watch_time()
+
+    async def fill_runtimes(self) -> None:
         """Busca na TMDB a duração dos episódios marcados sem ela (ex.: marcados de uma vez com "Assistido")."""
         semaphore = asyncio.Semaphore(DETAIL_CONCURRENCY)
         missing = self._repo.missing_runtimes()

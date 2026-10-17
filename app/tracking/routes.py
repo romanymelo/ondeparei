@@ -2,7 +2,7 @@
 
 from urllib.parse import parse_qs
 
-from fastapi import APIRouter, Depends, Request
+from fastapi import APIRouter, BackgroundTasks, Depends, Request
 from fastapi.responses import RedirectResponse
 from starlette.exceptions import HTTPException
 
@@ -39,9 +39,11 @@ def _status_response(request: Request, series_id: int, tracking):
 
 
 @router.post("/serie/{series_id:int}/status")
-async def set_status(request: Request, series_id: int, tracking: TrackingService = Depends(get_tracking)):
+async def set_status(request: Request, series_id: int, background: BackgroundTasks,
+                     tracking: TrackingService = Depends(get_tracking)):
     form = await read_form(request)
     result = await tracking.set_status(series_id, form.get("status", ""))
+    background.add_task(tracking.fill_runtimes)  # "Assistido" marca episódios sem duração: busca logo depois
     return _status_response(request, series_id, result)
 
 
@@ -73,9 +75,11 @@ async def toggle_episode(request: Request, series_id: int, tracking: TrackingSer
 
 
 @router.post("/serie/{series_id:int}/ate-aqui")
-async def mark_up_to(request: Request, series_id: int, tracking: TrackingService = Depends(get_tracking)):
+async def mark_up_to(request: Request, series_id: int, background: BackgroundTasks,
+                     tracking: TrackingService = Depends(get_tracking)):
     form = await read_form(request)
     season, episode = int_field(form, "temporada"), int_field(form, "episodio")
+    background.add_task(tracking.fill_runtimes)  # temporadas anteriores ficam sem duração: busca logo depois
     return _season_response(request, series_id, season, await tracking.mark_up_to(series_id, season, episode))
 
 

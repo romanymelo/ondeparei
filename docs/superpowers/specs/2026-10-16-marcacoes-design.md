@@ -210,6 +210,8 @@ Resumo das telas:
 
 **Contador de tempo** *(adicionado em 2026-10-17 a pedido do usuário, como no TV Time)*: no topo de Minhas séries, "Tempo de séries" com o total em meses, dias e horas (mês = 30 dias; só as unidades não nulas; "0 horas" sem nada) e o total de episódios marcados, Especiais incluídos. Cada episódio guarda a duração em minutos (`watched_episodes.runtime`, migração 2). Ela é gravada ao marcar pela página da temporada; os episódios marcados de uma vez ("Assistido", "até aqui" entre temporadas) ficam sem ela e têm a duração buscada na TMDB ao abrir Minhas séries (temporada; sem ela, a duração típica da série: média de `episode_run_time` ou a do último episódio exibido). Sem nenhuma das duas, o episódio conta no total de episódios com 0 minutos e a busca é tentada de novo depois.
 
+**Contador no cabeçalho** *(2026-10-17, a pedido do usuário)*: entre o logo e a busca, em todas as páginas, uma versão pequena do placar (unidades a partir da primeira não nula, mais "de séries"), com link para Minhas séries. As placas viram só na tela inicial. Some quando não há episódios marcados. Depois de "Assistido" e de "Marcar até aqui", as durações que faltam são buscadas em segundo plano, logo após a resposta. No celular, o contador ocupa uma linha própria acima da busca.
+
 **Selos** (`_cartao.html`): dentro de `.cartao-quadro`, no canto superior esquerdo do pôster, uma pastilha circular de 26px (meia-noite a 85% de opacidade) com o ícone do status em âmbar, e uma segunda pastilha com ♥ quando é favorita. Cada pastilha tem `aria-label` ("Assistindo", "Favorita"). Séries sem marcação não têm selo. Nome, ano e nota continuam embaixo do pôster, como hoje.
 
 ## 11. Rotas
