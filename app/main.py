@@ -9,6 +9,11 @@ from fastapi.exception_handlers import http_exception_handler
 from fastapi.staticfiles import StaticFiles
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
+import httpx
+
+from app.auth.client import SupabaseAuth
+from app.auth.csrf import CSRFMiddleware
+from app.auth.session import LoginRequired, SessionMiddleware, UserResolver, login_redirect
 from app.catalog import Catalog
 from app.config import ConfigError, Settings, load_settings
 from app.routes import router
@@ -55,6 +60,10 @@ def _register_error_handlers(app: FastAPI) -> None:
         logger.warning("TMDB indisponível: %s", exc)
         return _error_response(request, 503, "A TMDB não respondeu. Tente novamente em instantes.", retry=True)
 
+    @app.exception_handler(LoginRequired)
+    async def login_required(request: Request, exc: LoginRequired):
+        return login_redirect(request)
+
     @app.exception_handler(InvalidAction)
     async def invalid_action(request: Request, exc: InvalidAction):
         # 400 também com HTMX: o HTMX não troca o conteúdo em 4xx, então a tela fica como estava
@@ -78,12 +87,14 @@ def _start_tracking(app: FastAPI, catalog, database_path: str | Path):
     return conn
 
 
-def create_app(settings: Settings | None = None, catalog: Catalog | None = None,
+def create_app(settings: Settings | None = None, catalog: Catalog | None = None, auth=None,
                database_path: str | Path | None = None) -> FastAPI:
     @asynccontextmanager
     async def lifespan(app: FastAPI):
         if catalog is not None:
             app.state.catalog = catalog
+            app.state.auth = auth
+            app.state.resolver = UserResolver(auth) if auth is not None else None
             conn = _start_tracking(app, catalog, database_path or ":memory:")
             try:
                 yield
@@ -98,17 +109,24 @@ def create_app(settings: Settings | None = None, catalog: Catalog | None = None,
         logging.basicConfig(level=config.log_level.upper())
         http = create_http_client(config.tmdb_token.get_secret_value())
         app.state.catalog = Catalog(TMDBClient(http, TTLCache()), config.tmdb_region, config.tmdb_language)
+        supabase_http = httpx.AsyncClient(timeout=10)
+        app.state.auth = SupabaseAuth(supabase_http, config.supabase_url, config.supabase_publishable_key)
+        app.state.resolver = UserResolver(app.state.auth)
         conn = _start_tracking(app, app.state.catalog, database_path or config.database_path)
         try:
             yield
         finally:
             conn.close()
             await http.aclose()
+            await supabase_http.aclose()
 
     app = FastAPI(title=APP_NAME, lifespan=lifespan, docs_url=None, redoc_url=None, openapi_url=None)
     app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
     app.include_router(router)
     app.include_router(tracking_router)
+    # o último adicionado fica por fora: o CSRF recusa antes de qualquer outra coisa
+    app.add_middleware(SessionMiddleware)
+    app.add_middleware(CSRFMiddleware)
     _register_error_handlers(app)
     return app
 

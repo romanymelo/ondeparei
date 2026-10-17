@@ -5,6 +5,7 @@ from typing import Any
 
 from app.models import (CastMember, CatalogPage, Episode, Provider, Season, SeasonDetail, SeriesCard, SeriesDetail,
                         Spotlight, WatchOptions)
+from app.auth.client import AuthError, InvalidCredentials, InvalidSession, Session, User
 from app.tmdb.client import TMDBNotFound
 
 HX = {"HX-Request": "true"}
@@ -143,3 +144,65 @@ def tracked_catalog(detail: SeriesDetail | None = None, **kw: Any) -> FakeCatalo
     """Catálogo da série 100088: T1 toda exibida; T2 com E1–E2 exibidos e E3 estreando em 01/01/2027."""
     seasons = {1: make_season(1, 3), 2: make_season(2, 3, future_from=3)}
     return FakeCatalog(detail=detail or tracked_detail(), seasons=seasons, **kw)
+
+
+TEST_USER = User("00000000-0000-0000-0000-000000000001", "eu@teste.com", "Romany", "Melo")
+
+
+class FakeAuth:
+    """Mesma interface do SupabaseAuth. `users_by_token` vale para access e refresh tokens."""
+
+    def __init__(self, users_by_token: dict[str, User] | None = None,
+                 accounts: dict[str, tuple[str, User]] | None = None, error: AuthError | None = None) -> None:
+        self.users_by_token = dict(users_by_token or {})
+        self.accounts = dict(accounts or {})
+        self.error = error
+        self.calls: list[tuple[str, tuple]] = []
+
+    def _record(self, name: str, *args: Any) -> None:
+        self.calls.append((name, args))
+        if self.error is not None:
+            raise self.error
+
+    def _session(self, user: User, access: str = "tok-novo", refresh: str = "ref-novo") -> Session:
+        self.users_by_token[access] = user
+        self.users_by_token[refresh] = user
+        return Session(access, refresh, 2000000000, user)
+
+    async def sign_up(self, email, password, first_name, last_name):
+        self._record("sign_up", email, first_name, last_name)
+        user = User(f"id-{email}", email, first_name, last_name)
+        self.accounts[email] = (password, user)
+        return self._session(user)
+
+    async def sign_in(self, email, password):
+        self._record("sign_in", email)
+        account = self.accounts.get(email)
+        if account is None or account[0] != password:
+            raise InvalidCredentials("invalid_credentials")
+        return self._session(account[1])
+
+    async def refresh(self, refresh_token):
+        self._record("refresh", refresh_token)
+        if refresh_token not in self.users_by_token:
+            raise InvalidSession("refresh_token_not_found")
+        return self._session(self.users_by_token[refresh_token], "tok-renovado", "ref-renovado")
+
+    async def get_user(self, access_token):
+        self._record("get_user", access_token)
+        if access_token not in self.users_by_token:
+            raise InvalidSession("bad_jwt")
+        return self.users_by_token[access_token]
+
+    async def sign_out(self, access_token):
+        self._record("sign_out", access_token)
+
+    async def recover(self, email):
+        self._record("recover", email)
+
+    async def verify_recovery(self, token_hash):
+        self._record("verify_recovery", token_hash)
+        return self._session(TEST_USER, "tok-recuperacao", "ref-recuperacao")
+
+    async def update_password(self, access_token, password):
+        self._record("update_password", access_token)

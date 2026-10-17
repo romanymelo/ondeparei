@@ -1,7 +1,7 @@
 import pytest
 from fastapi.testclient import TestClient
 
-from tests.fakes import FakeCatalog, make_detail, make_page
+from tests.fakes import TEST_USER, FakeAuth, FakeCatalog, make_detail, make_page
 
 
 @pytest.fixture
@@ -10,8 +10,12 @@ def make_client(tmp_path):
 
     clients = []
 
-    def _make(fake, db=None):
-        client = TestClient(create_app(catalog=fake, database_path=db or tmp_path / "catalogo.db"))
+    def _make(fake, db=None, user=TEST_USER):
+        auth = FakeAuth({"tok-teste": user} if user else {})
+        client = TestClient(create_app(catalog=fake, auth=auth, database_path=db or tmp_path / "catalogo.db"),
+                            headers={"Origin": "http://testserver"})
+        if user:
+            client.cookies.set("op_acesso", "tok-teste")
         client.__enter__()
         clients.append(client)
         return client
