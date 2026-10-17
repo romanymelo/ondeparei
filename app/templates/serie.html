@@ -1,0 +1,112 @@
+{% extends "base.html" %}
+
+{% block title %}{{ serie.name }} · {{ APP_NAME }}{% endblock %}
+
+{% block content %}
+<article class="serie">
+  <div class="fundo"{% if serie.backdrop_url %} style="background-image: url('{{ serie.backdrop_url }}')"{% endif %}>
+    <a href="/" class="voltar" onclick="if (history.length > 1) { history.back(); return false; }">← Voltar</a>
+  </div>
+
+  <header class="cabecalho-serie">
+    {% if serie.poster_url %}
+      <img class="poster-grande" src="{{ serie.poster_url }}" alt="{{ serie.name }}">
+    {% else %}
+      <div class="poster-grande poster-vazio" aria-hidden="true"><span>{{ serie.name }}</span></div>
+    {% endif %}
+    <div class="info">
+      <h1>{{ serie.name }}</h1>
+      {% if serie.original_name and serie.original_name != serie.name %}
+        <p class="nome-original">{{ serie.original_name }}</p>
+      {% endif %}
+      <ul class="tags">
+        {% if serie.years_label %}<li>{{ serie.years_label }}</li>{% endif %}
+        {% if serie.status_label %}<li>{{ serie.status_label }}</li>{% endif %}
+        {% if serie.seasons_count %}
+          <li>{{ serie.seasons_count }} {{ "temporada" if serie.seasons_count == 1 else "temporadas" }}{% if serie.episodes_count %} · {{ serie.episodes_count }} ep.{% endif %}</li>
+        {% endif %}
+        {% for genre in serie.genres %}<li>{{ genre }}</li>{% endfor %}
+        {% if serie.rating %}
+          <li><span class="nota">★ {{ serie.rating|nota }}</span> ({{ serie.vote_count|milhar }} votos)</li>
+        {% endif %}
+      </ul>
+      {# fase 2: botões Assistida/Favorita aqui #}
+    </div>
+  </header>
+
+  <div class="colunas">
+    <div class="principal">
+      <h2>Sinopse</h2>
+      <p class="sinopse">{{ serie.overview or "Sinopse não disponível." }}</p>
+
+      {% if serie.trailer_youtube_key %}
+        <h2>Trailer</h2>
+        <div class="trailer">
+          <iframe src="https://www.youtube-nocookie.com/embed/{{ serie.trailer_youtube_key }}" loading="lazy"
+                  title="Trailer" allow="encrypted-media; picture-in-picture" allowfullscreen></iframe>
+        </div>
+      {% endif %}
+    </div>
+
+    <aside class="onde-assistir">
+      <h2>Onde assistir no Brasil</h2>
+      {% if serie.watch.by_type %}
+        {% for kind, providers in serie.watch.by_type.items() %}
+          <div class="linha-assistir">
+            <span class="rotulo">{{ WATCH_TYPE_LABELS[kind] }}</span>
+            <span class="logos">
+              {% for p in providers %}
+                {% if p.logo_url %}<img src="{{ p.logo_url }}" alt="{{ p.name }}" title="{{ p.name }}">{% else %}<span class="logo-texto">{{ p.name }}</span>{% endif %}
+              {% endfor %}
+            </span>
+          </div>
+        {% endfor %}
+      {% else %}
+        <p class="indisponivel">Não disponível em streaming no Brasil no momento</p>
+      {% endif %}
+      {% if serie.watch.link %}
+        <a class="botao" href="{{ serie.watch.link }}" target="_blank" rel="noopener">Ver opções de streaming ↗</a>
+      {% endif %}
+      <p class="fonte">Disponibilidade fornecida pelo JustWatch.</p>
+    </aside>
+  </div>
+
+  {% if serie.seasons %}
+    <section class="secao">
+      <h2>Temporadas</h2>
+      <div class="temporadas">
+        {% for season in serie.seasons %}
+          <div class="temporada">
+            {% if season.poster_url %}
+              <img src="{{ season.poster_url }}" alt="{{ season.name }}" loading="lazy">
+            {% else %}
+              <div class="poster-vazio" aria-hidden="true"></div>
+            {% endif %}
+            <span class="titulo">{{ season.name }}</span>
+            <span class="meta">{% if season.year %}{{ season.year }} · {% endif %}{{ season.episode_count }} ep.</span>
+          </div>
+        {% endfor %}
+      </div>
+    </section>
+  {% endif %}
+
+  {% if serie.cast %}
+    <section class="secao">
+      <h2>Elenco principal</h2>
+      <div class="elenco">
+        {% for person in serie.cast %}
+          <div class="pessoa">
+            {% if person.profile_url %}
+              <img src="{{ person.profile_url }}" alt="{{ person.name }}" loading="lazy">
+            {% else %}
+              <div class="foto-vazia" aria-hidden="true"></div>
+            {% endif %}
+            <span class="titulo">{{ person.name }}</span>
+            <span class="meta">{{ person.character }}</span>
+          </div>
+        {% endfor %}
+      </div>
+    </section>
+  {% endif %}
+</article>
+{% endblock %}

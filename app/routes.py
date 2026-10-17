@@ -79,3 +79,9 @@ async def search_page(request: Request, catalog: Catalog = Depends(get_catalog))
     if is_htmx(request) and page_number > 1:
         return templates.TemplateResponse(request, "_cartoes.html", context)
     return templates.TemplateResponse(request, "busca.html", context)
+
+
+@router.get("/serie/{series_id:int}")
+async def series_page(request: Request, series_id: int, catalog: Catalog = Depends(get_catalog)):
+    serie = await catalog.detail(series_id)
+    return templates.TemplateResponse(request, "serie.html", {"serie": serie})
