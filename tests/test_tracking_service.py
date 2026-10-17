@@ -71,9 +71,24 @@ async def test_status_toggles_off_and_is_validated(repo):
         await s.set_status(ID, "xyz")
 
 
-async def test_manual_watched_does_not_mark_episodes(repo):
-    await service(repo).set_status(ID, "watched")
-    assert repo.watched(ID) == frozenset()
+async def test_marking_watched_marks_every_aired_episode(repo):
+    t = await service(repo).set_status(ID, "watched")
+    assert repo.watched(ID) == {(1, 1), (1, 2), (1, 3), (2, 1), (2, 2)}  # T2E3 ainda não estreou
+    assert t.marks.status == "watched" and t.season_progress == {1: (3, 3), 2: (2, 2)}
+
+
+async def test_marking_watched_skips_specials(repo):
+    detail = make_detail(seasons=(Season(0, "Especiais", None, 2, None), Season(1, "Temporada 1", 2023, 3, None)),
+                         last_aired=(1, 3))
+    await service(repo, FakeCatalog(detail=detail)).set_status(ID, "watched")
+    assert repo.watched(ID) == {(1, 1), (1, 2), (1, 3)}
+
+
+async def test_leaving_watched_keeps_the_episodes(repo):
+    s = service(repo)
+    await s.set_status(ID, "watched")
+    assert (await s.set_status(ID, "watching")).marks.status == "watching"
+    assert len(repo.watched(ID)) == 5
 
 
 async def test_favorite_toggles_and_saves_snapshot(repo):

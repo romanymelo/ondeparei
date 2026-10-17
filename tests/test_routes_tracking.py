@@ -189,3 +189,10 @@ def test_controls_keep_ids_so_htmx_restores_keyboard_focus(make_client):
 @pytest.mark.parametrize("url", [f"/serie/{ID}", f"/serie/{ID}/temporada/1", "/minhas-series"])
 def test_pages_with_marks_are_not_kept_in_back_forward_cache(make_client, url):
     assert make_client(tracked_catalog()).get(url).headers["cache-control"] == "no-store"
+
+
+def test_marking_watched_fills_the_season_cards(make_client):
+    c = make_client(tracked_catalog())
+    c.post(f"/serie/{ID}/status", data={"status": "watched"})
+    t = c.get(f"/serie/{ID}").text
+    assert t.count('style="--pausa: 100%"') == 2 and "3/3" in t and "2/2" in t

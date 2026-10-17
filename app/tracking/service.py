@@ -47,7 +47,9 @@ class TrackingService:
         detail = await self._catalog.detail(series_id)
         marks = self._repo.marks(series_id)
         new_status = None if marks.status == status else status
-        self._save(series_id, detail, new_status, marks.favorite)
+        # "Assistido" marca todos os episódios já exibidos das temporadas (Especiais ficam de fora)
+        add = _aired(detail) if new_status == "watched" else ()
+        self._save(series_id, detail, new_status, marks.favorite, add=add)
         return await self._tracking(series_id, detail)
 
     async def toggle_favorite(self, series_id: int) -> SeriesTracking:

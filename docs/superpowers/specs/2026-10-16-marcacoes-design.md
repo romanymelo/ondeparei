@@ -39,7 +39,7 @@ Permitir marcar cada série como **Quero assistir**, **Assistindo** ou **Assisti
 - **Episódio exibido** é todo episódio `(t, e)` com `t ≥ 1` e `(t, e) ≤ last_episode_to_air` (comparação primeiro pela temporada, depois pelo episódio). Esse campo vem dos detalhes da série na TMDB e é a **única** referência para saber o que já foi ao ar, tanto nas regras quanto na tela.
 - Os episódios de cada temporada são numerados de 1 a `episode_count`, que é o padrão da TMDB.
 - **Especiais** (temporada 0) podem ser vistos e marcados, mas **não contam** para progresso, status automático nem "próximo episódio". Como o `last_episode_to_air` não cobre a temporada 0, um especial conta como exibido quando a data de exibição é anterior ou igual à data de hoje (`air_date ≤ hoje`). Essa data vem de `/tv/{id}/season/0`.
-- Marcar "Assistido" à mão **não** marca episódios. Para isso existem os atalhos.
+- Marcar "Assistido" à mão marca todos os episódios já exibidos das temporadas ≥ 1 (Especiais não). Trocar depois para outro status, ou desmarcar o "Assistido", não desmarca episódios. *(Alterado em 2026-10-17 a pedido do usuário, pensando no contador de horas.)*
 - Quando sai uma temporada nova de uma série "Assistida", o status não muda sozinho.
 - O nome e o pôster da série são guardados no banco (snapshot) e atualizados a cada ação, para "Minhas séries" abrir sem chamar a TMDB para cada série.
 
@@ -150,7 +150,7 @@ Todas são funções puras. Os episódios são representados por pares `(tempora
 
 **Temporada 0 (Especiais):** as três ações funcionam igual, mas a lista de episódios exibidos vem das datas da própria temporada (`air_date ≤ hoje`) em vez de `aired_episodes`. O `auto_status` ignora a temporada 0, então marcar especiais nunca muda o status.
 
-**Status manual:** muda só o status. Clicar no status que já está ativo remove o status (`NULL`).
+**Status manual:** muda o status; "Assistido" também marca os episódios exibidos (§3). Clicar no status que já está ativo remove o status (`NULL`).
 
 ## 9. Integração com a TMDB
 
