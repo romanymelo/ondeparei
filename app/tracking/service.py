@@ -24,6 +24,11 @@ class InvalidAction(ValueError):
     """Entrada inválida numa ação: status desconhecido, episódio inexistente ou que ainda não foi ao ar."""
 
 
+def _runtimes(season: SeasonDetail, typical: int | None) -> dict[Ep, int | None]:
+    """Duração de cada episódio da temporada; sem ela na TMDB, a típica da série."""
+    return {(season.number, e.number): e.runtime or typical for e in season.episodes}
+
+
 def _aired(detail: SeriesDetail) -> list[Ep]:
     return aired_episodes(((s.number, s.episode_count) for s in detail.seasons), detail.last_aired)
 
@@ -126,7 +131,8 @@ class TrackingService:
         marks = self._repo.marks(series_id)
         # especiais nunca mudam o status (spec §8)
         status = marks.status if number == 0 else auto_status(marks.status, aired, (watched | add) - remove)
-        self._save(series_id, detail, status, marks.favorite, add=add, remove=remove)
+        self._save(series_id, detail, status, marks.favorite, add=add, remove=remove,
+                   runtimes=_runtimes(season, detail.typical_runtime))
         return self._view(series_id, detail, season)
 
     def _season_aired(self, detail: SeriesDetail, season: SeasonDetail) -> list[Ep]:
@@ -146,19 +152,44 @@ class TrackingService:
         )
 
     def _save(self, series_id: int, detail: SeriesDetail, status: str | None, favorite: bool,
-              add: Collection[Ep] = (), remove: Collection[Ep] = ()) -> None:
+              add: Collection[Ep] = (), remove: Collection[Ep] = (), runtimes: dict[Ep, int | None] = {}) -> None:
         self._repo.save(series_id, name=detail.name, poster_path=detail.poster_path, status=status,
-                        favorite=favorite, add=add, remove=remove)
+                        favorite=favorite, add=add, remove=remove, runtimes=runtimes)
 
     # Minhas séries
     async def my_series(self, tab: str) -> MySeries:
         tab = tab if tab in TABS else DEFAULT_TAB
+        await self._fill_runtimes()
         counts = self._repo.counts()
         items = self._repo.list_tab(TABS[tab])
         if tab == "assistindo":
             semaphore = asyncio.Semaphore(DETAIL_CONCURRENCY)
             items = await asyncio.gather(*(self._with_next(item, semaphore) for item in items))
-        return MySeries(tab, {url: counts[key] for url, key in TABS.items()}, tuple(items))
+        return MySeries(tab, {url: counts[key] for url, key in TABS.items()}, tuple(items), self._repo.watch_time())
+
+    async def _fill_runtimes(self) -> None:
+        """Busca na TMDB a duração dos episódios marcados sem ela (ex.: marcados de uma vez com "Assistido")."""
+        semaphore = asyncio.Semaphore(DETAIL_CONCURRENCY)
+        missing = self._repo.missing_runtimes()
+        await asyncio.gather(*(self._fill_series_runtimes(tmdb_id, seasons, semaphore)
+                               for tmdb_id, seasons in missing.items()))
+
+    async def _fill_series_runtimes(self, tmdb_id: int, numbers: set[int], semaphore: asyncio.Semaphore) -> None:
+        async def fetch(call):
+            try:
+                async with semaphore:
+                    return await call
+            except TMDBError:
+                return None
+
+        detail = await fetch(self._catalog.detail(tmdb_id))
+        typical = detail.typical_runtime if detail else None
+        seasons = await asyncio.gather(*(fetch(self._catalog.season(tmdb_id, n)) for n in numbers))
+        known: dict[Ep, int | None] = {}
+        for season in filter(None, seasons):
+            known |= _runtimes(season, typical)
+        runtimes = {ep: known.get(ep) or typical for ep in self._repo.watched(tmdb_id) if ep[0] in numbers}
+        self._repo.set_runtimes(tmdb_id, {ep: minutes for ep, minutes in runtimes.items() if minutes})
 
     async def _with_next(self, item: TrackedSeries, semaphore: asyncio.Semaphore) -> TrackedSeries:
         """Próximo episódio e progresso; se a TMDB falhar para esta série, o cartão segue sem eles."""

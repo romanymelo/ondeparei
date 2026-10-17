@@ -9,6 +9,17 @@
     <h1 id="titulo-minhas" class="vitrine-titulo">Minhas séries</h1>
   </div>
 
+  {% set episodios, minutos = view.watch_time %}
+  <div class="tempo-de-tv">
+    <div class="tempo-bloco">
+      <p class="tempo-rotulo">Tempo de séries</p>
+      <p class="tempo-total">{{ minutos|tempo_tv }}</p>
+    </div>
+    <div class="tempo-bloco">
+      <p class="tempo-episodios">{{ episodios|milhar }} {{ "episódio" if episodios == 1 else "episódios" }}</p>
+    </div>
+  </div>
+
   <nav class="abas" aria-label="Listas">
     {% for chave, rotulo in TAB_LABELS.items() %}
       <a class="aba" href="/minhas-series?aba={{ chave }}"{% if chave == view.tab %} aria-current="page"{% endif %}>

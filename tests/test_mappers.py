@@ -222,3 +222,13 @@ def test_last_aired_when_a_special_airs_mid_season(next_episode, expected):
     data["seasons"] = [{"season_number": 1, "episode_count": 9, "air_date": "2023-01-15", "name": "T1"},
                        {"season_number": 2, "episode_count": 10, "air_date": "2026-10-01", "name": "T2"}]
     assert to_detail(data, "BR").last_aired == expected
+
+
+@pytest.mark.parametrize(("extra", "expected"), [
+    ({"episode_run_time": [42, 58]}, 50),
+    ({"episode_run_time": [], "last_episode_to_air": {"season_number": 2, "episode_number": 7, "runtime": 61}}, 61),
+    ({"episode_run_time": [], "last_episode_to_air": None}, None),
+])
+def test_typical_runtime(extra, expected):
+    data = load_fixture("tv_100088.json") | extra
+    assert to_detail(data, "BR").typical_runtime == expected

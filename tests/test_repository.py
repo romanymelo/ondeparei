@@ -95,3 +95,25 @@ def test_row_without_marks_is_deleted(repo):
 def test_unknown_status_is_refused(repo):
     with pytest.raises(sqlite3.IntegrityError):
         save(repo, 1, "xyz")
+
+
+def test_runtimes_are_stored_summed_and_repaired(repo):
+    save(repo, 1, "watching", add=[(1, 1), (1, 2), (0, 1)], runtimes={(1, 1): 50, (0, 1): 20})
+    save(repo, 2, "watched", add=[(1, 1)], runtimes={(1, 1): 30})
+    assert repo.watch_time() == (4, 100)
+    assert repo.missing_runtimes() == {1: {1}}
+    repo.set_runtimes(1, {(1, 2): 45})
+    assert repo.watch_time() == (4, 145) and repo.missing_runtimes() == {}
+
+
+def test_version_1_database_gains_the_runtime_column(tmp_path):
+    path = tmp_path / "v1.db"
+    conn = sqlite3.connect(path)
+    conn.executescript(MIGRATIONS[0] + "PRAGMA user_version = 1;")
+    conn.execute("INSERT INTO watched_episodes (tmdb_id, season, episode, watched_at) VALUES (1, 1, 1, 'x')")
+    conn.commit()
+    conn.close()
+    conn = connect(path)
+    assert conn.execute("PRAGMA user_version").fetchone()[0] == len(MIGRATIONS) >= 2
+    assert TrackingRepository(conn).missing_runtimes() == {1: {1}}
+    conn.close()

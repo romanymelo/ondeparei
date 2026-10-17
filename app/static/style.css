@@ -789,6 +789,33 @@ a.temporada:hover .titulo { color: var(--projetor); }
 .cartao-minha .titulo:hover, .cartao-minha .titulo:focus-visible { color: var(--projetor); }
 .cartao-minha a.proximo-cartao { color: var(--projetor); font-size: var(--t-0); font-weight: 600; }
 .cartao-minha a.proximo-cartao:hover { text-decoration: underline; }
+/* contador de tempo assistido, como no TV Time: o tempo aceso em âmbar */
+.tempo-de-tv {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 8px 32px;
+  margin: 4px 0 26px;
+  padding: 18px 22px 20px;
+  border: 1px solid var(--fio);
+  border-radius: 14px;
+  background:
+    radial-gradient(90% 140% at 0% 0%, rgba(255, 181, 71, 0.12), transparent 60%),
+    var(--veludo);
+  overflow: hidden;
+}
+.tempo-bloco p { margin: 0; }
+.tempo-rotulo { color: var(--nevoa); font-size: var(--t-0); }
+.tempo-total {
+  color: var(--projetor);
+  font-stretch: 70%;
+  font-weight: 800;
+  font-size: clamp(1.9rem, 4.5vw, 2.8rem);
+  line-height: 1.05;
+  text-shadow: 0 0 28px var(--projetor-brilho);
+}
+.tempo-episodios { font-stretch: 85%; font-weight: 700; font-size: var(--t-3); line-height: 1.1; }
+
 .vazio-minhas { display: grid; justify-items: start; gap: 14px; }
 .vazio-minhas .vazio { margin: 0; }
 

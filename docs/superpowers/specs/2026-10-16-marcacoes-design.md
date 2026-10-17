@@ -208,6 +208,8 @@ Resumo das telas:
 - **Aba Assistindo:** cada cartão tem a barra "onde parei" na base do pôster e, embaixo do nome, "Próximo: TxEy" em âmbar (link direto para o episódio) ou "Em dia ✓ (aguardando episódios)". Para isso, o app busca os detalhes de cada série com no máximo 10 chamadas simultâneas. Se a busca de uma série falhar, só aquele cartão fica sem a barra e sem a linha "Próximo".
 - **Lista vazia:** "Nenhuma série aqui ainda." e um link para o catálogo.
 
+**Contador de tempo** *(adicionado em 2026-10-17 a pedido do usuário, como no TV Time)*: no topo de Minhas séries, "Tempo de séries" com o total em meses, dias e horas (mês = 30 dias; só as unidades não nulas; "0 horas" sem nada) e o total de episódios marcados, Especiais incluídos. Cada episódio guarda a duração em minutos (`watched_episodes.runtime`, migração 2). Ela é gravada ao marcar pela página da temporada; os episódios marcados de uma vez ("Assistido", "até aqui" entre temporadas) ficam sem ela e têm a duração buscada na TMDB ao abrir Minhas séries (temporada; sem ela, a duração típica da série: média de `episode_run_time` ou a do último episódio exibido). Sem nenhuma das duas, o episódio conta no total de episódios com 0 minutos e a busca é tentada de novo depois.
+
 **Selos** (`_cartao.html`): dentro de `.cartao-quadro`, no canto superior esquerdo do pôster, uma pastilha circular de 26px (meia-noite a 85% de opacidade) com o ícone do status em âmbar, e uma segunda pastilha com ♥ quando é favorita. Cada pastilha tem `aria-label` ("Assistindo", "Favorita"). Séries sem marcação não têm selo. Nome, ano e nota continuam embaixo do pôster, como hoje.
 
 ## 11. Rotas

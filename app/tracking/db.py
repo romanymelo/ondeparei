@@ -25,7 +25,12 @@ CREATE TABLE watched_episodes (
 );
 """
 
-MIGRATIONS: tuple[str, ...] = (MIGRATION_1,)
+# duração do episódio em minutos, para o contador de tempo assistido (NULL = ainda não conhecida)
+MIGRATION_2 = """
+ALTER TABLE watched_episodes ADD COLUMN runtime INTEGER;
+"""
+
+MIGRATIONS: tuple[str, ...] = (MIGRATION_1, MIGRATION_2)
 
 
 def connect(path: str | Path) -> sqlite3.Connection:

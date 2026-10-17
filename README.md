@@ -40,6 +40,7 @@ Depois, abra http://localhost:8000.
 
 Na página de cada série dá para marcar **Quero assistir**, **Assistindo** ou **Assistido** e favoritar. Clicando numa temporada, você marca episódio por episódio (ou "até aqui", ou a temporada inteira); a página **Minhas séries** mostra tudo e o próximo episódio de cada série.
 
+- No topo de **Minhas séries**, o contador de tempo de séries (como no TV Time): meses, dias e horas assistidos e o total de episódios.
 - As marcações ficam num banco SQLite em `data/catalogo.db` (outro caminho: variável `DATABASE_PATH` no `.env`).
 - **Backup:** com o app parado, copie o arquivo `data/catalogo.db`.
 - **Recomeçar do zero:** com o app parado, apague esse arquivo.

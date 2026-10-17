@@ -169,3 +169,29 @@ async def test_unmarking_a_whole_watched_series_clears_the_status(repo):
     await s.toggle_season(ID, 2)
     assert (await s.toggle_season(ID, 1)).marks.status is None
     assert repo.marks_for([ID]) == {}  # sem status, favorito nem episódios: a linha some
+
+
+# Contador de tempo assistido (como no TV Time)
+async def test_marking_on_the_season_page_stores_the_runtime(repo):
+    await service(repo).toggle_episode(ID, 1, 1)
+    assert repo.watch_time() == (1, 50)
+
+
+async def test_my_series_fills_missing_runtimes_and_sums_the_time(repo):
+    s = service(repo)
+    await s.set_status(ID, "watched")  # 5 episódios, duração ainda desconhecida
+    view = await s.my_series("assistidas")
+    assert view.watch_time == (5, 250) and repo.missing_runtimes() == {}
+
+
+async def test_missing_runtime_falls_back_to_the_series_typical_runtime(repo):
+    s = service(repo, FakeCatalog(detail=tracked_detail(typical_runtime=40), seasons={}))  # temporadas falham
+    await s.set_status(ID, "watched")
+    assert (await s.my_series("assistidas")).watch_time == (5, 200)
+
+
+async def test_unknown_runtime_still_counts_the_episode(repo):
+    s = service(repo, FakeCatalog(detail=tracked_detail(), seasons={}))
+    await s.set_status(ID, "watched")
+    assert (await s.my_series("assistidas")).watch_time == (5, 0)
+    assert repo.missing_runtimes() == {ID: {1, 2}}  # tenta de novo na próxima vez

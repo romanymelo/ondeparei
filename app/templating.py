@@ -40,6 +40,17 @@ def format_percent(pair: tuple[int, int]) -> str:
     return f"{round(100 * done / total) if total else 0}%"
 
 
+def format_watch_time(minutes: int) -> str:
+    """Tempo assistido como no TV Time: "2 meses 5 dias 7 horas" (mês = 30 dias; só unidades não nulas)."""
+    hours = minutes // 60
+    months, hours = divmod(hours, 30 * 24)
+    days, hours = divmod(hours, 24)
+    parts = [f"{n} {singular if n == 1 else plural}"
+             for n, singular, plural in ((months, "mês", "meses"), (days, "dia", "dias"), (hours, "hora", "horas"))
+             if n]
+    return " ".join(parts) or "0 horas"
+
+
 def format_date(d: date) -> str:
     return d.strftime("%d/%m/%Y")
 
@@ -71,4 +82,4 @@ templates.env.globals.update(
 )
 templates.env.filters.update(milhar=format_thousands, nota=format_rating, servicos=watch_services,
                              porcento=format_percent, ep=format_episode,
-                             data=format_date)
+                             data=format_date, tempo_tv=format_watch_time)

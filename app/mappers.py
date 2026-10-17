@@ -218,6 +218,14 @@ def _last_aired(data: Mapping) -> tuple[int, int] | None:
     return max(started) if started else None
 
 
+def _typical_runtime(data: Mapping) -> int | None:
+    """Duração típica de um episódio: média de episode_run_time ou, sem ela, a do último episódio exibido."""
+    runtimes = [r for r in data.get("episode_run_time") or [] if r]
+    if runtimes:
+        return round(sum(runtimes) / len(runtimes))
+    return (data.get("last_episode_to_air") or {}).get("runtime") or None
+
+
 def _episode(item: Mapping, season: int) -> Episode:
     return Episode(
         season=season,
@@ -274,6 +282,7 @@ def to_detail(data: Mapping, region: str, overview_fallback: str = "") -> Series
         watch=to_watch_options(region_watch),
         poster_path=data.get("poster_path"),
         last_aired=_last_aired(data),
+        typical_runtime=_typical_runtime(data),
     )
 
 

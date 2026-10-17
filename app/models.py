@@ -99,6 +99,7 @@ class SeriesDetail:
     watch: WatchOptions
     poster_path: str | None = None  # guardado no banco (snapshot) quando a série é marcada
     last_aired: tuple[int, int] | None = None  # (temporada, episódio) do último episódio exibido
+    typical_runtime: int | None = None  # minutos; usado quando a TMDB não informa a duração de um episódio
 
 
 @dataclass(frozen=True)
@@ -190,3 +191,4 @@ class MySeries:
     tab: str
     counts: dict[str, int]  # chaves da URL: assistindo, quero, assistidas, favoritas
     items: tuple[TrackedSeries, ...]
+    watch_time: tuple[int, int] = (0, 0)  # (episódios marcados, minutos assistidos)

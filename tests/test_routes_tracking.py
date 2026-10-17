@@ -196,3 +196,16 @@ def test_marking_watched_fills_the_season_cards(make_client):
     c.post(f"/serie/{ID}/status", data={"status": "watched"})
     t = c.get(f"/serie/{ID}").text
     assert t.count('style="--pausa: 100%"') == 2 and "3/3" in t and "2/2" in t
+
+
+def test_my_series_shows_the_watch_time_counter(make_client, tmp_path):
+    db = tmp_path / "t.db"
+    episodes = [(1, 1), (1, 2), (1, 3), (2, 1), (2, 2)]
+    seed(db, status="watched", add=episodes, runtimes={ep: 50 for ep in episodes})  # 250 min
+    t = make_client(tracked_catalog(), db=db).get("/minhas-series?aba=assistidas").text
+    assert '<p class="tempo-total">4 horas</p>' in t and "5 episódios" in t
+
+
+def test_watch_time_counter_with_nothing_watched(make_client):
+    t = make_client(tracked_catalog()).get("/minhas-series").text
+    assert '<p class="tempo-total">0 horas</p>' in t and "0 episódios" in t
