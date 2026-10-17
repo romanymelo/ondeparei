@@ -1,6 +1,6 @@
 # Marcações e acompanhamento de episódios — Design (Fase 2a)
 
-- **Data:** 2026-10-16
+- **Data:** 2026-10-16 (telas revistas em 2026-10-17 para a identidade visual nova da fase 1)
 - **Status:** aguardando revisão
 - **Depende de:** Fase 1, Catálogo (`2026-10-16-catalogo-series-design.md`), já implementada no branch `feat/fase-1-catalogo`
 
@@ -50,10 +50,11 @@ Permitir marcar cada série como **Quero assistir**, **Assistindo** ou **Assisti
 3. "Marcar até aqui" em T2E3 marca a T1 inteira e mais T2E1 a T2E3.
 4. Marcar o último episódio exibido muda o status para **Assistido**. Desmarcar qualquer um volta para **Assistindo**.
 5. Minhas séries mostra as quatro abas com contagens. Na aba Assistindo aparece "Próximo: TxEy", com link para o episódio, ou "Em dia ✓".
-6. Os cartões do catálogo e da busca mostram os selos (🔖 ▶ ✓ ♥).
+6. Os cartões do catálogo e da busca mostram os selos de status e de favorita.
 7. Episódios que ainda não foram ao ar não podem ser marcados.
 8. Com a TMDB fora do ar, uma marcação mostra a mensagem de erro e **não grava nada**.
 9. `uv run pytest` passa sem internet.
+10. A barra âmbar "onde parei" mostra o progresso real (marcados ÷ exibidos) nos cartões de temporada, na página da temporada e na aba Assistindo.
 
 ## 5. Arquitetura
 
@@ -116,10 +117,12 @@ CREATE TABLE watched_episodes (
 - **`Episode`**: `season: int`, `number: int`, `name: str`, `overview: str`, `air_date: date | None`, `runtime: int | None`, `still_url: str | None` (`w300`).
 - **`SeasonDetail`**: `series_id`, `series_name`, `number`, `name`, `episodes: tuple[Episode, ...]`, mais a lista de temporadas da série para os atalhos (T1, T2…).
 - **`Marks`**: `status: str | None` (`want`/`watching`/`watched`) e `favorite: bool`.
-- **`TrackedSeries`** (cartão de Minhas séries): `tmdb_id`, `name`, `poster_url`, `marks: Marks`, `next_episode: tuple[int, int] | None`, `caught_up: bool`.
+- **`TrackedSeries`** (cartão de Minhas séries): `tmdb_id`, `name`, `poster_url`, `marks: Marks`, `next_episode: tuple[int, int] | None`, `caught_up: bool`, `progress: tuple[int, int] | None` (marcados, exibidos; só na aba Assistindo).
 - **`SeriesDetail`** ganha `last_aired: tuple[int, int] | None`, vindo de `last_episode_to_air`.
 
 **Rótulos de status:** `want` → "Quero assistir" (🔖), `watching` → "Assistindo" (▶), `watched` → "Assistido" (✓).
+
+**Ícones:** nesta spec, 🔖 ▶ ✓ ♥ são só abreviações. Na tela, são ícones SVG desenhados em linha (traço de 2px, `currentColor`), não emoji: emoji muda de aparência em cada sistema e destoa da fonte Archivo e da paleta.
 
 ## 8. Regras (`rules.py`)
 
@@ -161,25 +164,34 @@ Todas são funções puras. Os episódios são representados por pares `(tempora
 
 ## 10. Telas
 
-Os mockups aprovados ficam fora do repositório. Resumo:
+Os mockups aprovados ficam fora do repositório e foram feitos antes do visual novo. As telas seguem a identidade da fase 1 ("a sala escura, a tela acesa": meia-noite `#0e1430`, veludo `#171f48`, fio `#2b3570`, tela `#eef0ff`, névoa `#9aa3cc`, projetor âmbar `#ffb547`, fonte Archivo).
 
-**Cabeçalho:** link fixo **"📺 Minhas séries"**, ao lado do espaço reservado do menu do usuário.
+**A barra "onde parei" vira dado real.** A barra âmbar fina (`.pausa`, largura em `--pausa`) é a assinatura do app e hoje é decorativa no destaque. Nesta fase ela passa a mostrar o progresso de verdade, com `--pausa` = marcados ÷ exibidos:
+- na base de cada cartão de temporada, na página da série;
+- no topo da página da temporada, junto de "X de Y assistidos";
+- na base do pôster dos cartões da aba Assistindo, em Minhas séries.
+
+O destaque da tela inicial continua com a barra decorativa. A barra não aparece quando nada foi ao ar. É a única peça de destaque das telas novas: o resto usa os componentes que já existem (pílulas, botões, grade de pôsteres).
+
+Resumo das telas:
+
+**Cabeçalho:** link de texto **"Minhas séries"** no espaço `.menu-usuario`, com sublinhado âmbar quando a página está aberta.
 
 **Página da série** (`serie.html`):
-- **Seletor de status** com três opções (🔖 Quero assistir · ▶ Assistindo · ✓ Assistido); a opção ativa fica destacada.
-- Botão **♥ Favorita**, que liga e desliga.
+- **Seletor de status** logo abaixo da linha de informações (anos, situação, temporadas): três pílulas (🔖 Quero assistir, ▶ Assistindo, ✓ Assistido). A ativa fica preenchida em âmbar com texto meia-noite; as outras têm contorno `--fio`. No celular, as pílulas quebram linha.
+- Botão redondo **♥ Favorita** ao lado: contorno quando desligado, coração preenchido em âmbar quando ligado. Troca de cor com transição de 150 ms, desligada com `prefers-reduced-motion`.
 - Com status `watching`: **"▶ Próximo: TxEy — título"**, com link para `/serie/{id}/temporada/{x}#ep-{y}`. Se não houver próximo: "Em dia ✓".
 - O bloco de status (`_status.html`) é trocado via HTMX.
-- **Temporadas:** os cartões passam a ser links para a página da temporada. Cada um mostra a barra de progresso "marcados/exibidos" ("9/9 ✓" quando completa) ou "Em breve" quando nada foi ao ar.
+- **Temporadas:** os cartões passam a ser links para a página da temporada. Cada um mostra a barra "onde parei" na base da imagem e o texto "marcados/exibidos" ("9/9 ✓" quando completa), ou "Em breve" quando nada foi ao ar.
 
 **Página da temporada** (`temporada.html`, nova):
 - Link "← nome da série", título "Temporada N" e atalhos para as outras temporadas, com os Especiais por último.
 - Barra de progresso com "X de Y assistidos" e o botão "✓ Marcar temporada inteira" (ou "Desmarcar temporada").
 - **Lista de episódios:**
-  - cada linha tem `id="ep-{n}"`, ✓, imagem, "E{n} · título", data (dd/mm/aaaa) e duração
+  - cada linha tem `id="ep-{n}"`, botão ✓ circular de 40px (contorno `--fio`; marcado, fica preenchido em âmbar com o check em meia-noite), imagem 16:9 (some em telas com menos de 600px), "E{n} · título", data (dd/mm/aaaa) e duração em `--nevoa`
   - a sinopse fica em `<details>`
-  - o próximo episódio da série, se for desta temporada, ganha um destaque e o rótulo "← próximo"
-  - "marcar até aqui" aparece nos episódios exibidos e não marcados
+  - o próximo episódio da série, se for desta temporada, ganha borda esquerda âmbar e o rótulo "próximo"
+  - "marcar até aqui" aparece nos episódios exibidos e não marcados, como botão discreto em `--nevoa`, **sempre visível** (não só no hover)
 - **Episódios não exibidos** ficam esmaecidos, com "Estreia em dd/mm/aaaa" (ou "Data a definir") e sem ✓.
 - Todo o conteúdo variável fica num bloco (`_temporada.html`) que as ações devolvem via HTMX.
 
@@ -191,11 +203,12 @@ Os mockups aprovados ficam fora do repositório. Resumo:
   - ♥ Favoritas (`aba=favoritas`)
 
   Cada aba mostra a contagem. Um valor de aba inválido cai na aba padrão.
-- **Cartões:** pôster e nome do snapshot, ordenados por `updated_at` decrescente.
-- **Aba Assistindo:** cada cartão mostra "▶ Próximo: TxEy" ou "Em dia ✓ (aguardando episódios)". Para isso, o app busca os detalhes de cada série com no máximo 10 chamadas simultâneas. Se a busca de uma série falhar, só aquele cartão fica sem a linha "Próximo".
+- **Cabeçalho da página:** título "Minhas séries" no mesmo letreiro condensado de "Séries no streaming agora"; abas em pílulas com a contagem, a ativa com sublinhado âmbar.
+- **Cartões:** a mesma grade de pôsteres do catálogo, com pôster e nome do snapshot embaixo, ordenados por `updated_at` decrescente.
+- **Aba Assistindo:** cada cartão tem a barra "onde parei" na base do pôster e, embaixo do nome, "Próximo: TxEy" em âmbar (link direto para o episódio) ou "Em dia ✓ (aguardando episódios)". Para isso, o app busca os detalhes de cada série com no máximo 10 chamadas simultâneas. Se a busca de uma série falhar, só aquele cartão fica sem a barra e sem a linha "Próximo".
 - **Lista vazia:** "Nenhuma série aqui ainda." e um link para o catálogo.
 
-**Selos** (`_cartao.html`): no canto superior esquerdo do pôster, o ícone do status e ♥ quando é favorita. Séries sem marcação não têm selo.
+**Selos** (`_cartao.html`): dentro de `.cartao-quadro`, no canto superior esquerdo do pôster, uma pastilha circular de 26px (meia-noite a 85% de opacidade) com o ícone do status em âmbar, e uma segunda pastilha com ♥ quando é favorita. Cada pastilha tem `aria-label` ("Assistindo", "Favorita"). Séries sem marcação não têm selo. Nome, ano e nota continuam embaixo do pôster, como hoje.
 
 ## 11. Rotas
 
@@ -239,13 +252,13 @@ Mesmo esquema da fase 1: TDD, nada de internet, TMDB simulada (`FakeCatalog` gan
 | `test_rules.py` | funções puras | `aired_episodes` (sem Especiais, `last_aired` `None`, temporada parcial); `next_episode` e "Em dia"; `up_to` atravessando temporadas; `season_episodes`; cada linha da tabela de `auto_status`, incluindo "Assistido manual + 1 episódio → Assistindo" |
 | `test_repository.py` | SQLite real em `tmp_path` | migração do zero e ao reabrir (`user_version`); status; favorito; episódios individuais e em lote; `marks_for(ids)`; listas por aba e contagens; ordem por `updated_at`; limpeza da linha vazia |
 | `test_tracking_service.py` | `FakeCatalog` + repositório real | episódio → status automático; até aqui; temporada inteira (marcar e desmarcar); TMDB falhando → nada gravado; episódio não exibido → recusado |
-| `test_routes_tracking.py` | `TestClient` + `FakeCatalog` + banco temporário | página da temporada (lista, progresso, próximo, não exibidos sem ✓, `id="ep-N"`); cada POST: fragmento com HTMX e 303 sem; 400 em inválidos; Minhas séries (abas, contagens, aba inválida, vazio, Próximo/Em dia); selos no catálogo, na busca e no "Carregar mais"; mensagem de falha ao gravar |
+| `test_routes_tracking.py` | `TestClient` + `FakeCatalog` + banco temporário | página da temporada (lista, progresso com `--pausa` certo, próximo, não exibidos sem ✓, `id="ep-N"`); cada POST: fragmento com HTMX e 303 sem; 400 em inválidos; Minhas séries (abas, contagens, aba inválida, vazio, Próximo/Em dia, barra de progresso); selos no catálogo, na busca e no "Carregar mais"; mensagem de falha ao gravar |
 | `test_mappers.py` | fixtures reais | `to_season_detail`; `last_aired` |
 | `test_tmdb_contract.py` | API real (`-m tmdb`) | formato de `/tv/{id}/season/{n}` (`episode_number`, `air_date`) e presença de `last_episode_to_air` |
 
 **Fixtures:** o `capturar` passa a gravar `season_100088_1.json` e `season_100088_2.json`.
 
-**Verificação manual no navegador, com o usuário:** os critérios 1 a 8, mais voltar/avançar e a largura de celular.
+**Verificação manual no navegador, com o usuário:** os critérios 1 a 8 e o 10, mais voltar/avançar e a largura de celular.
 
 ## 14. Limitações conhecidas
 
