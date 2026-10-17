@@ -1,0 +1,30 @@
+{
+  "id": 100088,
+  "results": {
+    "BR": {
+      "link": "https://www.themoviedb.org/tv/100088-the-last-of-us/watch?locale=BR",
+      "flatrate": [
+        {
+          "logo_path": "/skypuy7SXuugIQeYg0IglmzoKaS.png",
+          "provider_id": 1899,
+          "provider_name": "HBO Max",
+          "display_priority": 8
+        },
+        {
+          "logo_path": "/64fLWeSyZ1KQZhIdvTdy4QHeWty.png",
+          "provider_id": 1825,
+          "provider_name": "HBO Max Amazon Channel",
+          "display_priority": 47
+        }
+      ],
+      "buy": [
+        {
+          "logo_path": "/jn6TLbtaTZntTRX9UYucHJvpQx1.png",
+          "provider_id": 10,
+          "provider_name": "Amazon Video",
+          "display_priority": 13
+        }
+      ]
+    }
+  }
+}

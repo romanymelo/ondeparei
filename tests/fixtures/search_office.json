@@ -1,0 +1,70 @@
+{
+  "page": 1,
+  "results": [
+    {
+      "adult": false,
+      "backdrop_path": "/9vMzIrMIncPmtalcxh1MOrgcE6C.jpg",
+      "genre_ids": [
+        35
+      ],
+      "id": 2316,
+      "origin_country": [
+        "US"
+      ],
+      "original_language": "en",
+      "original_name": "The Office",
+      "overview": "Michael Scott é o egocêntrico, insensível e incompetente gerente regional de uma subsidiária da Dunder Mifflin Paper Company. Michael acredita ser o cara mais engraçado do escritório, uma fonte de sabedoria para negócios e o melhor amigo de seus funcionários. Ele nem desconfia que a sua equipe o tolera apenas pelo fato dele assinar o contracheque deles. Sem saber o que os seus funcionários pensam a seu respeito, Michael acaba sempre alternando decisões absurdas ou patéticas, mas sempre hilárias.",
+      "popularity": 326.6593,
+      "poster_path": "/50DVZEgPwGokQf4o0KHZGQMJqDD.jpg",
+      "first_air_date": "2005-03-24",
+      "softcore": false,
+      "name": "The Office",
+      "vote_average": 8.583,
+      "vote_count": 5586
+    },
+    {
+      "adult": false,
+      "backdrop_path": "/9GWU1AyNqUYIUl1tU7CvXEHUVs9.jpg",
+      "genre_ids": [
+        35
+      ],
+      "id": 2996,
+      "origin_country": [
+        "GB"
+      ],
+      "original_language": "en",
+      "original_name": "The Office",
+      "overview": "Uma comédia inglesa criada e dirigida por Ricky Gervais e Stephen Merchant narrando o dia-a-dia da vida dos empregados de um escritório em Slough, Berkshire, na fictícia fábrica de papel chamada Wherham Hogg Paper Company. Embora fictícia, o programa tem a forma de um documentário, com a presença de câmeras que são frequentemente mostradas.",
+      "popularity": 26.5129,
+      "poster_path": "/oX2JKE1RzAONMbYlujHx0hRAJo1.jpg",
+      "first_air_date": "2001-07-09",
+      "softcore": false,
+      "name": "The Office",
+      "vote_average": 7.8,
+      "vote_count": 1010
+    },
+    {
+      "adult": false,
+      "backdrop_path": "/sjqFcCmTVuhz7bFxzmKrA0ZvvKZ.jpg",
+      "genre_ids": [
+        35
+      ],
+      "id": 256480,
+      "origin_country": [
+        "AU"
+      ],
+      "original_language": "en",
+      "original_name": "The Office",
+      "overview": "Hannah Howard é a diretora-executiva da empresa Flinley Craddick. Quando ela recebe a notícia da central de que seu escritório vai fechar e todos passarão a fazer trabalho remoto, ela ativa o modo sobrevivência e começa a fazer promessas que não pode cumprir a fim de manter a \"família do trabalho\" unida.",
+      "popularity": 5.9143,
+      "poster_path": "/wVS8a4sJmD9sP4NOo6qr4PTnlF9.jpg",
+      "first_air_date": "2024-10-18",
+      "softcore": false,
+      "name": "The Office",
+      "vote_average": 5.5,
+      "vote_count": 42
+    }
+  ],
+  "total_pages": 9,
+  "total_results": 161
+}

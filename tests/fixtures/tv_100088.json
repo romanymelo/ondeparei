@@ -1,0 +1,486 @@
+{
+  "adult": false,
+  "backdrop_path": "/lY2DhbA7Hy44fAKddr06UrXWWaQ.jpg",
+  "created_by": [
+    {
+      "id": 1295692,
+      "credit_id": "5e84f03598f1f10016a985c0",
+      "name": "Neil Druckmann",
+      "original_name": "Neil Druckmann",
+      "gender": 2,
+      "profile_path": "/bVUsM4aYiHbeSYE1xAw2H5Z1ANU.jpg"
+    },
+    {
+      "id": 35796,
+      "credit_id": "5e84f06a3344c600153f6a57",
+      "name": "Craig Mazin",
+      "original_name": "Craig Mazin",
+      "gender": 2,
+      "profile_path": "/uEhna6qcMuyU5TP7irpTUZ2ZsZc.jpg"
+    }
+  ],
+  "episode_run_time": [],
+  "first_air_date": "2023-01-15",
+  "genres": [
+    {
+      "id": 18,
+      "name": "Drama"
+    }
+  ],
+  "homepage": "https://www.hbo.com/the-last-of-us",
+  "id": 100088,
+  "in_production": true,
+  "languages": [
+    "en"
+  ],
+  "last_air_date": "2025-05-25",
+  "last_episode_to_air": {
+    "id": 5994273,
+    "name": "Convergência",
+    "overview": "Enquanto Lobos e Cicatrizes se preparam para uma batalha que pode encerrar sua longa guerra, a busca de Ellie a afasta de seus amigos e a leva a um confronto devastador.",
+    "vote_average": 6.221,
+    "vote_count": 111,
+    "air_date": "2025-05-25",
+    "episode_number": 7,
+    "episode_type": "finale",
+    "production_code": "",
+    "runtime": 50,
+    "season_number": 2,
+    "show_id": 100088,
+    "still_path": "/5xCYzdb4ASjn6wZQr5esz5aRf5U.jpg"
+  },
+  "name": "The Last of Us",
+  "next_episode_to_air": null,
+  "networks": [
+    {
+      "id": 49,
+      "logo_path": "/tuomPhY2UtuPTqqFnKMVHvSb724.png",
+      "name": "HBO",
+      "origin_country": "US"
+    }
+  ],
+  "number_of_episodes": 16,
+  "number_of_seasons": 2,
+  "origin_country": [
+    "US"
+  ],
+  "original_language": "en",
+  "original_name": "The Last of Us",
+  "overview": "Situado duas décadas após a implosão de nossa sociedade, o drama seguirá Joel, um sobrevivente difícil, que é contratado para contrabandear uma garota de 14 anos chamada Ellie para fora de uma zona de quarentena opressiva. O que começa como um pequeno trabalho logo se torna uma jornada brutal e de partir o coração, já que os dois precisam atravessar os Estados Unidos e dependem um do outro para sobreviver.",
+  "popularity": 81.9547,
+  "poster_path": "/qWo5TP7mBijoZrfxBJkUMctkBt0.jpg",
+  "production_companies": [
+    {
+      "id": 125281,
+      "logo_path": "/3hV8pyxzAJgEjiSYVv1WZ0ZYayp.png",
+      "name": "PlayStation Productions",
+      "origin_country": "US"
+    },
+    {
+      "id": 11073,
+      "logo_path": "/wHs44fktdoj6c378ZbSWfzKsM2Z.png",
+      "name": "Sony Pictures Television",
+      "origin_country": "US"
+    },
+    {
+      "id": 23217,
+      "logo_path": "/kXBZdQigEf6QiTLzo6TFLAa7jKD.png",
+      "name": "Naughty Dog",
+      "origin_country": "US"
+    },
+    {
+      "id": 119645,
+      "logo_path": null,
+      "name": "Word Games",
+      "origin_country": "US"
+    },
+    {
+      "id": 115241,
+      "logo_path": null,
+      "name": "The Mighty Mint",
+      "origin_country": "US"
+    },
+    {
+      "id": 3268,
+      "logo_path": "/tuomPhY2UtuPTqqFnKMVHvSb724.png",
+      "name": "HBO",
+      "origin_country": "US"
+    }
+  ],
+  "production_countries": [
+    {
+      "iso_3166_1": "US",
+      "name": "United States of America"
+    }
+  ],
+  "seasons": [
+    {
+      "air_date": "2023-01-15",
+      "episode_count": 9,
+      "id": 144593,
+      "name": "Temporada 1",
+      "overview": "Joel, um sobrevivente duro e cínico, e a jovem e impetuosa Ellie se conectam pela dificuldade do mundo onde vivem. Juntos, eles enfrentam circunstâncias brutais e monstros impiedosos durante uma difícil jornada pelos EUA após um surto apocalíptico.",
+      "poster_path": "/mb75VyQbh1QzhBt0C3Li4SxVevr.jpg",
+      "season_number": 1,
+      "vote_average": 7.8
+    },
+    {
+      "air_date": "2025-04-13",
+      "episode_count": 7,
+      "id": 405376,
+      "name": "Temporada 2",
+      "overview": "Cinco anos após os eventos da primeira temporada, Joel e Ellie se veem envolvidos em um conflito em um mundo ainda mais perigoso e imprevisível do que aquele que deixaram para trás.",
+      "poster_path": "/dmo6TYuuJgaYinXBPjrgG9mB5od.jpg",
+      "season_number": 2,
+      "vote_average": 6.6
+    }
+  ],
+  "softcore": false,
+  "spoken_languages": [
+    {
+      "english_name": "English",
+      "iso_639_1": "en",
+      "name": "English"
+    }
+  ],
+  "status": "Returning Series",
+  "tagline": "Quando estiver perdido na escuridão, procure a luz.",
+  "type": "Scripted",
+  "vote_average": 8.399,
+  "vote_count": 7422,
+  "aggregate_credits": {
+    "cast": [
+      {
+        "adult": false,
+        "gender": 3,
+        "id": 1668004,
+        "known_for_department": "Acting",
+        "name": "Bella Ramsey",
+        "original_name": "Bella Ramsey",
+        "popularity": 7.2493,
+        "profile_path": "/vDbgxc7RYawpB1wK7JDEj62j06H.jpg",
+        "total_episode_count": 16,
+        "roles": [
+          {
+            "credit_id": "60249992abf8e2003fa458b0",
+            "character": "Ellie Williams",
+            "episode_count": 16
+          }
+        ],
+        "order": 1
+      },
+      {
+        "adult": false,
+        "gender": 2,
+        "id": 1253360,
+        "known_for_department": "Acting",
+        "name": "Pedro Pascal",
+        "original_name": "Pedro Pascal",
+        "popularity": 10.6217,
+        "profile_path": "/oKcMbVn0NJTNzQt0ClKKvVXkm60.jpg",
+        "total_episode_count": 12,
+        "roles": [
+          {
+            "credit_id": "6024a814c0ae36003d59cc3c",
+            "character": "Joel Miller",
+            "episode_count": 12
+          },
+          {
+            "credit_id": "68620939083cd72025fdcc21",
+            "character": "Joel Miller (uncredited)",
+            "episode_count": 1
+          }
+        ],
+        "order": 164
+      },
+      {
+        "adult": false,
+        "gender": 2,
+        "id": 111016,
+        "known_for_department": "Acting",
+        "name": "Gabriel Luna",
+        "original_name": "Gabriel Luna",
+        "popularity": 1.9773,
+        "profile_path": "/bIPORtYxTJPEUJIThbZrpqf4A11.jpg",
+        "total_episode_count": 9,
+        "roles": [
+          {
+            "credit_id": "6407840b158c85007c1ea4a9",
+            "character": "Tommy Miller",
+            "episode_count": 9
+          }
+        ],
+        "order": 2
+      },
+      {
+        "adult": false,
+        "gender": 1,
+        "id": 1428070,
+        "known_for_department": "Acting",
+        "name": "Isabela Merced",
+        "original_name": "Isabela Merced",
+        "popularity": 6.0052,
+        "profile_path": "/7O5GWIH8IHwU4kGZIhC3JkGDiZr.jpg",
+        "total_episode_count": 7,
+        "roles": [
+          {
+            "credit_id": "67fc6f983110bd82dfad1aa8",
+            "character": "Dina",
+            "episode_count": 7
+          }
+        ],
+        "order": 3
+      },
+      {
+        "adult": false,
+        "gender": 2,
+        "id": 2569691,
+        "known_for_department": "Acting",
+        "name": "Young Mazino",
+        "original_name": "Young Mazino",
+        "popularity": 1.0155,
+        "profile_path": "/cRuVRx1DMe2hBkz5pssVqdpCtaQ.jpg",
+        "total_episode_count": 7,
+        "roles": [
+          {
+            "credit_id": "67fc6fa4aacf7cfb26996a94",
+            "character": "Jesse",
+            "episode_count": 7
+          }
+        ],
+        "order": 4
+      },
+      {
+        "adult": false,
+        "gender": 1,
+        "id": 210773,
+        "known_for_department": "Acting",
+        "name": "Rutina Wesley",
+        "original_name": "Rutina Wesley",
+        "popularity": 1.6158,
+        "profile_path": "/ujpdNAKxlv6TRI2mm0k3eSSZJkB.jpg",
+        "total_episode_count": 5,
+        "roles": [
+          {
+            "credit_id": "640784d16ee3d700a24c66fc",
+            "character": "Maria",
+            "episode_count": 5
+          }
+        ],
+        "order": 567
+      },
+      {
+        "adult": false,
+        "gender": 2,
+        "id": 1151408,
+        "known_for_department": "Acting",
+        "name": "Samuel Hoeksema",
+        "original_name": "Samuel Hoeksema",
+        "popularity": 0.5803,
+        "profile_path": "/6TEscmA3aFBkdWX2DuozcUhHkBK.jpg",
+        "total_episode_count": 4,
+        "roles": [
+          {
+            "credit_id": "6862083fd2bef443ba8e0e3b",
+            "character": "Museum Clicker",
+            "episode_count": 1
+          },
+          {
+            "credit_id": "63e707f763aad200bd918253",
+            "character": "Clicker",
+            "episode_count": 3
+          }
+        ],
+        "order": 571
+      },
+      {
+        "adult": false,
+        "gender": 2,
+        "id": 1773397,
+        "known_for_department": "Acting",
+        "name": "Danny Ramirez",
+        "original_name": "Danny Ramirez",
+        "popularity": 1.9638,
+        "profile_path": "/7ZvcfWA5O5ULiupbHZtGGEPwnpI.jpg",
+        "total_episode_count": 4,
+        "roles": [
+          {
+            "credit_id": "67fc73bb61b1c4bb32991779",
+            "character": "Manny Alvarez",
+            "episode_count": 4
+          }
+        ],
+        "order": 577
+      },
+      {
+        "adult": false,
+        "gender": 2,
+        "id": 31512,
+        "known_for_department": "Acting",
+        "name": "Robert John Burke",
+        "original_name": "Robert John Burke",
+        "popularity": 3.5946,
+        "profile_path": "/uWEaY5gypb6cp1bdUYG4uCKw4sK.jpg",
+        "total_episode_count": 4,
+        "roles": [
+          {
+            "credit_id": "67fc84bd3110bd82dfad1c75",
+            "character": "Seth",
+            "episode_count": 4
+          }
+        ],
+        "order": 580
+      },
+      {
+        "adult": false,
+        "gender": 1,
+        "id": 30084,
+        "known_for_department": "Acting",
+        "name": "Anna Torv",
+        "original_name": "Anna Torv",
+        "popularity": 4.3302,
+        "profile_path": "/muZIxj33R2EEJhm28c9hBd0AiRk.jpg",
+        "total_episode_count": 3,
+        "roles": [
+          {
+            "credit_id": "63c6f3414e6742008924609e",
+            "character": "Tess",
+            "episode_count": 3
+          }
+        ],
+        "order": 523
+      },
+      {
+        "adult": false,
+        "gender": 2,
+        "id": 1397605,
+        "known_for_department": "Acting",
+        "name": "Lamar Johnson",
+        "original_name": "Lamar Johnson",
+        "popularity": 1.1969,
+        "profile_path": "/4IEsKiSsyckleKsPsiIVtAh6QDy.jpg",
+        "total_episode_count": 3,
+        "roles": [
+          {
+            "credit_id": "640784a36ee3d7007c595535",
+            "character": "Henry Burrell",
+            "episode_count": 3
+          }
+        ],
+        "order": 565
+      },
+      {
+        "adult": false,
+        "gender": 1,
+        "id": 481337,
+        "known_for_department": "Acting",
+        "name": "Kaitlyn Dever",
+        "original_name": "Kaitlyn Dever",
+        "popularity": 3.1465,
+        "profile_path": "/np5rBCFRdeS1sXePL8uY09ktoC4.jpg",
+        "total_episode_count": 3,
+        "roles": [
+          {
+            "credit_id": "67fc73af437f0b80eeace9fd",
+            "character": "Abby Anderson",
+            "episode_count": 3
+          }
+        ],
+        "order": 576
+      }
+    ]
+  },
+  "videos": {
+    "results": [
+      {
+        "iso_639_1": "pt",
+        "iso_3166_1": "PT",
+        "name": "The Last of Us - temporada 2 | Trailer | Max",
+        "key": "58FFggjmaoY",
+        "site": "YouTube",
+        "size": 1080,
+        "type": "Trailer",
+        "official": true,
+        "id": "6ab5ad65c2a84ea66f823346",
+        "published_at": "2025-03-08T22:14:28.000Z"
+      },
+      {
+        "iso_639_1": "pt",
+        "iso_3166_1": "PT",
+        "name": "The Last of Us - temporada 2 | TLOU Day Teaser | Max",
+        "key": "COKtkRLxTsc",
+        "site": "YouTube",
+        "size": 1080,
+        "type": "Trailer",
+        "official": true,
+        "id": "6ab5ad6cc2a84ea66f823348",
+        "published_at": "2024-09-26T15:01:39.000Z"
+      },
+      {
+        "iso_639_1": "en",
+        "iso_3166_1": "US",
+        "name": "Opening Credits",
+        "key": "8SWhBsbxmpk",
+        "site": "YouTube",
+        "size": 1080,
+        "type": "Opening Credits",
+        "official": true,
+        "id": "63c59d4d70b44400910e46eb",
+        "published_at": "2023-01-16T17:30:00.000Z"
+      },
+      {
+        "iso_639_1": "en",
+        "iso_3166_1": "US",
+        "name": "Invitation To Set Featurette",
+        "key": "2Ity_VBjTGo",
+        "site": "YouTube",
+        "size": 1080,
+        "type": "Behind the Scenes",
+        "official": false,
+        "id": "640e9992ede1b000babf9668",
+        "published_at": "2023-01-05T18:18:17.000Z"
+      },
+      {
+        "iso_639_1": "en",
+        "iso_3166_1": "US",
+        "name": "Official Trailer",
+        "key": "uLtkt8BonwM",
+        "site": "YouTube",
+        "size": 1080,
+        "type": "Trailer",
+        "official": true,
+        "id": "638bb1af7390c000872f10b6",
+        "published_at": "2022-12-03T20:20:58.000Z"
+      }
+    ]
+  },
+  "watch/providers": {
+    "results": {
+      "BR": {
+        "link": "https://www.themoviedb.org/tv/100088-the-last-of-us/watch?locale=BR",
+        "flatrate": [
+          {
+            "logo_path": "/skypuy7SXuugIQeYg0IglmzoKaS.png",
+            "provider_id": 1899,
+            "provider_name": "HBO Max",
+            "display_priority": 8
+          },
+          {
+            "logo_path": "/64fLWeSyZ1KQZhIdvTdy4QHeWty.png",
+            "provider_id": 1825,
+            "provider_name": "HBO Max Amazon Channel",
+            "display_priority": 47
+          }
+        ],
+        "buy": [
+          {
+            "logo_path": "/jn6TLbtaTZntTRX9UYucHJvpQx1.png",
+            "provider_id": 10,
+            "provider_name": "Amazon Video",
+            "display_priority": 13
+          }
+        ]
+      }
+    }
+  }
+}

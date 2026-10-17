@@ -1,0 +1,74 @@
+{
+  "page": 1,
+  "results": [
+    {
+      "adult": false,
+      "backdrop_path": "/xhK9YCxNwnE0OB1SWvCY39heHQI.jpg",
+      "genre_ids": [
+        80,
+        18,
+        9648
+      ],
+      "id": 2734,
+      "origin_country": [
+        "US"
+      ],
+      "original_language": "en",
+      "original_name": "Law & Order: Special Victims Unit",
+      "overview": "Detetives que fazem parte da Unidade de Vítimas Especiais da polícia de Nova York investigam crimes de natureza sexual, como estupros, em que a vítima sobrevive, e auxilia as autoridades na investigação.",
+      "popularity": 481.3653,
+      "poster_path": "/nYkYmNFfKydgrcO45oNjOnW0FDJ.jpg",
+      "first_air_date": "1999-09-20",
+      "softcore": false,
+      "name": "Lei & Ordem: Unidade de Vítimas Especiais",
+      "vote_average": 7.959,
+      "vote_count": 4379
+    },
+    {
+      "adult": false,
+      "backdrop_path": "/qcSHGC5BfoqBoP99PzDIERYG5Qm.jpg",
+      "genre_ids": [
+        16,
+        35
+      ],
+      "id": 456,
+      "origin_country": [
+        "US"
+      ],
+      "original_language": "en",
+      "original_name": "The Simpsons",
+      "overview": "Uma animação sobre uma típica família dos Estados Unidos. Homer é o pai de família nada saudável ou inteligente, que adora beber cerveja. Marge é a esposa e mãe de família dedicada. Bart é o filho de 10 anos, que não leva a escola a sério e tem orgulho disso. Lisa é a garota de 8 anos, um gênio não apreciado. E Maggie é a bebê que não larga a chupeta.",
+      "popularity": 437.8903,
+      "poster_path": "/ARIEA8fMTk8HLy8AyLbKyUjsqC.jpg",
+      "first_air_date": "1989-12-17",
+      "softcore": false,
+      "name": "Os Simpsons",
+      "vote_average": 8.024,
+      "vote_count": 11075
+    },
+    {
+      "adult": false,
+      "backdrop_path": "/pF0qkRsrHkdYadPWY9AMeFZfcwk.jpg",
+      "genre_ids": [
+        10759,
+        80
+      ],
+      "id": 108978,
+      "origin_country": [
+        "US"
+      ],
+      "original_language": "en",
+      "original_name": "Reacher",
+      "overview": "Quando o policial militar aposentado Jack Reacher é preso por um assassinato que não cometeu, ele se vê no meio de uma trama mortal cheia de policiais corruptos, empresários obscuros e políticos conspiradores. Só com sua inteligência, ele precisa descobrir o que está havendo em Margrave, Geórgia.",
+      "popularity": 414.7994,
+      "poster_path": "/f1VCQIG2iCyOookdgOzwtUpwWC0.jpg",
+      "first_air_date": "2022-02-03",
+      "softcore": false,
+      "name": "Reacher",
+      "vote_average": 8.132,
+      "vote_count": 3502
+    }
+  ],
+  "total_pages": 719,
+  "total_results": 14380
+}

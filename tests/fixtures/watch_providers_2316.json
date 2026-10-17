@@ -1,0 +1,60 @@
+{
+  "id": 2316,
+  "results": {
+    "BR": {
+      "link": "https://www.themoviedb.org/tv/2316-the-office/watch?locale=BR",
+      "flatrate": [
+        {
+          "logo_path": "/rK1KljqmbvO9HQa1PBFLILWah72.png",
+          "provider_id": 8,
+          "provider_name": "Netflix",
+          "display_priority": 0
+        },
+        {
+          "logo_path": "/gMZdpavHmxFNnLpMHwVxfqeux2g.png",
+          "provider_id": 119,
+          "provider_name": "Amazon Prime Video",
+          "display_priority": 1
+        },
+        {
+          "logo_path": "/skypuy7SXuugIQeYg0IglmzoKaS.png",
+          "provider_id": 1899,
+          "provider_name": "HBO Max",
+          "display_priority": 8
+        },
+        {
+          "logo_path": "/eGUwOOIxcazwEBxqJpSN5sWEu6V.png",
+          "provider_id": 1796,
+          "provider_name": "Netflix Standard with Ads",
+          "display_priority": 40
+        },
+        {
+          "logo_path": "/64fLWeSyZ1KQZhIdvTdy4QHeWty.png",
+          "provider_id": 1825,
+          "provider_name": "HBO Max Amazon Channel",
+          "display_priority": 47
+        },
+        {
+          "logo_path": "/tpwTT1FpWqLLhxUfAuDavIXDDfI.png",
+          "provider_id": 2100,
+          "provider_name": "Amazon Prime Video with Ads",
+          "display_priority": 78
+        },
+        {
+          "logo_path": "/j3Q750FwRyIejO5MrNu25Kia57.png",
+          "provider_id": 1889,
+          "provider_name": "Universal+ Amazon Channel",
+          "display_priority": 81
+        }
+      ],
+      "buy": [
+        {
+          "logo_path": "/jn6TLbtaTZntTRX9UYucHJvpQx1.png",
+          "provider_id": 10,
+          "provider_name": "Amazon Video",
+          "display_priority": 13
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,139 @@
+{
+  "results": [
+    {
+      "display_priorities": {
+        "BR": 0
+      },
+      "display_priority": 0,
+      "logo_path": "/rK1KljqmbvO9HQa1PBFLILWah72.png",
+      "provider_name": "Netflix",
+      "provider_id": 8
+    },
+    {
+      "display_priorities": {
+        "BR": 1
+      },
+      "display_priority": 1,
+      "logo_path": "/gMZdpavHmxFNnLpMHwVxfqeux2g.png",
+      "provider_name": "Amazon Prime Video",
+      "provider_id": 119
+    },
+    {
+      "display_priorities": {
+        "BR": 2
+      },
+      "display_priority": 3,
+      "logo_path": "/9icYBfYFcwgCbky5VdGUIKJ4C5i.png",
+      "provider_name": "Apple TV",
+      "provider_id": 350
+    },
+    {
+      "display_priorities": {
+        "BR": 3
+      },
+      "display_priority": 3,
+      "logo_path": "/5eZ872CghnHFLB1j8grszbrx0dx.png",
+      "provider_name": "Disney Plus",
+      "provider_id": 337
+    },
+    {
+      "display_priorities": {
+        "BR": 4
+      },
+      "display_priority": 2,
+      "logo_path": "/aJXLTvX11u4fBLMPRVJZVKkLYHP.png",
+      "provider_name": "JustWatch TV",
+      "provider_id": 2285
+    },
+    {
+      "display_priorities": {
+        "BR": 5
+      },
+      "display_priority": 9,
+      "logo_path": "/zTJg0WVErBkcJv4S9FkQRUyXjnq.png",
+      "provider_name": "Claro video",
+      "provider_id": 167
+    },
+    {
+      "display_priorities": {
+        "BR": 6
+      },
+      "display_priority": 6,
+      "logo_path": "/jsAseYgBGuHRkl0sJs9AAQHHU8P.png",
+      "provider_name": "Looke",
+      "provider_id": 47
+    },
+    {
+      "display_priorities": {
+        "BR": 7
+      },
+      "display_priority": 6,
+      "logo_path": "/pkx3klJlwW5JdtaulvDx6hDNtch.png",
+      "provider_name": "Paramount Plus",
+      "provider_id": 531
+    },
+    {
+      "display_priorities": {
+        "BR": 8
+      },
+      "display_priority": 26,
+      "logo_path": "/skypuy7SXuugIQeYg0IglmzoKaS.png",
+      "provider_name": "HBO Max",
+      "provider_id": 1899
+    },
+    {
+      "display_priorities": {
+        "BR": 10
+      },
+      "display_priority": 10,
+      "logo_path": "/9A6Oxd3F7iXm7mds7CxYOBicojs.png",
+      "provider_name": "Globoplay",
+      "provider_id": 307
+    },
+    {
+      "display_priorities": {
+        "BR": 11
+      },
+      "display_priority": 11,
+      "logo_path": "/uFL3c4Cq8M6WoLymlC5Y8bmGytV.png",
+      "provider_name": "Crunchyroll",
+      "provider_id": 283
+    },
+    {
+      "display_priorities": {
+        "BR": 12
+      },
+      "display_priority": 15,
+      "logo_path": "/k7iSlvgWzZuO4zU5PcBjhABMuia.png",
+      "provider_name": "MUBI",
+      "provider_id": 11
+    },
+    {
+      "display_priorities": {
+        "BR": 13
+      },
+      "display_priority": 34,
+      "logo_path": "/jn6TLbtaTZntTRX9UYucHJvpQx1.png",
+      "provider_name": "Amazon Video",
+      "provider_id": 10
+    },
+    {
+      "display_priorities": {
+        "BR": 14
+      },
+      "display_priority": 14,
+      "logo_path": "/l8qT4DDRBVZWQouiT5OUnkw45m7.png",
+      "provider_name": "NetMovies",
+      "provider_id": 19
+    },
+    {
+      "display_priorities": {
+        "BR": 15
+      },
+      "display_priority": 6,
+      "logo_path": "/oPrhlrmvdq8QDWVXgHLAZz8B2Of.png",
+      "provider_name": "Curiosity Stream",
+      "provider_id": 190
+    }
+  ]
+}
