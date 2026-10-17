@@ -6,10 +6,10 @@
   <meta name="theme-color" content="#0e1430">
   <title>{% block title %}{{ APP_NAME }}{% endblock %}</title>
   <link rel="preload" href="/static/fonts/archivo-latin.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="stylesheet" href="/static/style.css">
+  <link rel="stylesheet" href="{{ static_url('style.css') }}">
   {# Voltar/avançar recarrega a URL em vez de restaurar um snapshot do HTMX (que perde o estado dos checkboxes). #}
   <meta name="htmx-config" content='{"historyCacheSize":0,"refreshOnHistoryMiss":true}'>
-  <script src="/static/htmx.min.js" defer></script>
+  <script src="{{ static_url('htmx.min.js') }}" defer></script>
 </head>
 <body>
   <header class="topo">

@@ -789,32 +789,116 @@ a.temporada:hover .titulo { color: var(--projetor); }
 .cartao-minha .titulo:hover, .cartao-minha .titulo:focus-visible { color: var(--projetor); }
 .cartao-minha a.proximo-cartao { color: var(--projetor); font-size: var(--t-0); font-weight: 600; }
 .cartao-minha a.proximo-cartao:hover { text-decoration: underline; }
-/* contador de tempo assistido, como no TV Time: o tempo aceso em âmbar */
-.tempo-de-tv {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: flex-end;
-  gap: 8px 32px;
-  margin: 4px 0 26px;
-  padding: 18px 22px 20px;
+/* placar "Tempo de séries": placas de letreiro de cinema, acesas em âmbar */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+.placar {
+  position: relative;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  grid-template-areas: "titulo titulo" "painel episodios";
+  align-items: end;
+  gap: 14px 40px;
+  margin: 6px 0 28px;
+  padding: 22px 28px 26px;
   border: 1px solid var(--fio);
-  border-radius: 14px;
+  border-radius: 20px;
   background:
-    radial-gradient(90% 140% at 0% 0%, rgba(255, 181, 71, 0.12), transparent 60%),
-    var(--veludo);
+    radial-gradient(60% 120% at 18% 110%, rgba(255, 181, 71, 0.16), transparent 70%),
+    linear-gradient(180deg, #141b44, var(--meia-noite));
+  box-shadow: inset 0 1px 0 rgba(238, 240, 255, 0.05), 0 18px 40px rgba(4, 7, 22, 0.45);
   overflow: hidden;
 }
-.tempo-bloco p { margin: 0; }
-.tempo-rotulo { color: var(--nevoa); font-size: var(--t-0); }
-.tempo-total {
+.placar-titulo { grid-area: titulo; margin: 0; color: var(--nevoa); font-size: 0.92rem; font-weight: 500; }
+.placar-painel { grid-area: painel; display: flex; gap: clamp(16px, 3vw, 34px); }
+.placar-unidade { display: grid; justify-items: center; gap: 8px; }
+.placas { display: flex; gap: 5px; perspective: 400px; }
+.placa {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 0.78em;
+  height: 1.12em;
+  border-radius: 9px;
+  background: linear-gradient(180deg, #212a63 0 50%, #19215a 50% 100%);
+  box-shadow:
+    inset 0 1px 0 rgba(238, 240, 255, 0.08),
+    inset 0 -2px 0 rgba(4, 7, 22, 0.35),
+    0 8px 18px rgba(4, 7, 22, 0.55);
   color: var(--projetor);
-  font-stretch: 70%;
+  font-size: clamp(3rem, 7.2vw, 5.4rem);
+  font-stretch: 68%;
   font-weight: 800;
-  font-size: clamp(1.9rem, 4.5vw, 2.8rem);
-  line-height: 1.05;
-  text-shadow: 0 0 28px var(--projetor-brilho);
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  text-shadow: 0 0 22px rgba(255, 181, 71, 0.45);
+  animation: virar 0.55s cubic-bezier(0.2, 0.8, 0.25, 1) both;
+  animation-delay: calc(var(--i) * 70ms + 120ms);
+  transform-origin: 50% 50%;
 }
-.tempo-episodios { font-stretch: 85%; font-weight: 700; font-size: var(--t-3); line-height: 1.1; }
+/* o vinco das placas, com as duas dobradiças */
+.placa::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  height: 2px;
+  transform: translateY(-1px);
+  background:
+    radial-gradient(circle at 3px 50%, #0b1030 2px, transparent 2.5px),
+    radial-gradient(circle at calc(100% - 3px) 50%, #0b1030 2px, transparent 2.5px),
+    rgba(6, 9, 28, 0.85);
+}
+.placar-legenda { color: var(--nevoa); font-size: 0.88rem; }
+/* unidade zerada fica apagada: o olho vai direto ao que conta */
+.placar-unidade--zero .placa { color: rgba(154, 163, 204, 0.42); text-shadow: none; }
+.placar-unidade--zero .placar-legenda { color: rgba(154, 163, 204, 0.6); }
+.placar-episodios {
+  grid-area: episodios;
+  justify-self: end;
+  margin: 0 0 30px;
+  padding-left: 32px;
+  border-left: 1px solid var(--fio);
+  color: var(--nevoa);
+  font-size: 0.95rem;
+}
+.placar-numero {
+  display: block;
+  color: var(--tela);
+  font-size: clamp(1.9rem, 4vw, 2.6rem);
+  font-stretch: 75%;
+  font-weight: 800;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+@keyframes virar {
+  from { transform: rotateX(-88deg); opacity: 0; }
+  60% { opacity: 1; }
+  to { transform: none; opacity: 1; }
+}
+
+@media (max-width: 599px) {
+  .placar { grid-template-columns: 1fr; grid-template-areas: "titulo" "painel" "episodios"; padding: 18px 16px 20px; gap: 14px; }
+  .placar-painel { gap: 10px; justify-content: space-between; }
+  .placas { gap: 4px; }
+  .placa { font-size: 3.15rem; border-radius: 8px; }
+  .placar-episodios { justify-self: start; margin: 0; padding: 14px 0 0; border-left: 0; border-top: 1px solid var(--fio); width: 100%; }
+  .placar-numero { display: inline; font-size: 1.6rem; margin-right: 4px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .placa { animation: none; }
+}
 
 .vazio-minhas { display: grid; justify-items: start; gap: 14px; }
 .vazio-minhas .vazio { margin: 0; }

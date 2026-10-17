@@ -1,3 +1,4 @@
+import re
 import sqlite3
 
 import pytest
@@ -203,9 +204,17 @@ def test_my_series_shows_the_watch_time_counter(make_client, tmp_path):
     episodes = [(1, 1), (1, 2), (1, 3), (2, 1), (2, 2)]
     seed(db, status="watched", add=episodes, runtimes={ep: 50 for ep in episodes})  # 250 min
     t = make_client(tracked_catalog(), db=db).get("/minhas-series?aba=assistidas").text
-    assert '<p class="tempo-total">4 horas</p>' in t and "5 episódios" in t
+    placas = re.findall(r'<span class="placa"[^>]*>(\d)</span>', t)
+    assert placas == ["0", "0", "0", "0", "0", "4"]  # meses, dias, horas
+    assert "meses" in t and "dias" in t and "horas" in t
+    assert '<p class="sr-only">4 horas em 5 episódios</p>' in t
+    assert '<strong class="placar-numero">5</strong>' in t
 
 
 def test_watch_time_counter_with_nothing_watched(make_client):
     t = make_client(tracked_catalog()).get("/minhas-series").text
-    assert '<p class="tempo-total">0 horas</p>' in t and "0 episódios" in t
+    assert '<p class="sr-only">0 horas em 0 episódios</p>' in t
+
+
+def test_stylesheet_url_changes_with_the_file_so_browsers_reload_it(client):
+    assert re.search(r'href="/static/style\.css\?v=\d+"', client.get("/").text)

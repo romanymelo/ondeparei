@@ -10,15 +10,23 @@
   </div>
 
   {% set episodios, minutos = view.watch_time %}
-  <div class="tempo-de-tv">
-    <div class="tempo-bloco">
-      <p class="tempo-rotulo">Tempo de séries</p>
-      <p class="tempo-total">{{ minutos|tempo_tv }}</p>
+  {% set meses, dias, horas = minutos|tempo_partes %}
+  <section class="placar" aria-labelledby="placar-titulo">
+    <h2 id="placar-titulo" class="placar-titulo">Tempo de séries</h2>
+    <p class="sr-only">{{ minutos|tempo_tv }} em {{ episodios|milhar }} {{ "episódio" if episodios == 1 else "episódios" }}</p>
+    <div class="placar-painel" aria-hidden="true">
+      {% for valor, singular, plural in ((meses, "mês", "meses"), (dias, "dia", "dias"), (horas, "hora", "horas")) %}
+        {% set unidade = loop.index0 %}
+        <div class="placar-unidade{% if not valor %} placar-unidade--zero{% endif %}">
+          <div class="placas">
+            {%- for digito in "%02d"|format(valor) %}<span class="placa" style="--i: {{ unidade * 2 + loop.index0 }}">{{ digito }}</span>{% endfor -%}
+          </div>
+          <span class="placar-legenda">{{ singular if valor == 1 else plural }}</span>
+        </div>
+      {% endfor %}
     </div>
-    <div class="tempo-bloco">
-      <p class="tempo-episodios">{{ episodios|milhar }} {{ "episódio" if episodios == 1 else "episódios" }}</p>
-    </div>
-  </div>
+    <p class="placar-episodios" aria-hidden="true"><strong class="placar-numero">{{ episodios|milhar }}</strong> {{ "episódio" if episodios == 1 else "episódios" }}</p>
+  </section>
 
   <nav class="abas" aria-label="Listas">
     {% for chave, rotulo in TAB_LABELS.items() %}
