@@ -3,12 +3,12 @@
   <form class="status-opcoes" method="post" action="/serie/{{ series_id }}/status"
         hx-post="/serie/{{ series_id }}/status" hx-target="#status-serie" hx-swap="outerHTML">
     {% for value in ("want", "watching", "watched") %}
-      <button class="status-opcao" name="status" value="{{ value }}" aria-pressed="{{ 'true' if tracking.marks.status == value else 'false' }}">{{ icone(value) }}<span>{{ MARK_LABELS[value] }}</span></button>
+      <button id="status-{{ value }}" class="status-opcao" name="status" value="{{ value }}" aria-pressed="{{ 'true' if tracking.marks.status == value else 'false' }}">{{ icone(value) }}<span>{{ MARK_LABELS[value] }}</span></button>
     {% endfor %}
   </form>
   <form method="post" action="/serie/{{ series_id }}/favorito"
         hx-post="/serie/{{ series_id }}/favorito" hx-target="#status-serie" hx-swap="outerHTML">
-    <button class="favorita" aria-pressed="{{ 'true' if tracking.marks.favorite else 'false' }}" aria-label="Favorita" title="Favorita">{{ icone("favorite") }}</button>
+    <button id="favorita" class="favorita" aria-pressed="{{ 'true' if tracking.marks.favorite else 'false' }}" aria-label="Favorita" title="Favorita">{{ icone("favorite") }}</button>
   </form>
   {% if tracking.marks.status == "watching" %}
     {% if tracking.next_episode %}

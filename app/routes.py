@@ -8,7 +8,7 @@ from fastapi.responses import RedirectResponse
 from app.catalog import Catalog
 from app.filters import parse_filters, parse_page
 from app.models import Provider
-from app.templating import VARY_HX, VISIBLE_PROVIDERS, is_htmx, templates
+from app.templating import NO_STORE, VARY_HX, VISIBLE_PROVIDERS, is_htmx, templates
 from app.tmdb.client import TMDBError
 from app.tracking.routes import get_tracking
 from app.tracking.service import TrackingService
@@ -103,4 +103,4 @@ async def series_page(request: Request, series_id: int, catalog: Catalog = Depen
                       tracking: TrackingService = Depends(get_tracking)):
     serie = await catalog.detail(series_id)
     context = {"serie": serie, "series_id": serie.id, "tracking": await tracking.series(serie)}
-    return templates.TemplateResponse(request, "serie.html", context)
+    return templates.TemplateResponse(request, "serie.html", context, headers=NO_STORE)

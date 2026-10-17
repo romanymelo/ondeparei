@@ -109,6 +109,7 @@ def test_whole_season_button_flips(make_client):
 @pytest.mark.parametrize("body", [
     {"temporada": "1", "episodio": "abc"}, {"temporada": "1"}, {"temporada": "1", "episodio": "-1"},
     {"temporada": "1", "episodio": "1.5"}, {"temporada": "2", "episodio": "3"}, {"temporada": "9", "episodio": "1"},
+    {"temporada": "1", "episodio": "²"},
 ])
 def test_invalid_episode_is_400(make_client, body):
     r = make_client(tracked_catalog()).post(f"/serie/{ID}/episodio", data=body, headers=HX)
@@ -175,3 +176,16 @@ def test_catalog_more_and_search_show_badges(make_client, tmp_path):
         t = c.get(url, headers=headers).text
         assert t.count('class="selo"') == 2, url
         assert 'aria-label="Assistindo"' in t and 'aria-label="Favorita"' in t
+
+
+def test_controls_keep_ids_so_htmx_restores_keyboard_focus(make_client):
+    c = make_client(tracked_catalog())
+    status = c.post(f"/serie/{ID}/status", data={"status": "watching"}, headers=HX).text
+    assert all(f'id="status-{v}"' in status for v in ("want", "watching", "watched")) and 'id="favorita"' in status
+    season = c.post(f"/serie/{ID}/episodio", data={"temporada": 1, "episodio": 1}, headers=HX).text
+    assert 'id="marcar-1-1"' in season and 'id="marcar-1-3"' in season and 'id="temporada-toda"' in season
+
+
+@pytest.mark.parametrize("url", [f"/serie/{ID}", f"/serie/{ID}/temporada/1", "/minhas-series"])
+def test_pages_with_marks_are_not_kept_in_back_forward_cache(make_client, url):
+    assert make_client(tracked_catalog()).get(url).headers["cache-control"] == "no-store"

@@ -6,7 +6,7 @@ from fastapi import APIRouter, Depends, Request
 from fastapi.responses import RedirectResponse
 from starlette.exceptions import HTTPException
 
-from app.templating import VARY_HX, is_htmx, templates
+from app.templating import NO_STORE, VARY_HX, is_htmx, templates
 from app.tmdb.client import TMDBNotFound
 from app.tracking.service import InvalidAction, TrackingService
 
@@ -25,7 +25,7 @@ async def read_form(request: Request) -> dict[str, str]:
 
 def int_field(form: dict[str, str], name: str) -> int:
     value = form.get(name, "")
-    if not value.isdigit():  # recusa ausente, negativo, decimal e texto
+    if not (value.isascii() and value.isdigit()):  # recusa ausente, negativo, decimal, texto e "²"
         raise InvalidAction(f"{name}={value!r}")
     return int(value)
 
@@ -55,7 +55,7 @@ async def season_page(request: Request, series_id: int, number: int, tracking: T
         view = await tracking.season(series_id, number)
     except TMDBNotFound:
         raise HTTPException(status_code=404) from None
-    return templates.TemplateResponse(request, "temporada.html", {"view": view}, headers=VARY_HX)
+    return templates.TemplateResponse(request, "temporada.html", {"view": view}, headers=VARY_HX | NO_STORE)
 
 
 def _season_response(request: Request, series_id: int, season: int, view):
@@ -87,4 +87,4 @@ async def toggle_season(request: Request, series_id: int, number: int,
 @router.get("/minhas-series")
 async def my_series_page(request: Request, tracking: TrackingService = Depends(get_tracking)):
     view = await tracking.my_series(request.query_params.get("aba", ""))
-    return templates.TemplateResponse(request, "minhas_series.html", {"view": view}, headers=VARY_HX)
+    return templates.TemplateResponse(request, "minhas_series.html", {"view": view}, headers=VARY_HX | NO_STORE)

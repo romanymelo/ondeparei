@@ -54,6 +54,12 @@ def test_provider_list_sorted_by_region_priority():
     assert [p.id for p in to_provider_list(data, "BR")] == [2, 3, 1]
 
 
+def test_provider_list_one_logo_per_service():
+    names = ["Netflix", "Paramount+ Amazon Channel", "Paramount Plus", "Netflix Standard with Ads", "Plex Channel", "Plex"]
+    data = {"results": [{"provider_id": i, "provider_name": n, "display_priority": i} for i, n in enumerate(names)]}
+    assert [p.name for p in to_provider_list(data, "BR")] == ["Netflix", "Paramount Plus", "Plex"]
+
+
 def p(i, prio=0):
     return {"provider_id": i, "provider_name": f"P{i}", "logo_path": f"/{i}.png", "display_priority": prio}
 
@@ -200,3 +206,16 @@ def test_last_aired_when_last_episode_is_a_special():
     data["seasons"] = [{"season_number": 1, "episode_count": 9, "air_date": "2023-01-15", "name": "T1"},
                        {"season_number": 2, "episode_count": 7, "air_date": "2025-04-13", "name": "T2"}]
     assert to_detail(data, "BR").last_aired == (1, 9)
+
+
+@pytest.mark.parametrize(("next_episode", "expected"), [
+    ({"season_number": 2, "episode_number": 3}, (2, 2)),
+    ({"season_number": 2, "episode_number": 1}, (1, 9)),
+])
+def test_last_aired_when_a_special_airs_mid_season(next_episode, expected):
+    data = load_fixture("tv_100088.json")
+    data["last_episode_to_air"] = {"season_number": 0, "episode_number": 4, "air_date": "2026-10-10"}
+    data["next_episode_to_air"] = next_episode
+    data["seasons"] = [{"season_number": 1, "episode_count": 9, "air_date": "2023-01-15", "name": "T1"},
+                       {"season_number": 2, "episode_count": 10, "air_date": "2026-10-01", "name": "T2"}]
+    assert to_detail(data, "BR").last_aired == expected

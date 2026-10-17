@@ -46,6 +46,8 @@ def format_episode(episode: tuple[int, int]) -> str:
 
 
 VARY_HX = {"Vary": "HX-Request"}
+# páginas com marcações: o Voltar do navegador não pode mostrar uma cópia antiga
+NO_STORE = {"Cache-Control": "no-store"}
 
 
 def is_htmx(request: Request) -> bool:

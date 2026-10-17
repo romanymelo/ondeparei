@@ -124,3 +124,13 @@ async def test_my_series_watching_tab(repo):
 
 async def test_my_series_unknown_tab_falls_back(repo):
     assert (await service(repo).my_series("xyz")).tab == "assistindo"
+
+
+async def test_specials_keep_manual_status_with_normal_episodes_marked(repo):
+    detail = make_detail(seasons=(Season(0, "Especiais", None, 2, None), Season(1, "Temporada 1", 2023, 3, None)),
+                         last_aired=(1, 3))
+    s = service(repo, FakeCatalog(detail=detail, seasons={0: make_season(0, 2), 1: make_season(1, 3)}))
+    await s.toggle_episode(ID, 1, 1)
+    await s.set_status(ID, "want")
+    assert (await s.toggle_episode(ID, 0, 1)).marks.status == "want"
+    assert (await s.toggle_episode(ID, 0, 1)).marks.status == "want"

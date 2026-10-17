@@ -116,7 +116,7 @@ def to_provider_list(data: Mapping, region: str) -> tuple[Provider, ...]:
         data.get("results", []),
         key=lambda i: i.get("display_priorities", {}).get(region, i.get("display_priority", 0)),
     )
-    return tuple(_provider(item) for item in items)
+    return merge_variants([_provider(item) for item in items])
 
 
 def to_genres(data: Mapping) -> tuple[Genre, ...]:
@@ -189,14 +189,23 @@ def _season(item: Mapping) -> Season:
 
 
 def _last_aired(data: Mapping) -> tuple[int, int] | None:
-    """(temporada, episódio) do último episódio exibido. Quando ele é um especial, vale o fim da última
-    temporada normal que estreou até a data desse especial."""
+    """(temporada, episódio) do último episódio exibido. Quando ele é um especial, vale o episódio antes do
+    próximo a ir ao ar ou, sem próximo, o fim da última temporada normal que estreou até a data do especial."""
     last = data.get("last_episode_to_air") or {}
     season, episode = last.get("season_number"), last.get("episode_number")
     if season is None or episode is None:
         return None
     if season >= 1:
         return season, episode
+    upcoming = data.get("next_episode_to_air") or {}
+    next_season, next_number = upcoming.get("season_number"), upcoming.get("episode_number")
+    if next_season and next_season >= 1 and next_number:
+        # temporada em andamento: exibido é tudo antes do próximo episódio
+        if next_number > 1:
+            return next_season, next_number - 1
+        earlier = [(s.get("season_number", 0), s.get("episode_count") or 0) for s in data.get("seasons") or []
+                   if 1 <= s.get("season_number", 0) < next_season]
+        return max(earlier) if earlier else None
     special_date = _date(last.get("air_date"))
     started = [(s.get("season_number", 0), s.get("episode_count") or 0) for s in data.get("seasons") or []
                if s.get("season_number", 0) >= 1 and special_date is not None

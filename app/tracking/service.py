@@ -120,7 +120,8 @@ class TrackingService:
         watched = self._repo.watched(series_id)
         add, remove = choose(self._season_aired(detail, season), aired, watched)
         marks = self._repo.marks(series_id)
-        status = auto_status(marks.status, aired, (watched | add) - remove)
+        # especiais nunca mudam o status (spec §8)
+        status = marks.status if number == 0 else auto_status(marks.status, aired, (watched | add) - remove)
         self._save(series_id, detail, status, marks.favorite, add=add, remove=remove)
         return self._view(series_id, detail, season)
 
