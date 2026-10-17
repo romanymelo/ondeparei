@@ -219,7 +219,11 @@ img { max-width: 100%; }
 .carregar-mais:hover { border-color: var(--accent); }
 .carregar-mais.htmx-request { opacity: 0.5; }
 
+/* ===== Busca ===== */
+.busca-resultados { padding: 24px; }
+
 @media (max-width: 767px) {
+  .busca-resultados { padding: 16px; }
   .catalogo { grid-template-columns: 1fr; grid-template-areas: "barra" "lateral" "grade"; }
   .lateral { display: none; border-right: 0; border-bottom: 1px solid var(--line); }
   .toggle-filtros:checked ~ .catalogo-form .lateral { display: block; }

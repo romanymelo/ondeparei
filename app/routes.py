@@ -4,9 +4,10 @@ from typing import TypeVar
 from urllib.parse import urlencode
 
 from fastapi import APIRouter, Depends, Request
+from fastapi.responses import RedirectResponse
 
 from app.catalog import Catalog
-from app.filters import parse_filters
+from app.filters import parse_filters, parse_page
 from app.templating import is_htmx, templates
 from app.tmdb.client import TMDBError
 
@@ -60,3 +61,21 @@ async def catalog_page(request: Request, catalog: Catalog = Depends(get_catalog)
         "current_year": current_year,
     }
     return templates.TemplateResponse(request, "catalogo.html", context)
+
+
+@router.get("/buscar")
+async def search_page(request: Request, catalog: Catalog = Depends(get_catalog)):
+    q = request.query_params.get("q", "").strip()
+    if not q:
+        return RedirectResponse("/", status_code=303)
+    page_number = parse_page(request.query_params.getlist("pagina"))
+    page = await catalog.search(q, page_number)
+    context = {
+        "q": q,
+        "page": page,
+        "has_next": page.page < page.total_pages,
+        "next_url": next_page_url(request.url.path, request.query_params.multi_items(), page.page + 1),
+    }
+    if is_htmx(request) and page_number > 1:
+        return templates.TemplateResponse(request, "_cartoes.html", context)
+    return templates.TemplateResponse(request, "busca.html", context)
