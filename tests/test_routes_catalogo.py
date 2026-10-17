@@ -79,3 +79,26 @@ def test_providers_beyond_12_go_into_details(make_client):
     opened = c.get("/?servicos=13").text
     assert re.search(r"<details open>\s*<summary>ver todos \(15\)</summary>", opened)
     assert 'name="servicos" value="13" checked' in opened
+
+
+# Revisão final #1: voltar/avançar do navegador com HTMX
+def test_base_disables_htmx_history_snapshots(client):
+    t = client.get("/").text
+    assert re.search(r'<meta name="htmx-config" content=\'\{"historyCacheSize":\s*0,\s*"refreshOnHistoryMiss":\s*true\}\'>', t)
+
+
+def test_history_restore_request_gets_full_page(client):
+    t = client.get("/?servicos=8", headers={"HX-Request": "true", "HX-History-Restore-Request": "true"}).text
+    assert "<html" in t and 'id="filtros"' in t
+
+
+@pytest.mark.parametrize("path", ["/", "/buscar?q=office"])
+def test_pages_vary_on_hx_request(make_client, path):
+    c = make_client(FakeCatalog(discover=make_page(), search=make_page()))
+    assert "HX-Request" in c.get(path).headers.get("vary", "")
+    assert "HX-Request" in c.get(path, headers=HX).headers.get("vary", "")
+
+
+# Revisão final #2: ano inválido não pode travar o formulário (htmx valida o form antes de enviar)
+def test_filter_form_skips_browser_validation(client):
+    assert re.search(r'<form id="filtros"[^>]*\bnovalidate\b', client.get("/").text)

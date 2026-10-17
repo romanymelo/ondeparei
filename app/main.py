@@ -11,7 +11,7 @@ from starlette.exceptions import HTTPException as StarletteHTTPException
 from app.catalog import Catalog
 from app.config import ConfigError, Settings, load_settings
 from app.routes import router
-from app.templating import APP_NAME, is_htmx, templates
+from app.templating import APP_NAME, VARY_HX, is_htmx, templates
 from app.tmdb.cache import TTLCache
 from app.tmdb.client import TMDBAuthError, TMDBClient, TMDBNotFound, TMDBUnavailable, create_http_client
 
@@ -30,8 +30,8 @@ def _retry_path(request: Request) -> str:
 def _error_response(request: Request, status: int, message: str, retry: bool):
     context = {"message": message, "retry_url": _retry_path(request) if retry else None}
     if is_htmx(request):
-        return templates.TemplateResponse(request, "_erro.html", context, status_code=200)
-    return templates.TemplateResponse(request, "erro.html", context, status_code=status)
+        return templates.TemplateResponse(request, "_erro.html", context, status_code=200, headers=VARY_HX)
+    return templates.TemplateResponse(request, "erro.html", context, status_code=status, headers=VARY_HX)
 
 
 def _register_error_handlers(app: FastAPI) -> None:

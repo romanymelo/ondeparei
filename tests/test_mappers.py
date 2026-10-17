@@ -110,3 +110,17 @@ def test_to_detail_tolerates_missing_optional_fields():
     assert (d.poster_url, d.backdrop_url, d.trailer_youtube_key) == (None, None, None)
     assert (d.cast, d.seasons, d.genres, d.years_label) == ((), (), (), "")
     assert d.watch == WatchOptions(None, {})
+
+
+# Revisão final #5: spec §8.4 — "2023–" se ainda está em exibição OU produção
+@pytest.mark.parametrize("status", ["Returning Series", "In Production", "Planned", "Pilot"])
+def test_years_label_is_open_when_status_is_ongoing(status):
+    data = {"id": 1, "name": "X", "first_air_date": "2019-01-01", "last_air_date": "2024-05-01",
+            "in_production": False, "status": status}
+    assert to_detail(data, "BR").years_label == "2019–"
+
+
+def test_years_label_closed_when_ended():
+    data = {"id": 1, "name": "X", "first_air_date": "2019-01-01", "last_air_date": "2024-05-01",
+            "in_production": False, "status": "Ended"}
+    assert to_detail(data, "BR").years_label == "2019–2024"

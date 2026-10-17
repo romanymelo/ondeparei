@@ -31,6 +31,7 @@ STATUS_LABELS = {
     "Planned": "Planejada",
     "Pilot": "Piloto",
 }
+ONGOING_STATUSES = {"Returning Series", "In Production", "Planned", "Pilot"}
 MAX_CAST = 10
 
 
@@ -161,7 +162,7 @@ def to_detail(data: Mapping, region: str, overview_fallback: str = "") -> Series
         overview=data.get("overview") or overview_fallback,
         first_year=first_year,
         last_year=last_year,
-        years_label=years_label(first_year, last_year, in_production),
+        years_label=years_label(first_year, last_year, in_production or status in ONGOING_STATUSES),
         status_label=STATUS_LABELS.get(status, status),
         in_production=in_production,
         seasons_count=data.get("number_of_seasons") or 0,

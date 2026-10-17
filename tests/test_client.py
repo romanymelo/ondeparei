@@ -95,3 +95,10 @@ async def test_token_never_logged(tmdb, mock, caplog):
     with pytest.raises(TMDBAuthError):
         await tmdb.get("/x", ttl=60)
     assert "tok-secreto" not in caplog.text
+
+
+# Revisão final #6: resposta 2xx que não é JSON vira TMDBUnavailable (e não 500 genérico)
+async def test_invalid_json_raises_unavailable(tmdb, mock):
+    mock.get("/x").respond(200, content=b"<html>erro do CDN</html>")
+    with pytest.raises(TMDBUnavailable):
+        await tmdb.get("/x", ttl=60)

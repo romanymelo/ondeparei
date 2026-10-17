@@ -70,7 +70,11 @@ class TMDBClient:
             response = await self._request(path, params)
 
         if response.is_success:
-            data = response.json()
+            try:
+                data = response.json()
+            except ValueError as exc:
+                logger.warning("TMDB devolveu resposta não-JSON em %s", path)
+                raise TMDBUnavailable(f"resposta inválida em {path}") from exc
             self._cache.set(key, data, ttl)
             return data
 

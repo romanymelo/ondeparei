@@ -28,8 +28,13 @@ def format_rating(x: float) -> str:
     return f"{x:.1f}".replace(".", ",")
 
 
+VARY_HX = {"Vary": "HX-Request"}
+
+
 def is_htmx(request: Request) -> bool:
-    return request.headers.get("HX-Request") == "true"
+    """Pedido de fragmento do HTMX. Restauração de histórico pede a página inteira."""
+    return (request.headers.get("HX-Request") == "true"
+            and request.headers.get("HX-History-Restore-Request") != "true")
 
 
 templates.env.globals.update(

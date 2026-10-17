@@ -5,6 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>{% block title %}{{ APP_NAME }}{% endblock %}</title>
   <link rel="stylesheet" href="/static/style.css">
+  {# Voltar/avançar recarrega a URL em vez de restaurar um snapshot do HTMX (que perde o estado dos checkboxes). #}
+  <meta name="htmx-config" content='{"historyCacheSize":0,"refreshOnHistoryMiss":true}'>
   <script src="/static/htmx.min.js" defer></script>
 </head>
 <body>

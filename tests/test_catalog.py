@@ -107,3 +107,12 @@ async def test_detail_not_found_propagates(catalog, mock):
     mock.get("/tv/1").respond(404)
     with pytest.raises(TMDBNotFound):
         await catalog.detail(1)
+
+
+# Revisão final #6: spec §8.3 — falha na consulta de um cartão não derruba a busca
+async def test_search_card_with_invalid_json_keeps_page(catalog, mock):
+    data = load_fixture("search_office.json")
+    mock.get("/search/tv").respond(json=data)
+    mock.get(url__regex=r"/tv/\d+/watch/providers").respond(200, content=b"nao e json")
+    page = await catalog.search("office", 1)
+    assert len(page.items) == 3 and all(c.providers is None for c in page.items)
