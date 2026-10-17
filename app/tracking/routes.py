@@ -6,16 +6,34 @@ from fastapi import APIRouter, BackgroundTasks, Depends, Request
 from fastapi.responses import RedirectResponse
 from starlette.exceptions import HTTPException
 
+from app.auth.session import LoginRequired
 from app.navigation import remember_list
 from app.templating import NO_STORE, VARY_HX, is_htmx, templates
 from app.tmdb.client import TMDBNotFound
 from app.tracking.service import InvalidAction, TrackingService
+from app.tracking.store import TrackingUnavailable, VisitorStore
 
 router = APIRouter()
 
 
 def get_tracking(request: Request) -> TrackingService:
-    return request.app.state.tracking
+    """Marcações da pessoa logada; visitante é levado ao login."""
+    user = getattr(request.state, "user", None)
+    if user is None:
+        raise LoginRequired()
+    stores = getattr(request.app.state, "stores", None)
+    if stores is None:
+        raise TrackingUnavailable("sem banco de marcações configurado")
+    return TrackingService(request.app.state.catalog, stores(user, request.state.access_token))
+
+
+def page_tracking(request: Request) -> TrackingService:
+    """Para páginas que qualquer um abre: visitante vê tudo desmarcado."""
+    user = getattr(request.state, "user", None)
+    stores = getattr(request.app.state, "stores", None)
+    if user is None or stores is None:
+        return TrackingService(request.app.state.catalog, VisitorStore())
+    return TrackingService(request.app.state.catalog, stores(user, request.state.access_token))
 
 
 async def read_form(request: Request) -> dict[str, str]:
@@ -53,7 +71,8 @@ async def toggle_favorite(request: Request, series_id: int, tracking: TrackingSe
 
 
 @router.get("/serie/{series_id:int}/temporada/{number:int}")
-async def season_page(request: Request, series_id: int, number: int, tracking: TrackingService = Depends(get_tracking)):
+async def season_page(request: Request, series_id: int, number: int,
+                      tracking: TrackingService = Depends(page_tracking)):
     try:
         view = await tracking.season(series_id, number)
     except TMDBNotFound:

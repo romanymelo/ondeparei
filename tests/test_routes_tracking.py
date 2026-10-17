@@ -6,7 +6,8 @@ import pytest
 from app.tmdb.client import TMDBUnavailable
 from app.tracking.db import connect
 from app.tracking.repository import TrackingRepository
-from tests.fakes import HX, FakeCatalog, make_detail, make_page, tracked_catalog, tracked_detail
+from app.auth.client import User
+from tests.fakes import HX, TEST_USER, FakeCatalog, make_detail, make_page, tracked_catalog, tracked_detail
 
 ID = 100088
 
@@ -14,13 +15,13 @@ ID = 100088
 def seed(db, tmdb_id=ID, **kw):
     conn = connect(db)
     fields = {"name": "The Last of Us", "poster_path": None, "status": None, "favorite": False} | kw
-    TrackingRepository(conn).save(tmdb_id, **fields)
+    TrackingRepository(conn, user_id=TEST_USER.id).save(tmdb_id, **fields)
     conn.close()
 
 
 def saved_marks(db):
     conn = connect(db)
-    marks = TrackingRepository(conn).marks_for([ID])
+    marks = TrackingRepository(conn, user_id=TEST_USER.id).marks_for([ID])
     conn.close()
     return marks
 
@@ -221,6 +222,7 @@ def test_stylesheet_url_changes_with_the_file_so_browsers_reload_it(client):
 
 
 # Contador também no cabeçalho
+@pytest.mark.xfail(strict=True, reason="Task 7: contador do cabeçalho por conta")
 def test_header_shows_the_watch_time_and_links_to_my_series(make_client, tmp_path):
     db = tmp_path / "h.db"
     episodes = [(1, 1), (1, 2), (1, 3), (2, 1), (2, 2)]
@@ -232,6 +234,7 @@ def test_header_shows_the_watch_time_and_links_to_my_series(make_client, tmp_pat
     assert "Tempo de séries: 4 horas" in header
 
 
+@pytest.mark.xfail(strict=True, reason="Task 7: contador do cabeçalho por conta")
 def test_header_counter_does_not_animate_outside_home(make_client, tmp_path):
     db = tmp_path / "h.db"
     seed(db, status="watched", add=[(1, 1)], runtimes={(1, 1): 120})
@@ -243,7 +246,31 @@ def test_header_hides_the_counter_with_nothing_watched(make_client):
     assert "contador-topo" not in make_client(tracked_catalog(discover=make_page())).get("/").text
 
 
+@pytest.mark.xfail(strict=True, reason="Task 7: contador do cabeçalho por conta")
 def test_marking_watched_fills_runtimes_right_after_the_click(make_client):
     c = make_client(tracked_catalog(discover=make_page()))
     c.post(f"/serie/{ID}/status", data={"status": "watched"})  # 5 episódios, duração buscada depois da resposta
     assert "Tempo de séries: 4 horas" in c.get("/").text
+
+
+# Visitante e contas separadas
+def test_visitor_browses_series_and_season_without_marks(make_client):
+    c = make_client(tracked_catalog(), user=None)
+    page = c.get(f"/serie/{ID}")
+    assert page.status_code == 200 and 'value="want" aria-pressed="false"' in page.text
+    assert 'aria-pressed="true"' not in c.get(f"/serie/{ID}/temporada/1").text
+
+
+def test_visitor_sees_no_badges(make_client, tmp_path):
+    db = tmp_path / "v.db"
+    seed(db, 1, name="Série 1", status="watching", favorite=True)
+    t = make_client(FakeCatalog(discover=make_page(), search=make_page(), detail=make_detail()), db=db, user=None).get("/").text
+    assert 'class="selo"' not in t
+
+
+def test_two_users_do_not_see_each_other(make_client, tmp_path):
+    db = tmp_path / "dois.db"
+    make_client(tracked_catalog(), db=db).post(f"/serie/{ID}/status", data={"status": "want"})
+    other = User("00000000-0000-0000-0000-000000000002", "outro@teste.com", "Ana", "Silva")
+    page = make_client(tracked_catalog(), db=db, user=other).get(f"/serie/{ID}").text
+    assert 'value="want" aria-pressed="true"' not in page

@@ -7,6 +7,8 @@ from app.models import (CastMember, CatalogPage, Episode, Provider, Season, Seas
                         Spotlight, WatchOptions)
 from app.auth.client import AuthError, InvalidCredentials, InvalidSession, Session, User
 from app.tmdb.client import TMDBNotFound
+from app.tracking.db import connect
+from app.tracking.repository import TrackingRepository
 
 HX = {"HX-Request": "true"}
 
@@ -206,3 +208,43 @@ class FakeAuth:
 
     async def update_password(self, access_token, password):
         self._record("update_password", access_token)
+
+
+class SqliteStore:
+    """TrackingStore assíncrono por cima do repositório SQLite, só para os testes (sem Supabase)."""
+
+    def __init__(self, conn, user_id: str) -> None:
+        self._repo = TrackingRepository(conn, user_id=user_id)
+
+    async def marks(self, tmdb_id):
+        return self._repo.marks(tmdb_id)
+
+    async def marks_for(self, tmdb_ids):
+        return self._repo.marks_for(tmdb_ids)
+
+    async def watched(self, tmdb_id):
+        return self._repo.watched(tmdb_id)
+
+    async def save(self, tmdb_id, **kw):
+        self._repo.save(tmdb_id, **kw)
+
+    async def counts(self):
+        return self._repo.counts()
+
+    async def list_tab(self, tab):
+        return self._repo.list_tab(tab)
+
+    async def watch_time(self):
+        return self._repo.watch_time()
+
+    async def missing_runtimes(self):
+        return self._repo.missing_runtimes()
+
+    async def set_runtimes(self, tmdb_id, runtimes):
+        self._repo.set_runtimes(tmdb_id, runtimes)
+
+
+def sqlite_stores(path):
+    """StoreFactory de teste: uma conexão SQLite, um store por usuário."""
+    conn = connect(path)
+    return lambda user, token: SqliteStore(conn, user.id)

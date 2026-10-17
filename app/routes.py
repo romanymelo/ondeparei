@@ -11,7 +11,7 @@ from app.models import Provider
 from app.navigation import back_target, remember_list
 from app.templating import NO_STORE, POPULAR_PROVIDERS, VARY_HX, VISIBLE_PROVIDERS, is_htmx, templates
 from app.tmdb.client import TMDBError
-from app.tracking.routes import get_tracking
+from app.tracking.routes import page_tracking
 from app.tracking.service import TrackingService
 
 router = APIRouter()
@@ -56,13 +56,13 @@ def split_providers(providers: Sequence[Provider], selected: Sequence[int],
 
 @router.get("/")
 async def catalog_page(request: Request, catalog: Catalog = Depends(get_catalog),
-                       tracking: TrackingService = Depends(get_tracking)):
+                       tracking: TrackingService = Depends(page_tracking)):
     filters = parse_filters(query_dict(request))
     page = await catalog.discover(filters)
     context = {
         "filters": filters,
         "page": page,
-        "marks": tracking.marks_for([card.id for card in page.items]),
+        "marks": await tracking.marks_for([card.id for card in page.items]),
         "has_next": page.page < page.total_pages,
         "next_url": next_page_url(request.url.path, request.query_params.multi_items(), page.page + 1),
     }
@@ -85,7 +85,7 @@ async def catalog_page(request: Request, catalog: Catalog = Depends(get_catalog)
 
 @router.get("/buscar")
 async def search_page(request: Request, catalog: Catalog = Depends(get_catalog),
-                      tracking: TrackingService = Depends(get_tracking)):
+                      tracking: TrackingService = Depends(page_tracking)):
     q = request.query_params.get("q", "").strip()
     if not q:
         return RedirectResponse("/", status_code=303)
@@ -94,7 +94,7 @@ async def search_page(request: Request, catalog: Catalog = Depends(get_catalog),
     context = {
         "q": q,
         "page": page,
-        "marks": tracking.marks_for([card.id for card in page.items]),
+        "marks": await tracking.marks_for([card.id for card in page.items]),
         "has_next": page.page < page.total_pages,
         "next_url": next_page_url(request.url.path, request.query_params.multi_items(), page.page + 1),
     }
@@ -105,7 +105,7 @@ async def search_page(request: Request, catalog: Catalog = Depends(get_catalog),
 
 @router.get("/serie/{series_id:int}")
 async def series_page(request: Request, series_id: int, catalog: Catalog = Depends(get_catalog),
-                      tracking: TrackingService = Depends(get_tracking)):
+                      tracking: TrackingService = Depends(page_tracking)):
     serie = await catalog.detail(series_id)
     context = {"serie": serie, "series_id": serie.id, "tracking": await tracking.series(serie)}
     back_url, back_is_previous = back_target(request)

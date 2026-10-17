@@ -1,4 +1,3 @@
-import sqlite3
 from datetime import date
 from pathlib import Path
 
@@ -59,16 +58,6 @@ def watch_time_units(minutes: int) -> list[tuple[int, str]]:
     return [(value, singular if value == 1 else plural) for value, (singular, plural) in parts[first:]]
 
 
-def watch_time_of(request: Request) -> tuple[int, int] | None:
-    """(episódios, minutos) para o contador do cabeçalho; None se o banco não responder."""
-    app = request.scope.get("app")
-    tracking = getattr(app.state, "tracking", None) if app else None
-    try:
-        return tracking.watch_time() if tracking else None
-    except sqlite3.Error:
-        return None
-
-
 def format_watch_time(minutes: int) -> str:
     """Tempo assistido como no TV Time: "2 meses 5 dias 7 horas" (só as unidades não nulas)."""
     months, days, hours = watch_time_parts(minutes)
@@ -110,7 +99,6 @@ templates.env.globals.update(
     VISIBLE_PROVIDERS=VISIBLE_PROVIDERS,
     MARK_LABELS=MARK_LABELS,
     static_url=static_url,
-    tempo_de_series=watch_time_of,
     TAB_LABELS=TAB_LABELS,
     TAB_ICONS=TAB_ICONS,
 )

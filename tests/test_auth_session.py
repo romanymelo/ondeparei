@@ -1,7 +1,6 @@
 import base64
 import json
 
-import pytest
 
 from app.auth.client import AuthUnavailable
 from app.auth.session import UserResolver
@@ -98,7 +97,6 @@ def test_supabase_down_logged_user_sees_series_page(make_client):
     assert r.status_code == 200 and "Max-Age=0" not in r.headers.get("set-cookie", "")
 
 
-@pytest.mark.xfail(strict=True, reason="Task 4: login exigido nas ações")
 def test_visitor_action_htmx_gets_hx_redirect(make_client):
     r = make_client(tracked_catalog(), user=None).post(
         f"/serie/{ID}/status", data={"status": "want"},
@@ -106,7 +104,6 @@ def test_visitor_action_htmx_gets_hx_redirect(make_client):
     assert r.status_code == 200 and r.headers["hx-redirect"] == f"/entrar?proximo=%2Fserie%2F{ID}"
 
 
-@pytest.mark.xfail(strict=True, reason="Task 4: login exigido nas ações")
 def test_visitor_action_page_gets_303_to_login(make_client):
     r = make_client(tracked_catalog(), user=None).post(
         f"/serie/{ID}/status", data={"status": "want"}, headers={"Referer": f"http://testserver/serie/{ID}"},
@@ -114,7 +111,6 @@ def test_visitor_action_page_gets_303_to_login(make_client):
     assert r.status_code == 303 and r.headers["location"] == f"/entrar?proximo=%2Fserie%2F{ID}"
 
 
-@pytest.mark.xfail(strict=True, reason="Task 4: login exigido em Minhas séries")
 def test_visitor_my_series_redirects_to_login(make_client):
     r = make_client(tracked_catalog(), user=None).get("/minhas-series?aba=quero", follow_redirects=False)
     assert r.status_code == 303 and r.headers["location"] == "/entrar?proximo=%2Fminhas-series%3Faba%3Dquero"

@@ -17,10 +17,9 @@ from app.auth.session import LoginRequired, SessionMiddleware, UserResolver, log
 from app.catalog import Catalog
 from app.config import ConfigError, Settings, load_settings
 from app.routes import router
-from app.tracking.db import connect
-from app.tracking.repository import TrackingRepository
 from app.tracking.routes import router as tracking_router
-from app.tracking.service import InvalidAction, TrackingService
+from app.tracking.service import InvalidAction
+from app.tracking.store import StoreFactory
 from app.templating import APP_NAME, VARY_HX, is_htmx, templates
 from app.tmdb.cache import TTLCache
 from app.tmdb.client import TMDBAuthError, TMDBClient, TMDBNotFound, TMDBUnavailable, create_http_client
@@ -81,25 +80,16 @@ def _register_error_handlers(app: FastAPI) -> None:
         return await http_exception_handler(request, exc)
 
 
-def _start_tracking(app: FastAPI, catalog, database_path: str | Path):
-    conn = connect(database_path)
-    app.state.tracking = TrackingService(catalog, TrackingRepository(conn))
-    return conn
-
-
 def create_app(settings: Settings | None = None, catalog: Catalog | None = None, auth=None,
-               database_path: str | Path | None = None) -> FastAPI:
+               stores: StoreFactory | None = None) -> FastAPI:
     @asynccontextmanager
     async def lifespan(app: FastAPI):
         if catalog is not None:
             app.state.catalog = catalog
             app.state.auth = auth
             app.state.resolver = UserResolver(auth) if auth is not None else None
-            conn = _start_tracking(app, catalog, database_path or ":memory:")
-            try:
-                yield
-            finally:
-                conn.close()
+            app.state.stores = stores
+            yield
             return
         try:
             config = settings or load_settings()
@@ -112,11 +102,10 @@ def create_app(settings: Settings | None = None, catalog: Catalog | None = None,
         supabase_http = httpx.AsyncClient(timeout=10)
         app.state.auth = SupabaseAuth(supabase_http, config.supabase_url, config.supabase_publishable_key)
         app.state.resolver = UserResolver(app.state.auth)
-        conn = _start_tracking(app, app.state.catalog, database_path or config.database_path)
+        app.state.stores = None  # Task 7: SupabaseTrackingRepository
         try:
             yield
         finally:
-            conn.close()
             await http.aclose()
             await supabase_http.aclose()
 

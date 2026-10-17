@@ -17,7 +17,7 @@
       <span class="marca-nome">{{ APP_NAME }}</span>
       <span class="marca-barra" aria-hidden="true"></span>
     </a>
-    {% set tempo = tempo_de_series(request) %}
+    {% set tempo = request.state.watch_time %}
     {% if tempo and tempo[0] %}
       <a class="contador-topo{% if request.url.path == '/' %} contador-topo--anima{% endif %}" href="/minhas-series"
          aria-label="Tempo de séries: {{ tempo[1]|tempo_tv }}. Ver Minhas séries">
