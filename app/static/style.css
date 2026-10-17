@@ -398,22 +398,11 @@ select.seletor {
     linear-gradient(160deg, var(--fio), var(--veludo));
 }
 
-/* nome e nota sobem por cima do pôster */
-.cartao-info {
-  position: absolute;
-  inset: auto 0 0 0;
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  padding: 44px 12px 12px;
-  background: linear-gradient(0deg, rgba(10, 14, 36, 0.96) 0%, rgba(10, 14, 36, 0.75) 55%, transparent 100%);
-  opacity: 0;
-  transition: opacity 0.18s ease-out;
-}
-.cartao:hover .cartao-info,
-.cartao:focus-visible .cartao-info { opacity: 1; }
+/* nome, ano e nota sempre visíveis, logo abaixo do pôster */
+.cartao-info { display: flex; flex-direction: column; gap: 3px; padding: 2px 2px 0; }
 .cartao:hover .cartao-quadro,
 .cartao:focus-visible .cartao-quadro { box-shadow: 0 0 0 2px var(--projetor); }
+.cartao:hover .titulo { color: var(--projetor); }
 .cartao:focus-visible { outline: none; }
 .titulo {
   font-stretch: 85%;
@@ -424,16 +413,10 @@ select.seletor {
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
+  transition: color 0.15s;
 }
 .meta { display: flex; gap: 10px; color: var(--nevoa); font-size: var(--t-0); }
 .nota { color: var(--projetor); }
-
-/* telas de toque: sem hover, as informações ficam embaixo */
-@media (hover: none) {
-  .cartao-info { position: static; padding: 8px 2px 0; background: none; opacity: 1; }
-  .cartao-quadro { overflow: visible; background: none; }
-  .cartao-quadro .poster { border-radius: 6px; }
-}
 
 .logos { display: flex; flex-wrap: wrap; gap: 4px; }
 .logos img { width: 22px; height: 22px; border-radius: 6px; }

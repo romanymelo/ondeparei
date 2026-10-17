@@ -5,12 +5,12 @@
     {% else %}
       <span class="poster poster-vazio" aria-hidden="true"><span>{{ card.name }}</span></span>
     {% endif %}
-    <span class="cartao-info">
-      <span class="titulo">{{ card.name }}</span>
-      <span class="meta">
-        {%- if card.year %}<span>{{ card.year }}</span>{% endif %}
-        {%- if card.rating %}<span class="nota">★ {{ card.rating|nota }}</span>{% endif -%}
-      </span>
+  </span>
+  <span class="cartao-info">
+    <span class="titulo">{{ card.name }}</span>
+    <span class="meta">
+      {%- if card.year %}<span>{{ card.year }}</span>{% endif %}
+      {%- if card.rating %}<span class="nota">★ {{ card.rating|nota }}</span>{% endif -%}
     </span>
   </span>
   {% if card.providers is not none %}
