@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}{{ APP_NAME }}{% endblock %}</title>
+  <link rel="stylesheet" href="/static/style.css">
+  <script src="/static/htmx.min.js" defer></script>
+</head>
+<body>
+  <header class="topo">
+    <a href="/" class="logo">{{ APP_NAME }}</a>
+    <form action="/buscar" method="get" role="search" class="busca">
+      <input type="search" name="q" value="{{ q or '' }}" maxlength="100"
+             placeholder="Buscar série pelo nome…" aria-label="Buscar série pelo nome">
+    </form>
+    <div class="menu-usuario"></div>
+  </header>
+
+  <main class="conteudo">
+    {% block content %}{% endblock %}
+  </main>
+
+  <footer class="rodape">
+    <img src="/static/tmdb-logo.svg" alt="TMDB" class="tmdb-logo" width="120" height="16">
+    <p>Este produto usa a API da TMDB, mas não é endossado nem certificado pela TMDB.</p>
+    <p>Dados de disponibilidade: JustWatch</p>
+  </footer>
+</body>
+</html>

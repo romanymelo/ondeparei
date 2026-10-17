@@ -23,3 +23,4 @@ pythonpath = ["."]
 asyncio_mode = "auto"
 addopts = "-m 'not tmdb'"
 markers = ["tmdb: chama a API real da TMDB (requer TMDB_TOKEN)"]
+filterwarnings = ["ignore:Using `httpx` with `starlette.testclient` is deprecated"]

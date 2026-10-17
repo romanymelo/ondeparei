@@ -1,0 +1,6 @@
+<div class="erro-inline" role="alert">
+  <p>{{ message }}</p>
+  {% if retry_url %}
+    <a class="botao" href="{{ retry_url }}">Tentar novamente</a>
+  {% endif %}
+</div>
