@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from datetime import date
 
 ALL_TYPES = ("flatrate", "free", "ads", "rent", "buy")
 
@@ -91,6 +92,8 @@ class SeriesDetail:
     seasons: tuple[Season, ...]
     cast: tuple[CastMember, ...]
     watch: WatchOptions
+    poster_path: str | None = None  # guardado no banco (snapshot) quando a série é marcada
+    last_aired: tuple[int, int] | None = None  # (temporada, episódio) do último episódio exibido
 
 
 @dataclass(frozen=True)
@@ -105,3 +108,80 @@ class Spotlight:
     backdrop_url: str
     genres: tuple[str, ...]
     providers: tuple[Provider, ...]
+
+
+@dataclass(frozen=True)
+class Episode:
+    season: int
+    number: int
+    name: str
+    overview: str
+    air_date: date | None
+    runtime: int | None
+    still_url: str | None
+
+
+@dataclass(frozen=True)
+class SeasonDetail:
+    series_id: int
+    number: int
+    name: str
+    episodes: tuple[Episode, ...]
+
+
+@dataclass(frozen=True)
+class Marks:
+    """Marcações de uma série: status (want/watching/watched ou None) e favorita."""
+
+    status: str | None = None
+    favorite: bool = False
+
+
+@dataclass(frozen=True)
+class TrackedSeries:
+    """Cartão de Minhas séries."""
+
+    tmdb_id: int
+    name: str
+    poster_url: str | None
+    marks: Marks
+    next_episode: tuple[int, int] | None = None
+    caught_up: bool = False
+    progress: tuple[int, int] | None = None  # (marcados, exibidos); só na aba Assistindo
+
+
+@dataclass(frozen=True)
+class SeriesTracking:
+    """Bloco de status da página da série e o progresso de cada temporada."""
+
+    marks: Marks
+    next_episode: tuple[int, int] | None
+    next_title: str | None
+    season_progress: dict[int, tuple[int, int]]  # temporada -> (marcados, exibidos); Especiais -> (marcados, 0)
+
+
+@dataclass(frozen=True)
+class SeasonView:
+    """Página da temporada: os episódios e o que já foi marcado e exibido nela."""
+
+    detail: SeriesDetail
+    season: SeasonDetail
+    marks: Marks
+    watched: frozenset[tuple[int, int]]
+    aired: frozenset[tuple[int, int]]
+    next_episode: tuple[int, int] | None
+
+    @property
+    def progress(self) -> tuple[int, int]:
+        return len(self.watched & self.aired), len(self.aired)
+
+    @property
+    def complete(self) -> bool:
+        return bool(self.aired) and self.aired <= self.watched
+
+
+@dataclass(frozen=True)
+class MySeries:
+    tab: str
+    counts: dict[str, int]  # chaves da URL: assistindo, quero, assistidas, favoritas
+    items: tuple[TrackedSeries, ...]
