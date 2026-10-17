@@ -49,9 +49,8 @@ Qualquer pessoa navega pelo catálogo sem conta. Para marcar séries, favoritar,
 1. Crie um projeto em https://supabase.com (de preferência na região **São Paulo**, `sa-east-1`).
 2. **SQL Editor** → cole o conteúdo de `supabase/migracoes/001_marcacoes.sql` → **Run**.
 3. **Authentication → Sign In / Providers → Email**: deixe ligado e **desligue "Confirm email"**.
-4. **Authentication → URL Configuration**: em **Site URL**, coloque `http://localhost:8000` (no deploy, o endereço do site).
-5. **Authentication → Emails → Reset Password**: no modelo, troque o link por
-   `{{ .SiteURL }}/nova-senha?token_hash={{ .TokenHash }}&type=recovery`
+4. **Authentication → URL Configuration**: em **Site URL**, coloque `http://localhost:8000` (no deploy, o endereço do site) e, em **Redirect URLs**, adicione `http://localhost:8000/nova-senha`.
+5. **Recuperação de senha**: não precisa mexer no modelo do e-mail. O link padrão volta para `/nova-senha?code=...`, e o app troca esse código pela sessão de recuperação (PKCE, com um cookie guardado no navegador que pediu). Sem servidor de e-mail próprio (SMTP), o Supabase só envia e-mails para os membros da sua organização; para outras pessoas recuperarem a senha, configure um SMTP (ex.: Resend) em **Authentication → Emails**.
 6. **Project Settings → API Keys**: copie para o `.env` a URL do projeto (`SUPABASE_URL`), a chave pública (`SUPABASE_PUBLISHABLE_KEY`) e a chave secreta (`SUPABASE_SECRET_KEY`). Cole direto no arquivo: nunca em chat, e-mail ou print.
 
 ### Trazer as marcações antigas

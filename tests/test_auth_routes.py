@@ -77,7 +77,7 @@ def test_forgot_password_always_same_message(make_client):
     message = "Se houver uma conta com esse e-mail, enviamos um link para criar uma senha nova."
     for email in ("eu@teste.com", "ninguem@x.com"):
         assert message in c.post("/esqueci-senha", data={"email": email}).text
-    assert [args for name, args in c.app.state.auth.calls if name == "recover"] == [("eu@teste.com",), ("ninguem@x.com",)]
+    assert [args[0] for name, args in c.app.state.auth.calls if name == "recover"] == ["eu@teste.com", "ninguem@x.com"]
 
 
 def test_recovery_link_expired(make_client):
@@ -133,3 +133,33 @@ def test_confirmation_required_and_invalid_email_messages(make_client):
     assert "Conta criada. Confirme o e-mail que enviamos e depois entre." in c.post("/criar-conta", data=SIGNUP).text
     c.app.state.auth.error = InvalidEmail()
     assert "Informe um e-mail válido." in c.post("/criar-conta", data=SIGNUP).text
+
+
+# Recuperação com o link padrão do Supabase (PKCE: ?code=...)
+def test_forgot_password_starts_pkce(make_client):
+    import base64
+    import hashlib
+    c = visitor(make_client)
+    r = c.post("/esqueci-senha", data={"email": "eu@teste.com"})
+    verifier = c.cookies.get("op_pkce")
+    assert verifier and len(verifier) >= 43
+    assert any(h.startswith("op_pkce=") and "HttpOnly" in h for h in r.headers.get_list("set-cookie"))
+    (_, (email, redirect_to, challenge)), = [c_ for c_ in c.app.state.auth.calls if c_[0] == "recover"]
+    expected = base64.urlsafe_b64encode(hashlib.sha256(verifier.encode()).digest()).decode().rstrip("=")
+    assert (email, redirect_to, challenge) == ("eu@teste.com", "http://testserver/nova-senha", expected)
+
+
+def test_recovery_code_is_exchanged_with_the_cookie_verifier(make_client):
+    c = visitor(make_client)
+    c.post("/esqueci-senha", data={"email": "eu@teste.com"})
+    verifier = c.cookies.get("op_pkce")
+    form = c.get("/nova-senha?code=abc")
+    assert 'name="senha"' in form.text and c.cookies.get("op_acesso") == "tok-recuperacao"
+    assert ("exchange_code", ("abc", verifier)) in c.app.state.auth.calls
+
+
+def test_recovery_code_without_verifier_cookie_is_expired(make_client):
+    c = visitor(make_client)
+    r = c.get("/nova-senha?code=abc")
+    assert "Este link expirou." in r.text
+    assert not any(name == "exchange_code" for name, _ in c.app.state.auth.calls)

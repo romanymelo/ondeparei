@@ -236,7 +236,7 @@ SUPABASE_SECRET_KEY=          # só para a importação e os testes de contrato
 1. Rodar `supabase/migracoes/001_marcacoes.sql` no SQL Editor.
 2. Em Authentication → Sign In / Providers: e-mail ligado, "Confirm email" desligado.
 3. Em Authentication → URL Configuration: Site URL `http://localhost:8000`.
-4. Em Authentication → Emails → Reset password: trocar o link do modelo para `{{ .SiteURL }}/nova-senha?token_hash={{ .TokenHash }}&type=recovery`.
+4. Em Authentication → URL Configuration → Redirect URLs: adicionar `http://localhost:8000/nova-senha`. *(Alterado em 2026-10-17: o painel não deixa editar o modelo do e-mail sem SMTP próprio; a recuperação usa PKCE — `/esqueci-senha` guarda o verifier num cookie `op_pkce` e manda `code_challenge` + `redirect_to`; `/nova-senha?code=…` troca o código por sessão em `POST /token?grant_type=pkce`. O caminho com `token_hash` continua aceito para quando houver modelo próprio.)*
 5. Copiar a URL do projeto, a chave pública e a chave secreta para o `.env`.
 
 ## 11. Erros

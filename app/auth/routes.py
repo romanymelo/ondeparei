@@ -1,5 +1,9 @@
 """Páginas de conta: entrar, criar conta, sair, esqueci minha senha e nova senha."""
 
+import base64
+import hashlib
+import secrets
+
 from fastapi import APIRouter, Request
 from fastapi.responses import RedirectResponse
 
@@ -27,6 +31,15 @@ _MESSAGES = {
     AuthUnavailable: UNAVAILABLE,
 }
 _SECRET_FIELDS = {"senha", "confirmacao"}
+PKCE_COOKIE = "op_pkce"
+PKCE_MAX_AGE = 3600  # o link de recuperação do Supabase vale 1 hora
+
+
+def _pkce_pair() -> tuple[str, str]:
+    """(verifier, challenge S256) do PKCE: o verifier fica num cookie deste navegador."""
+    verifier = secrets.token_urlsafe(48)
+    challenge = base64.urlsafe_b64encode(hashlib.sha256(verifier.encode()).digest()).decode().rstrip("=")
+    return verifier, challenge
 
 
 def _message(exc: AuthError) -> str:
@@ -121,28 +134,41 @@ async def forgot(request: Request):
     _, errors = validate_login({"email": email, "senha": "-"})
     if errors:
         return _render(request, "esqueci_senha.html", valores=_values(form), erros=errors)
+    verifier, challenge = _pkce_pair()
+    redirect_to = f"{str(request.base_url).rstrip('/')}/nova-senha"
     try:
-        await request.app.state.auth.recover(email)
+        await request.app.state.auth.recover(email, redirect_to=redirect_to, code_challenge=challenge)
     except (RateLimited, AuthUnavailable) as exc:
         return _render(request, "esqueci_senha.html", valores=_values(form), erro_geral=_message(exc))
     except AuthError:
         pass  # mesma resposta para todos: não revela quem tem conta
-    return _render(request, "esqueci_senha.html", enviado=RECOVERY_SENT)
+    response = _render(request, "esqueci_senha.html", enviado=RECOVERY_SENT)
+    response.set_cookie(PKCE_COOKIE, verifier, max_age=PKCE_MAX_AGE, httponly=True, samesite="lax", path="/",
+                        secure=request.url.scheme == "https")
+    return response
 
 
 @router.get("/nova-senha")
 async def new_password_page(request: Request):
+    code = request.query_params.get("code")
     token_hash = request.query_params.get("token_hash")
-    if not token_hash or request.query_params.get("type") != "recovery":
-        return _render(request, "nova_senha.html", expirado=True)
     try:
-        session = await request.app.state.auth.verify_recovery(token_hash)
+        if code:  # link padrão do Supabase (PKCE): precisa do verifier guardado neste navegador
+            verifier = request.cookies.get(PKCE_COOKIE)
+            if not verifier:
+                return _render(request, "nova_senha.html", expirado=True)
+            session = await request.app.state.auth.exchange_code(code, verifier)
+        elif token_hash and request.query_params.get("type") == "recovery":  # modelo de e-mail próprio (SMTP)
+            session = await request.app.state.auth.verify_recovery(token_hash)
+        else:
+            return _render(request, "nova_senha.html", expirado=True)
     except InvalidRecoveryLink:
         return _render(request, "nova_senha.html", expirado=True)
     except AuthError as exc:
         return _render(request, "nova_senha.html", expirado=True, erro_geral=_message(exc))
     response = _render(request, "nova_senha.html")
     set_session_cookies(response, session, secure=request.url.scheme == "https")
+    response.delete_cookie(PKCE_COOKIE, path="/")
     request.state.session_written = True
     return response
 

@@ -199,8 +199,12 @@ class FakeAuth:
     async def sign_out(self, access_token):
         self._record("sign_out", access_token)
 
-    async def recover(self, email):
-        self._record("recover", email)
+    async def recover(self, email, redirect_to=None, code_challenge=None):
+        self._record("recover", email, redirect_to, code_challenge)
+
+    async def exchange_code(self, auth_code, code_verifier):
+        self._record("exchange_code", auth_code, code_verifier)
+        return self._session(TEST_USER, "tok-recuperacao", "ref-recuperacao")
 
     async def verify_recovery(self, token_hash):
         self._record("verify_recovery", token_hash)

@@ -152,3 +152,17 @@ async def test_more_error_codes(auth, mock, code, error_name):
     error = getattr(client, error_name)
     with pytest.raises(error):
         await auth.sign_up("eu@x.com", "segredo123", "R", "M")
+
+
+async def test_recover_with_pkce_and_exchange_code(auth, mock):
+    route = mock.post("/recover").respond(json={})
+    await auth.recover("eu@x.com", redirect_to="http://localhost:8000/nova-senha", code_challenge="ch")
+    assert route.calls.last.request.url.params["redirect_to"] == "http://localhost:8000/nova-senha"
+    assert body(route) == {"email": "eu@x.com", "code_challenge": "ch", "code_challenge_method": "s256"}
+    token = mock.post("/token").respond(json=SESSION)
+    assert (await auth.exchange_code("abc", "ver")).access_token == "a1"
+    assert token.calls.last.request.url.params["grant_type"] == "pkce"
+    assert body(token) == {"auth_code": "abc", "code_verifier": "ver"}
+    mock.post("/token").respond(400, json={"error_code": "flow_state_not_found"})
+    with pytest.raises(InvalidRecoveryLink):
+        await auth.exchange_code("abc", "ver")

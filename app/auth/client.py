@@ -147,8 +147,23 @@ class SupabaseAuth:
         # scope=local: sai só deste navegador, sem derrubar a sessão em outros aparelhos
         await self._call("POST", "/logout", params={"scope": "local"}, token=access_token, session_call=True)
 
-    async def recover(self, email: str) -> None:
-        await self._call("POST", "/recover", json={"email": email})
+    async def recover(self, email: str, redirect_to: str | None = None, code_challenge: str | None = None) -> None:
+        """Envia o e-mail de recuperação. Com code_challenge (PKCE), o link volta com ?code=... para o servidor."""
+        body: dict = {"email": email}
+        if code_challenge:
+            body |= {"code_challenge": code_challenge, "code_challenge_method": "s256"}
+        await self._call("POST", "/recover", json=body, params={"redirect_to": redirect_to} if redirect_to else None)
+
+    async def exchange_code(self, auth_code: str, code_verifier: str) -> Session:
+        """Troca o ?code= do link de recuperação (PKCE) por uma sessão."""
+        try:
+            data = await self._call("POST", "/token", params={"grant_type": "pkce"},
+                                    json={"auth_code": auth_code, "code_verifier": code_verifier})
+        except (AuthUnavailable, RateLimited):
+            raise
+        except AuthError as exc:
+            raise InvalidRecoveryLink(str(exc)) from exc
+        return _session(data)
 
     async def verify_recovery(self, token_hash: str) -> Session:
         try:
